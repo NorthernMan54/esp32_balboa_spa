@@ -1,4 +1,7 @@
+This is port of the package to run on an ESP32 Device, and modernization of the package
+
 Based on the great work over at \
+https://github.com/cribskip/esp8266_spa
 https://github.com/ccutrer/balboa_worldwide_app/wiki
 https://github.com/ccutrer/balboa_worldwide_app/blob/master/doc/protocol.md
 
