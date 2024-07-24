@@ -20,7 +20,7 @@
 #include "balboa_helper.h"
 #include "esp32_spa.h"
 
-#include <Ticker.h>
+#include <TickTwo.h>
 #include <config.h>
 #include <esp_task_wdt.h>
 
@@ -257,12 +257,19 @@ void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
 //
 
 void resetFaultLog() { have_faultlog = 0; }
-
-Ticker faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
+TickTwo faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
 
 void resetFilterStatus() { have_filtersettings = 0; }
+TickTwo filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
 
-Ticker filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
+void nodeStatusReport() {
+  mqtt.publish((mqttTopic + "node/uptime").c_str(), String(millis() / 1000).c_str());
+}
+TickTwo nodeStatusTimer(nodeStatusReport, 1 * 60 * 1000); // 1 minutes
+
+#ifdef DS18B20_PIN
+TickTwo ds18b20Timer(ds18b20loop, 5 * 60 * 1000); // 5 minutes
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -350,7 +357,12 @@ void setup()
 
   faultlogTimer.start();
   filterStatusTimer.start();
+  nodeStatusTimer.start();
 
+#ifdef DS18B20_PIN
+  ds18b20Timer.start();
+  ds18b20Setup();
+#endif
   esp_task_wdt_init(INITIAL_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);                       // add current thread to WDT watch
 }
@@ -371,6 +383,7 @@ void loop()
 
   faultlogTimer.update();
   filterStatusTimer.update();
+  nodeStatusTimer.update();
 
   // DEBUG:mqtt.publish((mqttTopic + "rcv").c_str(), String(x).c_str());
   // _yield(); Read from Spa RS485
@@ -537,4 +550,8 @@ void loop()
     _yield();
     Q_in.clear();
   }
+
+#ifdef DS18B20_PIN
+  ds18b20Timer.update();
+#endif
 }

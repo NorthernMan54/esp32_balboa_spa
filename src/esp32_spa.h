@@ -9,6 +9,9 @@
 #define RLY1 26
 #define RLY2 27
 
+// DS18B20 configuration
+#define DS18B20_PIN 4 // uncommment to enable
+
 // ArduinoLog configuration - Not implemented yet
 
 #ifndef LOG_LEVEL
@@ -86,6 +89,11 @@ void restartReasonSetup();
 // OTA
 
 void otaSetup();
+
+// ds18b20
+
+void ds18b20Setup(void);
+void ds18b20loop(void);
 
 // Global functions
 
