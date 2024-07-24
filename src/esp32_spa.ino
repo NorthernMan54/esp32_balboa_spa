@@ -67,9 +67,6 @@ void hardReset()
 void mqttBasic()
 {
   mqtt.publish((mqttTopic + "node/state").c_str(), "ON");
-  mqtt.publish((mqttTopic + "node/debug").c_str(), "RECONNECT");
-  // mqtt.publish((mqttTopic + "node/debug").c_str(), String(millis()).c_str());
-  // mqtt.publish((mqttTopic + "node/debug").c_str(), String(oldstate).c_str());
   mqtt.publish((mqttTopic + "node/version").c_str(), VERSION);
   mqtt.publish((mqttTopic + "node/flashsize").c_str(), String(ESP.getFlashChipSize()).c_str());
   mqtt.publish((mqttTopic + "node/chipid").c_str(), String(ESP.getChipModel()).c_str());
@@ -144,7 +141,7 @@ void reconnect()
     }
     if (mqtt.connected())
     {
-      mqtt.publish((mqttTopic + "debug/error").c_str(), "MQTT Timeout - Reconnect Successfully Run");
+      publishError("MQTT Timeout - Reconnect Successfully Run");
       mqtt.publish((mqttTopic + "node/state").c_str(), "ON");
     }
   }
@@ -162,7 +159,7 @@ void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
   }
   String topic = String(p_topic);
 
-  mqtt.publish((mqttTopic + "node/debug").c_str(), topic.c_str());
+  mqtt.publish((mqttTopic + "node/command").c_str(), (topic+ ' -> ' + payload).c_str());
   _yield();
 
   // handle message topic
@@ -254,7 +251,6 @@ void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
     send = 0xff;
   }
 }
-//
 
 void resetFaultLog() { have_faultlog = 0; }
 TickTwo faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
@@ -366,7 +362,7 @@ void setup()
 
   Q_in.clear();
   Q_out.clear();
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Awaiting SPA Connection");
+  publishDebug("Awaiting SPA Connection");
 }
 
 void loop()
@@ -427,7 +423,7 @@ void loop()
 
         ID_ack();
         mqtt.publish((mqttTopic + "node/id").c_str(), String(id).c_str());
-        mqtt.publish((mqttTopic + "debug/message").c_str(), "Received SPA id");
+        publishDebug("Received SPA id");
         esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
       }
 
@@ -459,7 +455,7 @@ void loop()
           Q_out.push(0x00);
           Q_out.push(0x00);
           Q_out.push(0x01);
-          mqtt.publish((mqttTopic + "debug/message").c_str(), "Requesting SPA Configuration");
+          publishDebug("Requesting SPA Configuration");
           have_config = 1;
         }
         else if (have_faultlog == 0)
@@ -471,7 +467,7 @@ void loop()
           Q_out.push(0xFF);
           Q_out.push(0x00);
           have_faultlog = 1;
-          mqtt.publish((mqttTopic + "debug/message").c_str(), "Requesting SPA Fault Log");
+          publishDebug("Requesting SPA Fault Log");
         }
         else if ((have_filtersettings == 0) &&
                  (have_faultlog ==
@@ -483,7 +479,7 @@ void loop()
           Q_out.push(0x01);
           Q_out.push(0x00);
           Q_out.push(0x00);
-          mqtt.publish((mqttTopic + "debug/message").c_str(), "Requesting SPA Filter Settings");
+          publishDebug("Requesting SPA Filter Settings");
           have_filtersettings = 1;
         }
         else

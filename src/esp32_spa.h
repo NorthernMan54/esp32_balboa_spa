@@ -44,6 +44,11 @@
 #include <PubSubClient.h> // MQTT client
 #include <HardwareSerial.h>
 
+// MQTT Debug Messages
+
+#define publishDebug(...) mqtt.publish((mqttTopic + "debug/message").c_str(), __VA_ARGS__);
+#define publishError(...) mqtt.publish((mqttTopic + "debug/error").c_str(), __VA_ARGS__);
+
 // Leverage ESP32 WDT, to reset the device if the spa is not connected within 5 minutes, and if after connection messages stop coming in for 10 seconds
 
 #define INITIAL_WDT_TIMEOUT 300 // watchdog timeout in seconds

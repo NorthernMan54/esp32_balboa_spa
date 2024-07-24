@@ -16,11 +16,11 @@ void ds18b20Setup(void)
   sensors.begin();
   if (sensors.getDS18Count())
   {
-    mqtt.publish((mqttTopic + "debug/info").c_str(), (String(sensors.getDS18Count()) + " DS18B20 devices found").c_str(), true);
+    publishDebug((String(sensors.getDS18Count()) + " DS18B20 devices found").c_str(), true);
   }
   else
   {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), "No DS18B20 devices found");
+    publishError("No DS18B20 devices found");
   }
   mqtt.publish((mqttTopic + "node/ds18Count").c_str(), String(sensors.getDS18Count()).c_str());
 }
@@ -45,6 +45,6 @@ void ds18b20loop(void)
   }
   else
   {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), "No DS18B20 devices found");
+    publishError("No DS18B20 devices found");
   }
 }
