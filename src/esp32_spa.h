@@ -20,6 +20,11 @@
 #define VERSION "0.37.4"
 #define SAVE_CONN true // save the ip details above to local filesystem
 
+// Home Assistant Auto Discovery - uncommment to enable
+
+// #define HASSIO true
+// #define DISCOVERY_TOPIC "homeAssistant/" // MQTT Discovery topic
+
 // No need to edit anything below this line
 
 #include "balboa_helper.h"
@@ -62,8 +67,11 @@ String BROKER = _BROKER;
 String BROKER_LOGIN = _BROKER_LOGIN;
 String BROKER_PASS = _BROKER_PASS;
 
-// HomeAssistant autodiscover
+// HomeAssistant autodiscover, defaults to a different topic to avoid creating entities in HomeAssistant
+
+#ifndef HASSIO
 #define HASSIO false
+#endif
 void mqttDiscovery();
 #ifndef DISCOVERY_TOPIC
 #define DISCOVERY_TOPIC "testAssistant/" // MQTT Discovery topic
@@ -76,6 +84,7 @@ void setLastRestartReason(const String &reason);
 void restartReasonSetup();
 
 // OTA
+
 void otaSetup();
 
 // Global functions
@@ -84,7 +93,7 @@ WebServer httpServer(80);
 HTTPUpdate httpUpdater;
 WiFiClient wifiClient;
 PubSubClient mqtt(wifiClient);
-String mqttTopic = "Spa/";
+String mqttTopic = "Spa/";  // root topic, gets appeanded with node mac address
 char gateway_name[20];
 
 #endif
