@@ -8,8 +8,8 @@ void rs485_send();
 
 void decodeFault();
 void decodeFilterSettings();
-void decodeSettings();
-void decodeState();
+void decodeConfig();
+void decodeStatus();
 
 #define STRON String("ON").c_str()
 #define STROFF String("OFF").c_str()

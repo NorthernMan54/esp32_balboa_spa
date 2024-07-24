@@ -350,6 +350,9 @@ void setup()
 
   faultlogTimer.start();
   filterStatusTimer.start();
+
+  esp_task_wdt_init(INITIAL_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL);                       // add current thread to WDT watch
 }
 
 void loop()
@@ -390,7 +393,9 @@ void loop()
   // if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
   if (x == 0x7E && Q_in.size() > 2)
   {
-    // print_msg();
+#ifndef PRODUCTION
+    print_msg(Q_in);
+#endif
 
     // Unregistered or yet in progress
     if (id == 0)
@@ -408,8 +413,7 @@ void loop()
         ID_ack();
         mqtt.publish((mqttTopic + "node/id").c_str(), String(id).c_str());
         mqtt.publish((mqttTopic + "debug/message").c_str(), "Received SPA id");
-        esp_task_wdt_init(WDT_TIMEOUT, true); // enable panic so ESP32 restarts
-        esp_task_wdt_add(NULL);               // add current thread to WDT watch
+        esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
       }
 
       // FE BF 00:Any new clients?
@@ -493,7 +497,7 @@ void loop()
     {
       if (last_state_crc != Q_in[Q_in[1]])
       {
-        decodeSettings();
+        decodeConfig();
       }
     }
     else if (Q_in[2] == id && Q_in[4] == 0x28)
@@ -509,7 +513,7 @@ void loop()
     { // FF AF 13:Status Update - Packet index offset 5
       if (last_state_crc != Q_in[Q_in[1]])
       {
-        decodeState();
+        decodeStatus();
       }
     }
     else if (Q_in[2] == id &&
@@ -523,9 +527,10 @@ void loop()
     }
     else
     {
-      // DEBUG for finding meaning
-      // if (Q_in[2] & 0xFE || Q_in[2] == id)
-      // print_msg(Q_in);
+#ifndef PRODUCTION
+      if (Q_in[2] & 0xFE || Q_in[2] == id)
+        print_msg(Q_in);
+#endif
     }
 
     // Clean up queue

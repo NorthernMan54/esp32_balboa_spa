@@ -2,3 +2,4 @@
 .vscode
 
 src/config.h
+emulator/node_modules

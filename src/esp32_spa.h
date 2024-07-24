@@ -15,7 +15,7 @@
 #define LOG_LEVEL LOG_LEVEL_NOTICE
 #endif
 
-#define PRODUCTION false  // Enables hard reset when no spa messages are received
+// #define PRODUCTION true  // Enables debug messages etc
 
 #define VERSION "0.37.4"
 #define SAVE_CONN true // save the ip details above to local filesystem
@@ -36,21 +36,23 @@
 #include <PubSubClient.h> // MQTT client
 #include <HardwareSerial.h>
 
-#define WDT_TIMEOUT 10 // watchdog timeout in seconds
+// Leverage ESP32 WDT, to reset the device if the spa is not connected within 5 minutes, and if after connection messages stop coming in for 10 seconds
+
+#define INITIAL_WDT_TIMEOUT 300 // watchdog timeout in seconds
+#define RUNNING_WDT_TIMEOUT 10 // watchdog timeout in seconds
+
 // global variables
 
 CircularBuffer<uint8_t, 35> Q_in;
 CircularBuffer<uint8_t, 35> Q_out;
 uint8_t id = 0x00;  // spa id
 
-uint8_t last_state_crc = 0x00;
+uint8_t last_state_crc = 0x00;   // Used the reduce the number of status updates messages processed ( ie if the CRC doesn't change, don't process the message)
 char have_config = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
 char have_faultlog = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
 char have_filtersettings = 0;    // stages: 0-> want it; 1-> requested it; 2-> gotit; 3-> further processed it
 char ip_settings = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
 char wifi_settings = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
-char faultlog_minutes = 0;       // temp logic so we only get the fault log once per 5 minutes
-char filtersettings_minutes = 0; // temp logic so we only get the filter settings once per 5 minutes
 
 // WiFi and MQTT Configuration - values defined in config.h
 

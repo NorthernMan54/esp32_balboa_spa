@@ -192,7 +192,7 @@ void decodeFilterSettings()
   have_filtersettings = 2;
 }
 
-void decodeSettings()
+void decodeConfig()
 {
   // mqtt.publish((mqttTopic + "config/status").c_str(), "Got config");
   SpaConfig.pump1 = Q_in[5] & 0x03;
@@ -228,7 +228,7 @@ void decodeSettings()
   mqtt.publish((mqttTopic + "debug/message").c_str(), "SPA Config Received");
 }
 
-void decodeState()
+void decodeStatus()
 {
   String s;
   double d = 0.0;
