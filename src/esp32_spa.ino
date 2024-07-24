@@ -262,7 +262,8 @@ TickTwo faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
 void resetFilterStatus() { have_filtersettings = 0; }
 TickTwo filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
 
-void nodeStatusReport() {
+void nodeStatusReport()
+{
   mqtt.publish((mqttTopic + "node/uptime").c_str(), String(millis() / 1000).c_str());
 }
 TickTwo nodeStatusTimer(nodeStatusReport, 1 * 60 * 1000); // 1 minutes
@@ -295,16 +296,6 @@ void setup()
 
   // Spa communication, 115.200 baud 8N1
   Serial2.begin(115200, SERIAL_8N1, TX485_Rx, TX485_Tx);
-
-  // give Spa time to wake up after POST
-  for (uint8_t i = 0; i < 5; i++)
-  {
-    delay(1000);
-    yield();
-  }
-
-  Q_in.clear();
-  Q_out.clear();
 
   // Setup gateway name and mqtt topic
 
@@ -353,8 +344,8 @@ void setup()
 
   getLastRestartReason();
   setLastRestartReason("Unknown (No Info Stored)");
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Awaiting SPA Connection");
 
+  nodeStatusReport();
   faultlogTimer.start();
   filterStatusTimer.start();
   nodeStatusTimer.start();
@@ -365,6 +356,17 @@ void setup()
 #endif
   esp_task_wdt_init(INITIAL_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);                       // add current thread to WDT watch
+
+  // give Spa time to wake up after POST
+  for (uint8_t i = 0; i < 5; i++)
+  {
+    delay(1000);
+    yield();
+  }
+
+  Q_in.clear();
+  Q_out.clear();
+  mqtt.publish((mqttTopic + "debug/message").c_str(), "Awaiting SPA Connection");
 }
 
 void loop()
