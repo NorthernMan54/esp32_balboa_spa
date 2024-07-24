@@ -19,7 +19,6 @@ setInterval(() => {
   })
 }, 5000);
 
-
 // Open errors will be emitted as an error event
 port.on('error', function (err) {
   console.log('Error: ', err.message)

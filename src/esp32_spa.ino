@@ -159,7 +159,7 @@ void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
   }
   String topic = String(p_topic);
 
-  mqtt.publish((mqttTopic + "node/command").c_str(), (topic+ ' -> ' + payload).c_str());
+  mqtt.publish((mqttTopic + "node/command").c_str(), (topic + " -> " + payload).c_str());
   _yield();
 
   // handle message topic
