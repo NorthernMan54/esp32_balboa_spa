@@ -189,7 +189,9 @@ void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
   else if (topic.equals((mqttTopic + "command").c_str()))
   {
     if (payload.equals("reset"))
-      hardReset();
+      setLastRestartReason("MQTT Reset Command");
+    _yield();
+    hardReset();
   }
   else if (topic.equals((mqttTopic + "heatingmode/set").c_str()))
   {
@@ -507,6 +509,7 @@ void loop()
     {
       if (last_state_crc != Q_in[Q_in[1]])
       {
+        // {"topic":"node/msg","payload":"7e b 19 bf 2e a 00 01 10 00 00 37 7e ","command":"2e","config":true}
         decodeConfig();
       }
     }
