@@ -22,7 +22,6 @@
 
 #include <TickTwo.h>
 #include <config.h>
-#include <esp_task_wdt.h>
 
 uint8_t x, i, j;
 uint8_t send = 0x00;

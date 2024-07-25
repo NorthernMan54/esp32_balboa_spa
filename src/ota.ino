@@ -7,6 +7,8 @@ void otaSetup()
   ArduinoOTA.begin();
   ArduinoOTA.onStart(notifyOfUpdateStarted);
   ArduinoOTA.onEnd(notifyOfUpdateEnded);
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+                        { esp_task_wdt_reset(); });
   ArduinoOTA.onError([](ota_error_t error)
                      {
     mqtt.publish((mqttTopic + "debug/error").c_str(), ("OTA Failed " + String(error)).c_str());
