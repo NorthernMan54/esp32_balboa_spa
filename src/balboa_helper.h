@@ -2,6 +2,7 @@
 #define balboa_helper_h
 #include "esp32_spa.h"
 
+uint8_t validateCRC8(CircularBuffer<uint8_t, 35> &data);
 void ID_request();
 void ID_ack();
 void rs485_send();

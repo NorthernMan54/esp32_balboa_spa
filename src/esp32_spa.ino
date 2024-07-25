@@ -148,7 +148,7 @@ void reconnect()
 }
 
 // function called when a MQTT message arrived
-void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
+void mqttCommand(char *p_topic, byte *p_payload, unsigned int p_length)
 {
   // concat the payload into a string
   String payload;
@@ -326,7 +326,7 @@ void setup()
   httpServer.begin();
 
   mqtt.setServer(BROKER.c_str(), 1883);
-  mqtt.setCallback(mqttMessage);
+  mqtt.setCallback(mqttCommand);
   mqtt.setKeepAlive(10);
   mqtt.setSocketTimeout(20);
 
@@ -401,13 +401,15 @@ void loop()
   if (Q_in[1] == 0x7E && Q_in.size() > 1)
     Q_in.pop();
 
-  // Complete package
-  // if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
-  if (x == 0x7E && Q_in.size() > 2)
-  {
+    // Complete package
+    // if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
 #ifndef PRODUCTION
-    print_msg(Q_in);
+  print_msg(Q_in);
+  mqtt.publish((mqttTopic + "debug/calculatedCRC8").c_str(), String(validateCRC8(Q_in), HEX).c_str());
+  mqtt.publish((mqttTopic + "debug/receivedCRC8").c_str(), String(Q_in[Q_in[1]], HEX).c_str());
 #endif
+  if (x == 0x7E && Q_in.size() > 2 && validateCRC8(Q_in) == Q_in[Q_in[1]])
+  {
 
     // Unregistered or yet in progress
     if (id == 0)
@@ -549,6 +551,9 @@ void loop()
     // Clean up queue
     _yield();
     Q_in.clear();
+  }
+  else
+  {
   }
 
 #ifdef DS18B20_PIN

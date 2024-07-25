@@ -1,20 +1,65 @@
 #include "esp32_spa.h"
 #include "balboa_helper.h"
+#include "CRC8.h"
+#include "CRC.h"
 
-inline uint8_t crc8(CircularBuffer<uint8_t, 35> &data) {
+void print_msg(const uint8_t *array, int length)
+{
+  String s;
+  byte x;
+  // for (i = 0; i < (Q_in[1] + 2); i++) {
+  for (int i = 0; i < length; i++)
+  {
+    x = array[i];
+    if (x < 0x0A)
+      s += "0";
+    s += String(x, HEX);
+    s += " ";
+  }
+  mqtt.publish((mqttTopic + "debug/msg").c_str(), s.c_str());
+}
+
+CRC8 crc;
+
+uint8_t validateCRC8(CircularBuffer<uint8_t, 35> &data)
+{
+  if (data.size() > 3)
+  {
+
+    byte array[70];
+    for (int i = 0; i < data.size() - 2; i++)
+    {
+      array[i] = data[i + 1];
+    }
+    // polynome, initial, xorOut, reverseIn, reverseOut)
+  //  print_msg((uint8_t *)array, data.size() - 3);
+    return calcCRC8((uint8_t *)array, data.size() - 3, 0x07, 0x02, 0x02);
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+inline uint8_t crc8(CircularBuffer<uint8_t, 35> &data)
+{
   unsigned long crc;
   int i, bit;
   uint8_t length = data.size();
 
   crc = 0x02;
-  for ( i = 0 ; i < length ; i++ ) {
+  for (i = 0; i < length; i++)
+  {
     crc ^= data[i];
-    for ( bit = 0 ; bit < 8 ; bit++ ) {
-      if ( (crc & 0x80) != 0 ) {
+    for (bit = 0; bit < 8; bit++)
+    {
+      if ((crc & 0x80) != 0)
+      {
         crc <<= 1;
         crc ^= 0x7;
       }
-      else {
+      else
+      {
         crc <<= 1;
       }
     }
@@ -395,8 +440,8 @@ void decodeStatus()
   mqtt.publish((mqttTopic + "relay_2/state").c_str(), s.c_str());
 }
 
-
-inline void ID_request() {
+inline void ID_request()
+{
   Q_out.push(0xFE);
   Q_out.push(0xBF);
   Q_out.push(0x01);
@@ -407,7 +452,8 @@ inline void ID_request() {
   rs485_send();
 }
 
-inline void ID_ack() {
+inline void ID_ack()
+{
   Q_out.push(id);
   Q_out.push(0xBF);
   Q_out.push(0x03);
@@ -415,15 +461,17 @@ inline void ID_ack() {
   rs485_send();
 }
 
-void rs485_send() {
+void rs485_send()
+{
   // The following is not required for the new RS485 chip
-  if (AUTO_TX) {
-
-  } else {
+  if (AUTO_TX)
+  {
+  }
+  else
+  {
     digitalWrite(TX485_Tx, HIGH);
     delay(1);
   }
-
 
   // Add telegram length
   Q_out.unshift(Q_out.size() + 2);
@@ -438,17 +486,18 @@ void rs485_send() {
   for (int i = 0; i < Q_out.size(); i++)
     Serial2.write(Q_out[i]);
 
-  //print_msg(Q_out);
+  // print_msg(Q_out);
 
   Serial2.flush();
 
-  if (AUTO_TX) {
-
-  } else {
+  if (AUTO_TX)
+  {
+  }
+  else
+  {
     digitalWrite(TX485_Tx, LOW);
   }
 
   // DEBUG: print_msg(Q_out);
   Q_out.clear();
 }
-
