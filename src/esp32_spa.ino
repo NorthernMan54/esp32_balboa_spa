@@ -404,9 +404,9 @@ void loop()
     // Complete package
     // if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
 #ifndef PRODUCTION
-  print_msg(Q_in);
-  mqtt.publish((mqttTopic + "debug/calculatedCRC8").c_str(), String(validateCRC8(Q_in), HEX).c_str());
-  mqtt.publish((mqttTopic + "debug/receivedCRC8").c_str(), String(Q_in[Q_in[1]], HEX).c_str());
+//  print_msg(Q_in);
+//  mqtt.publish((mqttTopic + "debug/calculatedCRC8").c_str(), String(validateCRC8(Q_in), HEX).c_str());
+//  mqtt.publish((mqttTopic + "debug/receivedCRC8").c_str(), String(Q_in[Q_in[1]], HEX).c_str());
 #endif
   if (x == 0x7E && Q_in.size() > 2 && validateCRC8(Q_in) == Q_in[Q_in[1]])
   {
