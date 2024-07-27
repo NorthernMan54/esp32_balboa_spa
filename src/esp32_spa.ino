@@ -43,7 +43,7 @@ void print_msg(CircularBuffer<uint8_t, 35> &data)
   for (i = 0; i < data.size(); i++)
   {
     x = Q_in[i];
-    if (x < 0x0A)
+    if (x < 0x10)
       s += "0";
     s += String(x, HEX);
     s += " ";
@@ -410,12 +410,12 @@ void loop()
 #endif
   if (x == 0x7E && Q_in.size() > 2 && validateCRC8(Q_in) == Q_in[Q_in[1]])
   {
-
+    print_msg(Q_in);
     // Unregistered or yet in progress
     if (id == 0)
     {
-      if (Q_in[2] == 0xFE)
-        print_msg(Q_in);
+      //     if (Q_in[2] == 0xFE)
+      //       print_msg(Q_in);
 
       // FE BF 02:got new client ID
       if (Q_in[2] == 0xFE && Q_in[4] == 0x02)
@@ -437,8 +437,8 @@ void loop()
       }
     }
     else if (Q_in[2] == id &&
-             Q_in[4] == 0x06)
-    { // we have an ID, do clever stuff
+             Q_in[4] == 0x06) // CTS
+    {                         // we have an ID, do clever stuff
       // id BF 06:Ready to Send
       if (send == 0xff)
       {

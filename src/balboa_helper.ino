@@ -11,7 +11,7 @@ void print_msg(const uint8_t *array, int length)
   for (int i = 0; i < length; i++)
   {
     x = array[i];
-    if (x < 0x0A)
+    if (x < 0x10)
       s += "0";
     s += String(x, HEX);
     s += " ";
