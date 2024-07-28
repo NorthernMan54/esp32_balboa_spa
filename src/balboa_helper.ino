@@ -32,7 +32,7 @@ uint8_t validateCRC8(CircularBuffer<uint8_t, 35> &data)
       array[i] = data[i + 1];
     }
     // polynome, initial, xorOut, reverseIn, reverseOut)
-  //  print_msg((uint8_t *)array, data.size() - 3);
+    //  print_msg((uint8_t *)array, data.size() - 3);
     return calcCRC8((uint8_t *)array, data.size() - 3, 0x07, 0x02, 0x02);
   }
   else
@@ -150,6 +150,7 @@ void decodeFault()
   have_faultlog = 2;
   // mqtt.publish((mqttTopic + "debug/have_faultlog").c_str(), "have the
   // faultlog, #2");
+  mqtt.publish((mqttTopic + "debug/message").c_str(), "Fault Log Received");
 }
 
 void decodeFilterSettings()
@@ -234,6 +235,7 @@ void decodeFilterSettings()
   payld = "{\"start\":\"" + s + "\",\"duration\":\"" + d + "\"}";
   mqtt.publish((mqttTopic + "filter2/state").c_str(), payld.c_str());
 
+  mqtt.publish((mqttTopic + "debug/message").c_str(), "Filter Settings Received");
   have_filtersettings = 2;
 }
 
@@ -273,6 +275,8 @@ void decodeConfig()
   mqtt.publish((mqttTopic + "debug/message").c_str(), "SPA Config Received");
 }
 
+#define TwoBit(value, bit) (((value) >> (bit)) & 0x03)
+
 void decodeStatus()
 {
   String s;
@@ -283,27 +287,27 @@ void decodeStatus()
   // print_msg(Q_in);
 
   // 25:Flag Byte 20 - Set Temperature
-  if (SpaConfig.temp_scale == 0)
+  if ((Q_in[14] & 0x01) == 0)
   {
     d = Q_in[25];
   }
-  else if (SpaConfig.temp_scale == 1)
+  else if ((Q_in[14] & 0x01) == 1)
   {
     d = Q_in[25] / 2;
     if (Q_in[25] % 2 == 1)
       d += 0.5;
   }
 
-  mqtt.publish((mqttTopic + "target_temp/state").c_str(), String(d, 2).c_str());
+  mqtt.publish((mqttTopic + "status/target_temp").c_str(), String(d, 2).c_str());
 
   // 7:Flag Byte 2 - Actual temperature
   if (Q_in[7] != 0xFF)
   {
-    if (SpaConfig.temp_scale == 0)
+    if ((Q_in[14] & 0x01) == 0)
     {
       d = Q_in[7];
     }
-    else if (SpaConfig.temp_scale == 1)
+    else if ((Q_in[14] & 0x01) == 1)
     {
       d = Q_in[7] / 2;
       if (Q_in[7] % 2 == 1)
@@ -316,7 +320,7 @@ void decodeStatus()
         d = c; // remove spurious readings greater or less than 20% away from// previous read
     }
 
-    mqtt.publish((mqttTopic + "temperature/state").c_str(), String(d, 2).c_str());
+    mqtt.publish((mqttTopic + "status/temperature").c_str(), String(d, 2).c_str());
     c = d;
   }
   else
@@ -324,6 +328,11 @@ void decodeStatus()
     d = 0;
   }
   // REMARK Move upper publish to HERE to get 0 for unknown temperature
+
+  // 5:Flag Byte 0 - ?Spa State? 0x00=Running, 0x01=Initializing, 0x05=Hold Mode, ?0x14=A/B Temps ON?, 0x17=Test Mode
+  mqtt.publish((mqttTopic + "status/spa_state").c_str(), String(Q_in[5]).c_str());
+  // 6:Flag Byte 1 - ?Initialization Mode? 0x00=Idle, 0x01=Priming Mode, 0x02=?Fault?, 0x03=Reminder, 0x04=?Stage 1?, 0x05=?Stage 3?, 0x42=?Stage 2?
+  mqtt.publish((mqttTopic + "status/spa_mode").c_str(), String(Q_in[6]).c_str());
 
   // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time
   if (Q_in[8] < 10)
@@ -336,93 +345,138 @@ void decodeStatus()
     s += "0";
   s += String(Q_in[9]);
   SpaState.minutes = Q_in[9];
-  mqtt.publish((mqttTopic + "time/state").c_str(), s.c_str());
+  mqtt.publish((mqttTopic + "status/time").c_str(), s.c_str());
 
   // 10:Flag Byte 5 - Heating Mode
   switch (Q_in[10])
   {
   case 0:
-    mqtt.publish((mqttTopic + "heatingmode/state").c_str(), STRON); // Ready
-    mqtt.publish((mqttTopic + "heat_mode/state").c_str(), "heat");  // Ready
+    mqtt.publish((mqttTopic + "status/heatingmode").c_str(), STRON); // Ready
+    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "heat");  // Ready
     SpaState.restmode = 0;
     break;
   case 3: // Ready-in-Rest
     SpaState.restmode = 0;
     break;
   case 1:
-    mqtt.publish((mqttTopic + "heatingmode/state").c_str(), STROFF); // Rest
-    mqtt.publish((mqttTopic + "heat_mode/state").c_str(), "off");    // Rest
+    mqtt.publish((mqttTopic + "status/heatingmode").c_str(), STROFF); // Rest
+    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "off");    // Rest
     SpaState.restmode = 1;
     break;
   }
 
-  // 15:Flags Byte 10 / Heat status, Temp Range
-  d = bitRead(Q_in[15], 4);
+  // 14:Flag Byte 9 - Temperature Scale, Clock Mode, Filter Mode
+  // 0  Temperature Scale	0=1°F, 1=0.5°C
+  SpaConfig.temp_scale = Q_in[14] & 0x01;
+  // 1	Clock Mode	0=12-hour, 1=24-hour
+  // 2		??
+  // 3-4	Filter Mode	0=OFF, 1=Cycle 1, 2=Cycle 2, 3=Cycle 1 and 2
+  switch (TwoBit(Q_in[15], 3))
+  {
+  case 0:
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), STROFF); // Ready
+    break;
+  case 1:                                                               // Ready-in-Rest
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1"); // Ready
+    break;
+  case 2:
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 2"); // Ready
+    break;
+  case 3:                                                                   // Ready-in-Rest
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1 & 2"); // Ready
+    break;
+  }
+  // 5	Panel Locked	0=No, 1=Yes
+  // 6	??	0
+  // 7	??	0
+
+  // 15:Flags Byte 10 / Heat status - 0=OFF, 1=Heating, 2=Heat Waiting, Temp Range
+  d = TwoBit(Q_in[15], 4);
   if (d == 0)
-    mqtt.publish((mqttTopic + "heatstate/state").c_str(), STROFF);
+    mqtt.publish((mqttTopic + "status/heatstate").c_str(), STROFF);
   else if (d == 1 || d == 2)
-    mqtt.publish((mqttTopic + "heatstate/state").c_str(), STRON);
+    mqtt.publish((mqttTopic + "status/heatstate").c_str(), STRON);
 
   d = bitRead(Q_in[15], 2);
   if (d == 0)
   {
-    mqtt.publish((mqttTopic + "highrange/state").c_str(), STROFF); // LOW
+    mqtt.publish((mqttTopic + "status/highrange").c_str(), STROFF); // LOW
     SpaState.highrange = 0;
   }
   else if (d == 1)
   {
-    mqtt.publish((mqttTopic + "highrange/state").c_str(), STRON); // HIGH
+    mqtt.publish((mqttTopic + "status/highrange").c_str(), STRON); // HIGH
     SpaState.highrange = 1;
   }
 
-  // 16:Flags Byte 11
-  if (bitRead(Q_in[16], 1) == 1)
+  d = bitRead(Q_in[15], 3);
+  if (d == 0)
   {
-    mqtt.publish((mqttTopic + "jet_1/state").c_str(), STRON);
+    mqtt.publish((mqttTopic + "status/needHeat").c_str(), STROFF); // LOW
+  }
+  else if (d == 1)
+  {
+    mqtt.publish((mqttTopic + "status/needHeat").c_str(), STRON); // HIGH
+  }
+
+  // 16:Flags Byte 11
+  if (TwoBit(Q_in[16], 0) == 2)
+  {
+    mqtt.publish((mqttTopic + "status/jet_1").c_str(), "High");
+    SpaState.jet1 = 2;
+  }
+  else if (TwoBit(Q_in[16], 0) == 1)
+  {
+    mqtt.publish((mqttTopic + "status/jet_1").c_str(), STRON);
     SpaState.jet1 = 1;
   }
   else
   {
-    mqtt.publish((mqttTopic + "jet_1/state").c_str(), STROFF);
+    mqtt.publish((mqttTopic + "status/jet_1").c_str(), STROFF);
     SpaState.jet1 = 0;
   }
 
-  if (bitRead(Q_in[16], 3) == 1)
+  if (TwoBit(Q_in[16], 2) == 2)
   {
-    mqtt.publish((mqttTopic + "jet_2/state").c_str(), STRON);
-    SpaState.jet2 = 1;
+    mqtt.publish((mqttTopic + "status/jet_2").c_str(), "High");
+    SpaState.jet1 = 2;
+  }
+  else if (TwoBit(Q_in[16], 2) == 1)
+  {
+    mqtt.publish((mqttTopic + "status/jet_2").c_str(), STRON);
+    SpaState.jet1 = 1;
   }
   else
   {
-    mqtt.publish((mqttTopic + "jet_2/state").c_str(), STROFF);
-    SpaState.jet2 = 0;
+    mqtt.publish((mqttTopic + "status/jet_2").c_str(), STROFF);
+    SpaState.jet1 = 0;
   }
 
   // 18:Flags Byte 13
   if (bitRead(Q_in[18], 1) == 1)
-    mqtt.publish((mqttTopic + "circ/state").c_str(), STRON);
+    mqtt.publish((mqttTopic + "status/circ").c_str(), STRON);
   else
-    mqtt.publish((mqttTopic + "circ/state").c_str(), STROFF);
+    mqtt.publish((mqttTopic + "status/circ").c_str(), STROFF);
 
-  if (bitRead(Q_in[18], 2) == 1)
+  if (TwoBit(Q_in[18], 2) > 0)
   {
-    mqtt.publish((mqttTopic + "blower/state").c_str(), STRON);
+    mqtt.publish((mqttTopic + "status/blower").c_str(), STRON);
     SpaState.blower = 1;
   }
   else
   {
-    mqtt.publish((mqttTopic + "blower/state").c_str(), STROFF);
+    mqtt.publish((mqttTopic + "status/blower").c_str(), STROFF);
     SpaState.blower = 0;
   }
   // 19:Flags Byte 14
   if (Q_in[19] == 0x03)
   {
-    mqtt.publish((mqttTopic + "light/state").c_str(), STRON);
+    mqtt.publish((mqttTopic + "status/light").c_str(), STRON);
     SpaState.light = 1;
   }
   else
   {
-    mqtt.publish((mqttTopic + "light/state").c_str(), STROFF);
+    mqtt.publish((mqttTopic + "status/light").c_str(), STROFF);
     SpaState.light = 0;
   }
 
@@ -432,12 +486,12 @@ void decodeStatus()
   s = "OFF";
   if (digitalRead(RLY1) == LOW)
     s = "ON";
-  mqtt.publish((mqttTopic + "relay_1/state").c_str(), s.c_str());
+  mqtt.publish((mqttTopic + "status/relay_1").c_str(), s.c_str());
 
   s = "OFF";
   if (digitalRead(RLY2) == LOW)
     s = "ON";
-  mqtt.publish((mqttTopic + "relay_2/state").c_str(), s.c_str());
+  mqtt.publish((mqttTopic + "status/relay_2").c_str(), s.c_str());
 }
 
 inline void ID_request()
