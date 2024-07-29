@@ -19,6 +19,7 @@
 // B    WHITE
 #include "balboa_helper.h"
 #include "esp32_spa.h"
+#include "rs485_bridge.h"
 
 #include <TickTwo.h>
 #include <config.h>
@@ -322,6 +323,7 @@ void setup()
     hardReset();
   }
 
+  bridgeSetup();
   //  httpUpdater.setup(&httpServer, "admin", "");
   httpServer.begin();
 
@@ -411,6 +413,7 @@ void loop()
   if (x == 0x7E && Q_in.size() > 2 && validateCRC8(Q_in) == Q_in[Q_in[1]])
   {
     print_msg(Q_in);
+    // bridgeSend(Q_in);
     // Unregistered or yet in progress
     if (id == 0)
     {
@@ -559,4 +562,5 @@ void loop()
 #ifdef DS18B20_PIN
   ds18b20Timer.update();
 #endif
+  bridgeLoop();
 }

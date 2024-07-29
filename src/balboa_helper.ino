@@ -370,8 +370,8 @@ void decodeStatus()
   SpaConfig.temp_scale = Q_in[14] & 0x01;
   // 1	Clock Mode	0=12-hour, 1=24-hour
   // 2		??
-  // 3-4	Filter Mode	0=OFF, 1=Cycle 1, 2=Cycle 2, 3=Cycle 1 and 2
-  switch (TwoBit(Q_in[15], 3))
+  // 3-4	Filter Mode	0=OFF, 1=Cycle 1, 2=Cycle 2, 3=Cycle 1 and 2  ( Docs said bits 3-4, but I found mine is 2-3 )
+  switch (TwoBit(Q_in[14], 2))
   {
   case 0:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), STROFF); // Ready

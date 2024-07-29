@@ -14,6 +14,7 @@ void decodeStatus();
 
 #define STRON String("ON").c_str()
 #define STROFF String("OFF").c_str()
+#define BALBOA_MESSAGE_SIZE 35
 
 struct
 {
