@@ -14,7 +14,7 @@ socket = get_socket(host);
 
 socket?.on('data', (data) => {
   const bufView = new Uint8Array(data);
-  console.log.log("Data received", bufView);
+  console.log("Data received", bufView);
   // this.readAndActOnSocketContents(bufView);
 });
 

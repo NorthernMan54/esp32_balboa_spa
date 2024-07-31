@@ -19,8 +19,38 @@ void print_msg(const uint8_t *array, int length)
   mqtt.publish((mqttTopic + "debug/msg").c_str(), s.c_str());
 }
 
-CRC8 crc;
+void print_outMsg(const uint8_t *array, int length)
+{
+  String s;
+  byte x;
+  // for (i = 0; i < (Q_in[1] + 2); i++) {
+  for (int i = 0; i < length; i++)
+  {
+    x = array[i];
+    if (x < 0x10)
+      s += "0";
+    s += String(x, HEX);
+    s += " ";
+  }
+  mqtt.publish((mqttTopic + "node/outMsg").c_str(), s.c_str());
+}
 
+void print_outMsg(CircularBuffer<uint8_t, 35> &data)
+{
+  String s;
+  // for (i = 0; i < (Q_in[1] + 2); i++) {
+  for (int i = 0; i < data.size(); i++)
+  {
+    int x = Q_in[i];
+    if (x < 0x10)
+      s += "0";
+    s += String(x, HEX);
+    s += " ";
+  }
+  mqtt.publish((mqttTopic + "node/outMsg").c_str(), s.c_str());
+}
+
+CRC8 crc;
 uint8_t validateCRC8(CircularBuffer<uint8_t, 35> &data)
 {
   if (data.size() > 3)
@@ -541,6 +571,7 @@ void rs485_send()
     Serial2.write(Q_out[i]);
 
   // print_msg(Q_out);
+  print_outMsg(Q_out);
 
   Serial2.flush();
 

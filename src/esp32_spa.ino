@@ -25,7 +25,7 @@
 #include <config.h>
 
 uint8_t x, i, j;
-uint8_t send = 0x00;
+
 uint8_t settemp = 0x00;
 
 void _yield()
@@ -413,35 +413,49 @@ void loop()
   if (x == 0x7E && Q_in.size() > 2 && validateCRC8(Q_in) == Q_in[Q_in[1]])
   {
     print_msg(Q_in);
-    // bridgeSend(Q_in);
+    if (Bridge_Message)
+      if (!Clear_to_Send)
+        bridgeSend(Q_in);
     // Unregistered or yet in progress
+    mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
     if (id == 0)
     {
       //     if (Q_in[2] == 0xFE)
       //       print_msg(Q_in);
 
       // FE BF 02:got new client ID
-      if (Q_in[2] == 0xFE && Q_in[4] == 0x02)
+      // Existing_WiFi_Client_Request
+      // Status_Update
+      if (Status_Update)
+      {
+        Existing_Client_Response
+            id = 0x0a;
+        rs485_send();
+        publishDebug("Publish Existing Module Response");
+        mqtt.publish((mqttTopic + "node/id").c_str(), String(id, 16).c_str());
+        publishDebug("Received SPA id");
+        esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
+      }
+      if (Channel_Assignment_Response)
       {
         id = Q_in[5];
         if (id > 0x2F)
           id = 0x2F;
 
         ID_ack();
-        mqtt.publish((mqttTopic + "node/id").c_str(), String(id).c_str());
+        mqtt.publish((mqttTopic + "node/id").c_str(), String(id, 16).c_str());
         publishDebug("Received SPA id");
         esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
       }
 
       // FE BF 00:Any new clients?
-      if (Q_in[2] == 0xFE && Q_in[4] == 0x00)
+      if (New_Client_Clear_to_Send)
       {
         ID_request();
       }
     }
-    else if (Q_in[2] == id &&
-             Q_in[4] == 0x06) // CTS
-    {                         // we have an ID, do clever stuff
+    else if (Clear_to_Send) // CTS
+    {                       // we have an ID, do clever stuff
       // id BF 06:Ready to Send
       if (send == 0xff)
       {
@@ -450,6 +464,10 @@ void loop()
         Q_out.push(0xBF);
         Q_out.push(0x20);
         Q_out.push(settemp);
+      }
+      else if (send == 0xfe)
+      {
+        // Bridge message
       }
       else if (send == 0x00)
       {
@@ -510,38 +528,23 @@ void loop()
       rs485_send();
       send = 0x00;
     }
-    else if (Q_in[2] == id && Q_in[4] == 0x2E)
+    else if (Configuration_Response)
     {
-      if (last_state_crc != Q_in[Q_in[1]])
-      {
-        // {"topic":"node/msg","payload":"7e b 19 bf 2e a 00 01 10 00 00 37 7e ","command":"2e","config":true}
-        decodeConfig();
-      }
+      // {"topic":"node/msg","payload":"7e b 19 bf 2e a 00 01 10 00 00 37 7e ","command":"2e","config":true}
+      decodeConfig();
     }
-    else if (Q_in[2] == id && Q_in[4] == 0x28)
+    else if (Fault_Log_Response)
     {
-      if (last_state_crc != Q_in[Q_in[1]])
-      {
-        decodeFault();
-      }
+      decodeFault();
     }
-    else if (Q_in[2] == 0xFF &&
-             Q_in[4] ==
-                 0x13)
+    else if (Status_Update)
     { // FF AF 13:Status Update - Packet index offset 5
-      if (last_state_crc != Q_in[Q_in[1]])
-      {
-        decodeStatus();
-      }
+      decodeStatus();
     }
-    else if (Q_in[2] == id &&
-             Q_in[4] == 0x23)
+    else if (Filter_Cycles_Message)
     { // FF AF 23:Filter Cycle Message - Packet
       // index offset 5
-      if (last_state_crc != Q_in[Q_in[1]])
-      {
-        decodeFilterSettings();
-      }
+      decodeFilterSettings();
     }
     else
     {

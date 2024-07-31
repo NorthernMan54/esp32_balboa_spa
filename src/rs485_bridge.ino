@@ -78,6 +78,11 @@ void bridgeLoop()
         print_msg("bridge/in", message, length);
         //  P_in.clear();
         mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
+        send = 0xfe;
+        for (int i = 2; i < length - 2; i++)
+        {
+          Q_out.push(message[i]);
+        }
       }
       else
       {

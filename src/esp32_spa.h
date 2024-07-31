@@ -60,6 +60,7 @@
 CircularBuffer<uint8_t, 35> Q_in;
 CircularBuffer<uint8_t, 35> Q_out;
 uint8_t id = 0x00;  // spa id
+uint8_t send = 0x00;
 
 uint8_t last_state_crc = 0x00;   // Used the reduce the number of status updates messages processed ( ie if the CRC doesn't change, don't process the message)
 char have_config = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
