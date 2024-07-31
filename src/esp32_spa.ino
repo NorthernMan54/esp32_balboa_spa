@@ -43,7 +43,7 @@ void print_msg(CircularBuffer<uint8_t, 35> &data)
   // for (i = 0; i < (Q_in[1] + 2); i++) {
   for (i = 0; i < data.size(); i++)
   {
-    x = Q_in[i];
+    x = data[i];
     if (x < 0x10)
       s += "0";
     s += String(x, HEX);
@@ -431,10 +431,12 @@ void loop()
         Existing_Client_Response
             id = 0x0a;
         rs485_send();
+        send = 0x00;
         publishDebug("Publish Existing Module Response");
         mqtt.publish((mqttTopic + "node/id").c_str(), String(id, 16).c_str());
-        publishDebug("Received SPA id");
+        publishDebug("Set SPA id 0x0A");
         esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
+        Q_in.clear();
       }
       if (Channel_Assignment_Response)
       {
@@ -471,6 +473,9 @@ void loop()
       }
       else if (send == 0x00)
       {
+        mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
+        mqtt.publish((mqttTopic + "node/have_faultlog").c_str(), String(have_faultlog, 16).c_str());
+        mqtt.publish((mqttTopic + "node/have_filtersettings").c_str(), String(have_filtersettings, 16).c_str());
         if (have_config == 0)
         { // Get configuration of the hot tub
           Q_out.push(id);
@@ -482,7 +487,7 @@ void loop()
           publishDebug("Requesting SPA Configuration");
           have_config = 1;
         }
-        else if (have_faultlog == 0)
+        else if (have_faultlog == 0 && have_config == 3)
         { // Get the fault log
           Q_out.push(id);
           Q_out.push(0xBF);
@@ -524,9 +529,11 @@ void loop()
         Q_out.push(send);
         Q_out.push(0x00);
       }
-
-      rs485_send();
-      send = 0x00;
+      if (Q_out.size() > 0)
+      {
+        rs485_send();
+        send = 0x00;
+      }
     }
     else if (Configuration_Response)
     {

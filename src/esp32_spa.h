@@ -63,11 +63,11 @@ uint8_t id = 0x00;  // spa id
 uint8_t send = 0x00;
 
 uint8_t last_state_crc = 0x00;   // Used the reduce the number of status updates messages processed ( ie if the CRC doesn't change, don't process the message)
-char have_config = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
-char have_faultlog = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
-char have_filtersettings = 0;    // stages: 0-> want it; 1-> requested it; 2-> gotit; 3-> further processed it
-char ip_settings = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
-char wifi_settings = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
+uint8_t have_config = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
+uint8_t have_faultlog = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
+uint8_t have_filtersettings = 0;    // stages: 0-> want it; 1-> requested it; 2-> gotit; 3-> further processed it
+uint8_t ip_settings = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
+uint8_t wifi_settings = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
 
 // WiFi and MQTT Configuration - values defined in config.h
 
@@ -87,6 +87,8 @@ void mqttDiscovery();
 #define DISCOVERY_TOPIC "testAssistant/" // MQTT Discovery topic
 #endif
 String discoveryTopic = DISCOVERY_TOPIC;
+
+void _yield();
 
 // restartReason
 void getLastRestartReason();

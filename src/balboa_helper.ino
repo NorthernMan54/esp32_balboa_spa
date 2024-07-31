@@ -2,7 +2,7 @@
 #include "balboa_helper.h"
 #include "CRC8.h"
 #include "CRC.h"
-
+/*
 void print_msg(const uint8_t *array, int length)
 {
   String s;
@@ -17,8 +17,9 @@ void print_msg(const uint8_t *array, int length)
     s += " ";
   }
   mqtt.publish((mqttTopic + "debug/msg").c_str(), s.c_str());
-}
+} */
 
+/*
 void print_outMsg(const uint8_t *array, int length)
 {
   String s;
@@ -33,7 +34,9 @@ void print_outMsg(const uint8_t *array, int length)
     s += " ";
   }
   mqtt.publish((mqttTopic + "node/outMsg").c_str(), s.c_str());
+  _yield();
 }
+*/
 
 void print_outMsg(CircularBuffer<uint8_t, 35> &data)
 {
@@ -41,13 +44,14 @@ void print_outMsg(CircularBuffer<uint8_t, 35> &data)
   // for (i = 0; i < (Q_in[1] + 2); i++) {
   for (int i = 0; i < data.size(); i++)
   {
-    int x = Q_in[i];
+    int x = data[i];
     if (x < 0x10)
       s += "0";
     s += String(x, HEX);
     s += " ";
   }
   mqtt.publish((mqttTopic + "node/outMsg").c_str(), s.c_str());
+  _yield();
 }
 
 CRC8 crc;
