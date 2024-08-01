@@ -29,7 +29,7 @@ void decodeStatus();
 
 #define Bridge_Message (id > 0 && (Q_in[2] == id || Q_in[2] == 0xFF))
 #define Existing_Client_Response Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x05); Q_out.push(0x04); Q_out.push(0x08); Q_out.push(0x00);  // 08 10 BF 05 04 08 00
-#define WiFi_Module_Configuration_Response Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x94); Q_out.push(0x02); Q_out.push(0x14); Q_out.push(0x80); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0xFF); Q_out.push(0xFF); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95);
+#define WiFi_Module_Configuration_Response Q_out.push(0x7E); Q_out.push(0x1D); Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x94); Q_out.push(0x02); Q_out.push(0x14); Q_out.push(0x80); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0xFF); Q_out.push(0xFF); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95); Q_out.push(0x27); Q_out.push(0x7E);
 
 struct
 {

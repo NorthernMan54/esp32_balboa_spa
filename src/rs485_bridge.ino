@@ -29,7 +29,7 @@ void print_msg(String topic, CircularBuffer<uint8_t, 35> &data)
   // for (i = 0; i < (Q_in[1] + 2); i++) {
   for (int i = 0; i < data.size(); i++)
   {
-    int x = Q_in[i];
+    int x = data[i];
     if (x < 0x10)
       s += "0";
     s += String(x, HEX);
@@ -76,13 +76,22 @@ void bridgeLoop()
       if (length > 0)
       {
         print_msg("bridge/in", message, length);
+
+
+
+      if (message[2] == 0x0A && message[4] == 0x04) {
+        Q_out.clear();
+        WiFi_Module_Configuration_Response
+        bridgeSend(Q_out);
+      } else {
         //  P_in.clear();
         mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
         send = 0xfe;
+        Q_out.clear();
         for (int i = 2; i < length - 2; i++)
         {
           Q_out.push(message[i]);
-        }
+        }}
       }
       else
       {
