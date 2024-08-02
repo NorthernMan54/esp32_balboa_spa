@@ -83,6 +83,7 @@ void bridgeLoop()
         Q_out.clear();
         WiFi_Module_Configuration_Response
         bridgeSend(Q_out);
+        Q_out.clear();
       } else {
         //  P_in.clear();
         mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
