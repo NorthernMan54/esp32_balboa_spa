@@ -20,7 +20,7 @@
 #include "balboa_helper.h"
 #include "esp32_spa.h"
 
-#include <Ticker.h>
+#include <TickTwo.h>
 #include <config.h>
 #include <esp_task_wdt.h>
 
@@ -43,7 +43,7 @@ void print_msg(CircularBuffer<uint8_t, 35> &data)
   // for (i = 0; i < (Q_in[1] + 2); i++) {
   for (i = 0; i < data.size(); i++)
   {
-    x = Q_in[i];
+    x = data[i];
     if (x < 0x0A)
       s += "0";
     s += String(x, HEX);
@@ -258,11 +258,11 @@ void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
 
 void resetFaultLog() { have_faultlog = 0; }
 
-Ticker faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
+TickTwo faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
 
 void resetFilterStatus() { have_filtersettings = 0; }
 
-Ticker filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
+TickTwo filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -400,8 +400,8 @@ void loop()
     // Unregistered or yet in progress
     if (id == 0)
     {
-      if (Q_in[2] == 0xFE)
-        print_msg(Q_in);
+//      if (Q_in[2] == 0xFE)
+//        print_msg(Q_in);
 
       // FE BF 02:got new client ID
       if (Q_in[2] == 0xFE && Q_in[4] == 0x02)
@@ -411,7 +411,7 @@ void loop()
           id = 0x2F;
 
         ID_ack();
-        mqtt.publish((mqttTopic + "node/id").c_str(), String(id).c_str());
+        mqtt.publish((mqttTopic + "node/id").c_str(), String(id, 16).c_str());
         mqtt.publish((mqttTopic + "debug/message").c_str(), "Received SPA id");
         esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
       }
@@ -528,8 +528,8 @@ void loop()
     else
     {
 #ifndef PRODUCTION
-      if (Q_in[2] & 0xFE || Q_in[2] == id)
-        print_msg(Q_in);
+//      if (Q_in[2] & 0xFE || Q_in[2] == id)
+//        print_msg(Q_in);
 #endif
     }
 

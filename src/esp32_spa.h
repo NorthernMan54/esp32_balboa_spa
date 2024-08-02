@@ -89,6 +89,8 @@ void otaSetup();
 
 // Global functions
 
+void _yield();
+
 WebServer httpServer(80);
 HTTPUpdate httpUpdater;
 WiFiClient wifiClient;

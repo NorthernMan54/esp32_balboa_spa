@@ -1,6 +1,22 @@
 #include "esp32_spa.h"
 #include "balboa_helper.h"
 
+void print_Outmsg(CircularBuffer<uint8_t, 35> &data)
+{
+  String s;
+  // for (i = 0; i < (Q_in[1] + 2); i++) {
+  for (int i = 0; i < data.size(); i++)
+  {
+    int x = data[i];
+    if (x < 0x0A)
+      s += "0";
+    s += String(x, HEX);
+    s += " ";
+  }
+  mqtt.publish((mqttTopic + "node/outMsg").c_str(), s.c_str());
+  _yield();
+}
+
 inline uint8_t crc8(CircularBuffer<uint8_t, 35> &data) {
   unsigned long crc;
   int i, bit;
@@ -448,7 +464,8 @@ void rs485_send() {
     digitalWrite(TX485_Tx, LOW);
   }
 
-  // DEBUG: print_msg(Q_out);
+  print_Outmsg(Q_out);
+  
   Q_out.clear();
 }
 

@@ -6,6 +6,8 @@ void otaSetup()
   ArduinoOTA.setHostname(gateway_name);
   ArduinoOTA.begin();
   ArduinoOTA.onStart(notifyOfUpdateStarted);
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+                        { esp_task_wdt_reset(); });
   ArduinoOTA.onEnd(notifyOfUpdateEnded);
   ArduinoOTA.onError([](ota_error_t error)
                      {
