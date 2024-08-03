@@ -254,6 +254,16 @@ void mqttCommand(char *p_topic, byte *p_payload, unsigned int p_length)
   }
 }
 
+void resetConfigStatus()
+{
+  if (have_config == 1)
+  {
+    have_config = 0;
+    mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
+  }
+}
+TickTwo resetConfig(resetConfigStatus, 1 * 60 * 1000); // 1 minutes
+
 void resetFaultLog() { have_faultlog = 0; }
 TickTwo faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
 
@@ -348,6 +358,7 @@ void setup()
   faultlogTimer.start();
   filterStatusTimer.start();
   nodeStatusTimer.start();
+  resetConfig.start();
 
 #ifdef DS18B20_PIN
   ds18b20Timer.start();
@@ -366,6 +377,9 @@ void setup()
   Q_in.clear();
   Q_out.clear();
   publishDebug("Awaiting SPA Connection");
+  mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
+  mqtt.publish((mqttTopic + "node/have_faultlog").c_str(), String(have_faultlog, 16).c_str());
+  mqtt.publish((mqttTopic + "node/have_filtersettings").c_str(), String(have_filtersettings, 16).c_str());
 }
 
 void loop()
@@ -385,6 +399,7 @@ void loop()
   faultlogTimer.update();
   filterStatusTimer.update();
   nodeStatusTimer.update();
+  resetConfig.update();
 
   // DEBUG:mqtt.publish((mqttTopic + "rcv").c_str(), String(x).c_str());
   // _yield(); Read from Spa RS485
@@ -417,7 +432,7 @@ void loop()
       if (!Clear_to_Send)
         bridgeSend(Q_in);
     // Unregistered or yet in progress
-    mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
+    //    mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
     if (id == 0)
     {
       //     if (Q_in[2] == 0xFE)
@@ -556,8 +571,8 @@ void loop()
     else
     {
 #ifndef PRODUCTION
-      if (Q_in[2] & 0xFE || Q_in[2] == id)
-        print_msg(Q_in);
+//      if (Q_in[2] & 0xFE || Q_in[2] == id)
+//        print_msg(Q_in);
 #endif
     }
 
