@@ -64,21 +64,6 @@ void hardReset()
   };
 }
 
-void mqttBasic()
-{
-  mqtt.publish((mqttTopic + "node/state").c_str(), "ON");
-  mqtt.publish((mqttTopic + "node/version").c_str(), VERSION);
-  mqtt.publish((mqttTopic + "node/flashsize").c_str(), String(ESP.getFlashChipSize()).c_str());
-  mqtt.publish((mqttTopic + "node/chipid").c_str(), String(ESP.getChipModel()).c_str());
-  mqtt.publish((mqttTopic + "node/speed").c_str(), String(ESP.getCpuFreqMHz()).c_str());
-
-  String release = String(__DATE__) + " - " + String(__TIME__);
-  mqtt.publish((mqttTopic + "node/release").c_str(), release.c_str());
-
-  // ... and resubscribe
-  mqtt.subscribe((mqttTopic + "command").c_str());
-}
-
 void mqttPubSub()
 {
   // ONLY DO THE FOLLOWING IF have_config == true otherwise it will not work
@@ -273,6 +258,17 @@ TickTwo filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
 void nodeStatusReport()
 {
   mqtt.publish((mqttTopic + "node/uptime").c_str(), String(millis() / 1000).c_str());
+  mqtt.publish((mqttTopic + "node/state").c_str(), "ON");
+  mqtt.publish((mqttTopic + "node/version").c_str(), VERSION);
+  mqtt.publish((mqttTopic + "node/flashsize").c_str(), String(ESP.getFlashChipSize()).c_str());
+  mqtt.publish((mqttTopic + "node/chipid").c_str(), String(ESP.getChipModel()).c_str());
+  mqtt.publish((mqttTopic + "node/speed").c_str(), String(ESP.getCpuFreqMHz()).c_str());
+
+  String release = String(__DATE__) + " - " + String(__TIME__);
+  mqtt.publish((mqttTopic + "node/release").c_str(), release.c_str());
+
+  // ... and resubscribe
+  mqtt.subscribe((mqttTopic + "command").c_str());
 }
 TickTwo nodeStatusTimer(nodeStatusReport, 1 * 60 * 1000); // 1 minutes
 
@@ -344,7 +340,7 @@ void setup()
 
   if (!mqtt.connected())
     reconnect();
-  mqttBasic();
+  nodeStatusReport();
 
   MDNS.begin("spa");
   MDNS.addService("http", "tcp", 80);
@@ -391,7 +387,7 @@ void loop()
   }
   if (!mqtt.connected())
     reconnect();
-  if (have_config == 2)
+  if (have_config >= 2)
     mqttPubSub(); // do mqtt stuff after we're connected and if we have got the config elements
   // httpServer.handleClient(); needed?
   _yield();
