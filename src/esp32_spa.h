@@ -30,6 +30,8 @@
 
 // No need to edit anything below this line
 
+#define BALBOA_MESSAGE_SIZE 50
+
 #include "balboa_helper.h"
 #include "config.h" // MQTT and WiFi configuration
 
@@ -57,8 +59,8 @@
 
 // global variables
 
-CircularBuffer<uint8_t, 35> Q_in;
-CircularBuffer<uint8_t, 35> Q_out;
+CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_in;
+CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_out;
 uint8_t id = 0x00;  // spa id
 uint8_t send = 0x00;
 
@@ -112,5 +114,16 @@ WiFiClient wifiClient;
 PubSubClient mqtt(wifiClient);
 String mqttTopic = "Spa/";  // root topic, gets appeanded with node mac address
 char gateway_name[20];
+
+#ifndef GMT_OFFSET
+#define GMT_OFFSET -14400
+#endif
+
+#ifndef DAYLIGHT_OFFSET
+#define DAYLIGHT_OFFSET 0
+#endif
+
+const long  gmtOffset_sec = GMT_OFFSET;
+const int   daylightOffset_sec = DAYLIGHT_OFFSET;
 
 #endif

@@ -1,8 +1,11 @@
 #ifndef balboa_helper_h
 #define balboa_helper_h
 #include "esp32_spa.h"
+#include "Analytics.h"
 
-uint8_t validateCRC8(CircularBuffer<uint8_t, 35> &data);
+#define BALBOA_MESSAGE_SIZE 50
+
+uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data);
 void ID_request();
 void ID_ack();
 void rs485_send();
@@ -14,7 +17,6 @@ void decodeStatus();
 
 #define STRON String("ON").c_str()
 #define STROFF String("OFF").c_str()
-#define BALBOA_MESSAGE_SIZE 35
 
 #define DeDuplicate (last_state_crc != Q_in[Q_in[1]])
 #define New_Client_Clear_to_Send (Q_in[2] == 0xFE && Q_in[4] == 0x00 )
@@ -30,6 +32,7 @@ void decodeStatus();
 #define Bridge_Message (id > 0 && (Q_in[2] == id || Q_in[2] == 0xFF))
 #define Existing_Client_Response Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x05); Q_out.push(0x04); Q_out.push(0x37); Q_out.push(0x00);  // 08 10 BF 05 04 08 00 - Config request doesn't seem to work
 // #define WiFi_Module_Configuration_Request Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x05); Q_out.push(0x04); Q_out.push(0x08); Q_out.push(0x00);
+// Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95)
 #define WiFi_Module_Configuration_Response Q_out.push(0x7E); Q_out.push(0x1D); Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x94); Q_out.push(0x02); Q_out.push(0x14); Q_out.push(0x80); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0xFF); Q_out.push(0xFF); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95); Q_out.push(0x27); Q_out.push(0x7E);
 
 struct
@@ -87,13 +90,5 @@ struct
   uint8_t filt2DurationMinute : 6;
 
 } SpaFilterSettings;
-
-unsigned long heaterOnTimeToday = 0;
-unsigned long previousHeaterReading = millis();
-unsigned long heaterOnTimeYesterday = 0;
-
-unsigned long filterOnTimeToday = 0;
-unsigned long previousFilterReading = millis();
-unsigned long filterOnTimeYesterday = 0;
 
 #endif

@@ -2,43 +2,12 @@
 #include "balboa_helper.h"
 #include "CRC8.h"
 #include "CRC.h"
-/*
-void print_msg(const uint8_t *array, int length)
-{
-  String s;
-  byte x;
-  // for (i = 0; i < (Q_in[1] + 2); i++) {
-  for (int i = 0; i < length; i++)
-  {
-    x = array[i];
-    if (x < 0x10)
-      s += "0";
-    s += String(x, HEX);
-    s += " ";
-  }
-  mqtt.publish((mqttTopic + "debug/msg").c_str(), s.c_str());
-} */
+#include "Analytics.h"
 
-/*
-void print_outMsg(const uint8_t *array, int length)
-{
-  String s;
-  byte x;
-  // for (i = 0; i < (Q_in[1] + 2); i++) {
-  for (int i = 0; i < length; i++)
-  {
-    x = array[i];
-    if (x < 0x10)
-      s += "0";
-    s += String(x, HEX);
-    s += " ";
-  }
-  mqtt.publish((mqttTopic + "node/outMsg").c_str(), s.c_str());
-  _yield();
-}
-*/
+Analytics heaton;
+Analytics filteron;
 
-void print_outMsg(CircularBuffer<uint8_t, 35> &data)
+void print_outMsg(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   String s;
   // for (i = 0; i < (Q_in[1] + 2); i++) {
@@ -55,7 +24,7 @@ void print_outMsg(CircularBuffer<uint8_t, 35> &data)
 }
 
 CRC8 crc;
-uint8_t validateCRC8(CircularBuffer<uint8_t, 35> &data)
+uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   if (data.size() > 3)
   {
@@ -75,7 +44,7 @@ uint8_t validateCRC8(CircularBuffer<uint8_t, 35> &data)
   }
 }
 
-inline uint8_t crc8(CircularBuffer<uint8_t, 35> &data)
+inline uint8_t crc8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   unsigned long crc;
   int i, bit;
@@ -409,22 +378,23 @@ void decodeStatus()
   {
   case 0:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), STROFF); // Ready
+    filteron.off();
     break;
   case 1:                                                               // Ready-in-Rest
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1"); // Ready
-    filterOnTimeToday += millis() - previousFilterReading;
+    filteron.on();
     break;
   case 2:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 2"); // Ready
-    filterOnTimeToday += millis() - previousFilterReading;
+    filteron.on();
     break;
   case 3:                                                                   // Ready-in-Rest
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1 & 2"); // Ready
-    filterOnTimeToday += millis() - previousFilterReading;
+    filteron.on();
     break;
   }
-  mqtt.publish((mqttTopic + "status/filterOnTimeToday").c_str(), String(filterOnTimeToday / 1000).c_str());
-  previousFilterReading = millis();
+  mqtt.publish((mqttTopic + "status/filterOnTimeToday").c_str(), String(filteron.today()).c_str());
+  mqtt.publish((mqttTopic + "status/filterOnTimeYesterday").c_str(), String(filteron.yesterday()).c_str());
   // 5	Panel Locked	0=No, 1=Yes
   // 6	??	0
   // 7	??	0
@@ -432,15 +402,17 @@ void decodeStatus()
   // 15:Flags Byte 10 / Heat status - 0=OFF, 1=Heating, 2=Heat Waiting, Temp Range
   d = TwoBit(Q_in[15], 4);
   if (d == 0)
+  {
     mqtt.publish((mqttTopic + "status/heatstate").c_str(), STROFF);
+    heaton.off();
+  }
   else if (d == 1 || d == 2)
   {
     mqtt.publish((mqttTopic + "status/heatstate").c_str(), STRON);
-    heaterOnTimeToday += millis() - previousHeaterReading;
-    mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heaterOnTimeToday / 1000).c_str());
+    heaton.on();
   }
-  mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heaterOnTimeToday / 1000).c_str());
-  previousHeaterReading = millis();
+  mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heaton.today()).c_str());
+  mqtt.publish((mqttTopic + "status/heaterOnTimeYesterday").c_str(), String(heaton.yesterday()).c_str());
 
   d = bitRead(Q_in[15], 2);
   if (d == 0)

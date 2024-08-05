@@ -1,8 +1,6 @@
 #include "esp32_spa.h"
 #include "rs485_bridge.h"
 
-#define BALBOA_PORT 4257
-
 CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> P_in;
 CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> P_out;
 
@@ -23,7 +21,7 @@ void print_msg(String topic, uint8_t *Q_in, int length)
   mqtt.publish((mqttTopic + topic).c_str(), s.c_str());
 }
 
-void print_msg(String topic, CircularBuffer<uint8_t, 35> &data)
+void print_msg(String topic, CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   String s;
   // for (i = 0; i < (Q_in[1] + 2); i++) {
@@ -40,10 +38,17 @@ void print_msg(String topic, CircularBuffer<uint8_t, 35> &data)
 
 WiFiServer bridge(BALBOA_PORT); // Port number for the server
 WiFiClient client;
+WiFiUDP Discovery;
+
+char packetBuffer[255];                                 // buffer to hold incoming packet
+char ReplyBuffer[] = "BWGSPA\r\n00-15-27-00-00-01\r\n"; // a string to send back Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95)
 
 void bridgeSetup()
 {
   bridge.begin();
+#ifdef DISCOVERY
+  Discovery.begin(BALBOA_UDP_DISCOVERY_PORT);
+#endif
   //  bridge.setNoDelay(true);
 };
 
@@ -68,31 +73,30 @@ void bridgeLoop()
     if (client.available())
     {
       int length = 0;
-      mqtt.publish((mqttTopic + "bridge/msg").c_str(), String(client.available()).c_str());
-      while (client.available())
-      {
-        length = client.read(message, BALBOA_MESSAGE_SIZE);
-      }
+      // Need to handle "7e 08 0a bf 22 00 00 01 58 7e 7e 08 0a bf 22 04 00 00 f4 7e 7e 08 0a bf 22 01 00 00 34 7e 7e 08 0a bf 22 02 00 00 89 7e "
+      // Which is config request (2e), followed by 04 (25), Filter Cycles Message (23), and Information Response ( 24 )
+      length = client.read(message, BALBOA_MESSAGE_SIZE);
       if (length > 0)
       {
         print_msg("bridge/in", message, length);
-
-
-
-      if (message[2] == 0x0A && message[4] == 0x04) {
-        Q_out.clear();
-        WiFi_Module_Configuration_Response
-        bridgeSend(Q_out);
-        Q_out.clear();
-      } else {
-        //  P_in.clear();
-        mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
-        send = 0xfe;
-        Q_out.clear();
-        for (int i = 2; i < length - 2; i++)
+        if (message[2] == 0x0A && message[4] == 0x04)
         {
-          Q_out.push(message[i]);
-        }}
+          Q_out.clear();
+          WiFi_Module_Configuration_Response
+              bridgeSend(Q_out);
+          Q_out.clear();
+        }
+        else
+        {
+          //  P_in.clear();
+          mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
+          send = 0xfe;
+          Q_out.clear();
+          for (int i = 2; i < length - 2; i++)
+          {
+            Q_out.push(message[i]);
+          }
+        }
       }
       else
       {
@@ -107,9 +111,23 @@ void bridgeLoop()
     mqtt.publish((mqttTopic + "bridge/msg").c_str(), "Client Disconnected");
     client.stop();
   }
+
+#ifdef DISCOVERY
+  // Check for UDP Discovery
+  int packetSize = Discovery.parsePacket();
+  if (packetSize)
+  {
+    // receive incoming UDP packets
+    Discovery.read(packetBuffer, 255);
+    Discovery.beginPacket(Discovery.remoteIP(), Discovery.remotePort());
+    Discovery.write((const uint8_t *)ReplyBuffer, strlen(ReplyBuffer));
+    Discovery.endPacket();
+    mqtt.publish((mqttTopic + "bridge/udpMsg").c_str(), packetBuffer);
+  }
+#endif
 };
 
-void bridgeSend(CircularBuffer<uint8_t, 35> &data)
+void bridgeSend(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   if (client && client.connected())
   {

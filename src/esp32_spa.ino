@@ -37,7 +37,7 @@ void _yield()
   ArduinoOTA.handle();
 }
 
-void print_msg(CircularBuffer<uint8_t, 35> &data)
+void print_msg(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   String s;
   // for (i = 0; i < (Q_in[1] + 2); i++) {
@@ -255,9 +255,23 @@ TickTwo faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
 void resetFilterStatus() { have_filtersettings = 0; }
 TickTwo filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
 
+int getTime()
+{
+time_t now;
+struct tm *now_tm;
+int hour;
+
+now = time(NULL);
+now_tm = localtime(&now);
+hour = now_tm->tm_hour;
+
+  return hour;
+}
+
 void nodeStatusReport()
 {
   mqtt.publish((mqttTopic + "node/uptime").c_str(), String(millis() / 1000).c_str());
+  mqtt.publish((mqttTopic + "node/getTime").c_str(), String(getTime()).c_str());
   mqtt.publish((mqttTopic + "node/state").c_str(), "ON");
   mqtt.publish((mqttTopic + "node/version").c_str(), VERSION);
   mqtt.publish((mqttTopic + "node/flashsize").c_str(), String(ESP.getFlashChipSize()).c_str());
@@ -332,6 +346,7 @@ void setup()
     hardReset();
   }
 
+  configTime(gmtOffset_sec, daylightOffset_sec, "pool.ntp.org");
   bridgeSetup();
   //  httpUpdater.setup(&httpServer, "admin", "");
   httpServer.begin();
@@ -417,7 +432,7 @@ void loop()
 #ifndef PRODUCTION
     print_msg(Q_in);
 #endif
-    if (Bridge_Message && DeDuplicate)
+    if (Bridge_Message)
       if (!Clear_to_Send)
       {
         if (!Status_Update)
@@ -426,7 +441,7 @@ void loop()
         }
         else
         {
-          if (DeDuplicate)
+//          if (DeDuplicate)
             bridgeSend(Q_in);
         }
       }
