@@ -119,7 +119,7 @@ void reconnect()
     delay(1000);
 
     // have_config = 2;
-    if (have_config == 3)
+    if (have_config >= 2)
     {
       // have_config = 2; we have disconnected, let's republish our configuration
       mqttPubSub();
@@ -269,6 +269,9 @@ void nodeStatusReport()
 
   // ... and resubscribe
   mqtt.subscribe((mqttTopic + "command").c_str());
+  mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
+  mqtt.publish((mqttTopic + "node/have_faultlog").c_str(), String(have_faultlog, 16).c_str());
+  mqtt.publish((mqttTopic + "node/have_filtersettings").c_str(), String(have_filtersettings, 16).c_str());
 }
 TickTwo nodeStatusTimer(nodeStatusReport, 1 * 60 * 1000); // 1 minutes
 
@@ -340,7 +343,6 @@ void setup()
 
   if (!mqtt.connected())
     reconnect();
-  nodeStatusReport();
 
   MDNS.begin("spa");
   MDNS.addService("http", "tcp", 80);
@@ -373,9 +375,6 @@ void setup()
   Q_in.clear();
   Q_out.clear();
   publishDebug("Awaiting SPA Connection");
-  mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
-  mqtt.publish((mqttTopic + "node/have_faultlog").c_str(), String(have_faultlog, 16).c_str());
-  mqtt.publish((mqttTopic + "node/have_filtersettings").c_str(), String(have_filtersettings, 16).c_str());
 }
 
 void loop()
@@ -387,7 +386,7 @@ void loop()
   }
   if (!mqtt.connected())
     reconnect();
-  if (have_config >= 2)
+  if (have_config == 2)
     mqttPubSub(); // do mqtt stuff after we're connected and if we have got the config elements
   // httpServer.handleClient(); needed?
   _yield();
@@ -397,8 +396,6 @@ void loop()
   nodeStatusTimer.update();
   resetConfig.update();
 
-  // DEBUG:mqtt.publish((mqttTopic + "rcv").c_str(), String(x).c_str());
-  // _yield(); Read from Spa RS485
   if (Serial2.available())
   {
     x = Serial2.read();
@@ -407,6 +404,7 @@ void loop()
     // Drop until SOF is seen
     if (Q_in.first() != 0x7E)
       Q_in.clear();
+
     esp_task_wdt_reset();
   }
 
@@ -414,19 +412,24 @@ void loop()
   if (Q_in[1] == 0x7E && Q_in.size() > 1)
     Q_in.pop();
 
-    // Complete package
-    // if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
-#ifndef PRODUCTION
-//  print_msg(Q_in);
-//  mqtt.publish((mqttTopic + "debug/calculatedCRC8").c_str(), String(validateCRC8(Q_in), HEX).c_str());
-//  mqtt.publish((mqttTopic + "debug/receivedCRC8").c_str(), String(Q_in[Q_in[1]], HEX).c_str());
-#endif
   if (x == 0x7E && Q_in.size() > 2 && validateCRC8(Q_in) == Q_in[Q_in[1]])
   {
+#ifndef PRODUCTION
     print_msg(Q_in);
-    if (Bridge_Message)
+#endif
+    if (Bridge_Message && DeDuplicate)
       if (!Clear_to_Send)
-        bridgeSend(Q_in);
+      {
+        if (!Status_Update)
+        {
+          bridgeSend(Q_in);
+        }
+        else
+        {
+          if (DeDuplicate)
+            bridgeSend(Q_in);
+        }
+      }
     // Unregistered or yet in progress
     //    mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
     if (id == 0)
@@ -484,9 +487,6 @@ void loop()
       }
       else if (send == 0x00)
       {
-        mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
-        mqtt.publish((mqttTopic + "node/have_faultlog").c_str(), String(have_faultlog, 16).c_str());
-        mqtt.publish((mqttTopic + "node/have_filtersettings").c_str(), String(have_filtersettings, 16).c_str());
         if (have_config == 0)
         { // Get configuration of the hot tub
           Q_out.push(id);
@@ -555,7 +555,7 @@ void loop()
     {
       decodeFault();
     }
-    else if (Status_Update)
+    else if (Status_Update && DeDuplicate)
     { // FF AF 13:Status Update - Packet index offset 5
       decodeStatus();
     }

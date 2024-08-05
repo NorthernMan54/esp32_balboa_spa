@@ -241,7 +241,7 @@ void decodeFilterSettings()
   d += String(SpaFilterSettings.filt1DurationMinute);
 
   payld = "{\"start\":\"" + s + "\",\"duration\":\"" + d + "\"}";
-  mqtt.publish((mqttTopic + "filter1/state").c_str(), payld.c_str());
+  mqtt.publish((mqttTopic + "filter/filter1").c_str(), payld.c_str());
 
   // Filter 2 time conversion
   if (SpaFilterSettings.filt2Hour < 10)
@@ -262,12 +262,12 @@ void decodeFilterSettings()
     d += "0";
   d += String(SpaFilterSettings.filt2DurationMinute);
   if ((int)(SpaFilterSettings.filt2Enable) == 1)
-    mqtt.publish((mqttTopic + "filter2_enabled/state").c_str(), STRON);
+    mqtt.publish((mqttTopic + "filter/filter2_enabled").c_str(), STRON);
   else
-    mqtt.publish((mqttTopic + "filter2_enabled/state").c_str(), STROFF);
+    mqtt.publish((mqttTopic + "filter/filter2_enabled").c_str(), STROFF);
 
   payld = "{\"start\":\"" + s + "\",\"duration\":\"" + d + "\"}";
-  mqtt.publish((mqttTopic + "filter2/state").c_str(), payld.c_str());
+  mqtt.publish((mqttTopic + "filter/filter2").c_str(), payld.c_str());
 
   mqtt.publish((mqttTopic + "debug/message").c_str(), "Filter Settings Received");
   have_filtersettings = 2;
@@ -574,8 +574,10 @@ void rs485_send()
   for (int i = 0; i < Q_out.size(); i++)
     Serial2.write(Q_out[i]);
 
-  // print_msg(Q_out);
+// print_msg(Q_out);
+#ifndef PRODUCTION
   print_outMsg(Q_out);
+#endif
 
   Serial2.flush();
 

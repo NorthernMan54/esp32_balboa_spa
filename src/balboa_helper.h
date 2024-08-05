@@ -22,10 +22,10 @@ void decodeStatus();
 #define Existing_WiFi_Client_Request (Q_in[2] == 0x0a && Q_in[4] == 0x04)  // 7e 05 0a bf 04 77 7e
 #define Clear_to_Send (Q_in[2] == id && Q_in[4] == 0x06 )
 
-#define Status_Update (Q_in[2] == 0xFF && Q_in[4] == 0x13 && DeDuplicate)
-#define Filter_Cycles_Message Q_in[2] == id && Q_in[4] == 0x23 && DeDuplicate
-#define Fault_Log_Response Q_in[2] == id && Q_in[4] == 0x28 && DeDuplicate
-#define Configuration_Response Q_in[2] == id && Q_in[4] == 0x2E && DeDuplicate
+#define Status_Update (Q_in[2] == 0xFF && Q_in[4] == 0x13)
+#define Filter_Cycles_Message Q_in[2] == id && Q_in[4] == 0x23
+#define Fault_Log_Response Q_in[2] == id && Q_in[4] == 0x28 
+#define Configuration_Response Q_in[2] == id && Q_in[4] == 0x2E
 
 #define Bridge_Message (id > 0 && (Q_in[2] == id || Q_in[2] == 0xFF))
 #define Existing_Client_Response Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x05); Q_out.push(0x04); Q_out.push(0x37); Q_out.push(0x00);  // 08 10 BF 05 04 08 00 - Config request doesn't seem to work
