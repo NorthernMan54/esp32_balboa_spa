@@ -412,14 +412,19 @@ void decodeStatus()
     break;
   case 1:                                                               // Ready-in-Rest
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1"); // Ready
+    filterOnTimeToday += millis() - previousFilterReading;
     break;
   case 2:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 2"); // Ready
+    filterOnTimeToday += millis() - previousFilterReading;
     break;
   case 3:                                                                   // Ready-in-Rest
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1 & 2"); // Ready
+    filterOnTimeToday += millis() - previousFilterReading;
     break;
   }
+  mqtt.publish((mqttTopic + "status/filterOnTimeToday").c_str(), String(filterOnTimeToday / 1000).c_str());
+  previousFilterReading = millis();
   // 5	Panel Locked	0=No, 1=Yes
   // 6	??	0
   // 7	??	0
@@ -429,7 +434,13 @@ void decodeStatus()
   if (d == 0)
     mqtt.publish((mqttTopic + "status/heatstate").c_str(), STROFF);
   else if (d == 1 || d == 2)
+  {
     mqtt.publish((mqttTopic + "status/heatstate").c_str(), STRON);
+    heaterOnTimeToday += millis() - previousHeaterReading;
+    mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heaterOnTimeToday / 1000).c_str());
+  }
+  mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heaterOnTimeToday / 1000).c_str());
+  previousHeaterReading = millis();
 
   d = bitRead(Q_in[15], 2);
   if (d == 0)

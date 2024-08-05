@@ -88,4 +88,12 @@ struct
 
 } SpaFilterSettings;
 
+unsigned long heaterOnTimeToday = 0;
+unsigned long previousHeaterReading = millis();
+unsigned long heaterOnTimeYesterday = 0;
+
+unsigned long filterOnTimeToday = 0;
+unsigned long previousFilterReading = millis();
+unsigned long filterOnTimeYesterday = 0;
+
 #endif
