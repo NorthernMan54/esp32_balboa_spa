@@ -36,8 +36,8 @@ void print_msg(String topic, CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   mqtt.publish((mqttTopic + topic).c_str(), s.c_str());
 }
 
-WiFiServer bridge(BALBOA_PORT); // Port number for the server
-WiFiClient client;
+WiFiServer bridge(BALBOA_PORT);         // Port number for the server
+WiFiClient clients[MAX_BRIDGE_CLIENTS]; // Array to hold the clients
 WiFiUDP Discovery;
 
 char packetBuffer[255];                                 // buffer to hold incoming packet
@@ -46,7 +46,7 @@ char ReplyBuffer[] = "BWGSPA\r\n00-15-27-00-00-01\r\n"; // a string to send back
 void bridgeSetup()
 {
   bridge.begin();
-#ifdef DISCOVERY
+#ifdef LOCAL_CONNECT
   Discovery.begin(BALBOA_UDP_DISCOVERY_PORT);
 #endif
   //  bridge.setNoDelay(true);
@@ -55,64 +55,78 @@ void bridgeSetup()
 void bridgeLoop()
 {
 
-  // Check for new client connections
-  if (!client || !client.connected())
+  WiFiClient newClient = bridge.available();
+  if (newClient)
   {
-    client = bridge.available(); // Accept new client connection
-    if (client)
+    // Check if there's space for a new client
+    bool added = false;
+    for (int i = 0; i < MAX_BRIDGE_CLIENTS; i++)
     {
-      mqtt.publish((mqttTopic + "bridge/msg").c_str(), "Bridge Connected");
-      Serial.println("New client connected");
+      if (!clients[i])
+      {
+        clients[i] = newClient;
+        mqtt.publish((mqttTopic + "bridge/msg").c_str(), ("Bridge Connected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
+        added = true;
+        break;
+      }
+    }
+
+    if (!added)
+    {
+      mqtt.publish((mqttTopic + "bridge/msg").c_str(), ("Bridge not Connected - no slots " + newClient.remoteIP().toString()).c_str());
+      newClient.stop();
     }
   }
 
-  // If a client is connected, bridge data
-  if (client && client.connected())
+  // Handle data from connected clients
+  for (int i = 0; i < MAX_BRIDGE_CLIENTS; i++)
   {
-    //  mqtt.publish((mqttTopic + "bridge/msg").c_str(), "Client Connected");
-    if (client.available())
+    if (clients[i] && clients[i].connected())
     {
-      int length = 0;
-      // Need to handle "7e 08 0a bf 22 00 00 01 58 7e 7e 08 0a bf 22 04 00 00 f4 7e 7e 08 0a bf 22 01 00 00 34 7e 7e 08 0a bf 22 02 00 00 89 7e "
-      // Which is config request (2e), followed by 04 (25), Filter Cycles Message (23), and Information Response ( 24 )
-      length = client.read(message, BALBOA_MESSAGE_SIZE);
-      if (length > 0)
+      if (clients[i].available())
       {
-        print_msg("bridge/in", message, length);
-        if (message[2] == 0x0A && message[4] == 0x04)
+        int length = 0;
+        // Need to handle "7e 08 0a bf 22 00 00 01 58 7e 7e 08 0a bf 22 04 00 00 f4 7e 7e 08 0a bf 22 01 00 00 34 7e 7e 08 0a bf 22 02 00 00 89 7e "
+        // Which is config request (2e), followed by 04 (25), Filter Cycles Message (23), and Information Response ( 24 )
+        length = clients[i].read(message, BALBOA_MESSAGE_SIZE);
+        if (length > 0)
         {
-          Q_out.clear();
-          WiFi_Module_Configuration_Response
-              bridgeSend(Q_out);
-          Q_out.clear();
+          print_msg("bridge/in", message, length);
+          if (message[2] == 0x0A && message[4] == 0x04)
+          {
+            Q_out.clear();
+            WiFi_Module_Configuration_Response
+                bridgeSend(Q_out);
+            Q_out.clear();
+          }
+          else
+          {
+            //  P_in.clear();
+            mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
+            send = 0xfe;
+            Q_out.clear();
+            for (int i = 2; i < length - 2; i++)
+            {
+              Q_out.push(message[i]);
+            }
+          }
         }
         else
         {
-          //  P_in.clear();
-          mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
-          send = 0xfe;
-          Q_out.clear();
-          for (int i = 2; i < length - 2; i++)
-          {
-            Q_out.push(message[i]);
-          }
+          mqtt.publish((mqttTopic + "bridge/msg").c_str(), "No Msg Received");
         }
       }
-      else
+      else if (!clients[i].connected())
       {
-        mqtt.publish((mqttTopic + "bridge/msg").c_str(), "No Msg Received");
+        // Client disconnected
+        mqtt.publish((mqttTopic + "bridge/msg").c_str(), ("Client Disconnected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
+        clients[i].stop();
+        clients[i] = WiFiClient();
       }
     }
   }
 
-  // Close the connection if the client has disconnected
-  if (client && !client.connected())
-  {
-    mqtt.publish((mqttTopic + "bridge/msg").c_str(), "Client Disconnected");
-    client.stop();
-  }
-
-#ifdef DISCOVERY
+#ifdef LOCAL_CONNECT
   // Check for UDP Discovery
   int packetSize = Discovery.parsePacket();
   if (packetSize)
@@ -129,12 +143,24 @@ void bridgeLoop()
 
 void bridgeSend(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
-  if (client && client.connected())
+  bool sent = false;
+  for (int i = 0; i < MAX_BRIDGE_CLIENTS; i++)
+  {
+    if (clients[i] && clients[i].connected())
+    {
+      sent = true;
+
+      uint8_t output[BALBOA_MESSAGE_SIZE];
+      data.copyToArray(output);
+      clients[i].write(output, data.size());
+    }
+    else
+    {
+    }
+  }
+  if (sent)
   {
     print_msg("bridge/out", data);
-    uint8_t output[BALBOA_MESSAGE_SIZE];
-    data.copyToArray(output);
-    client.write(output, data.size());
   }
   else
   {
