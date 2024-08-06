@@ -27,11 +27,13 @@ void otaSetup()
 
 void notifyOfUpdateStarted()
 {
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Arduino OTA Update Start");
+  publishDebug("Arduino OTA Update Start");
+  _yield();
 }
 
 void notifyOfUpdateEnded()
 {
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Arduino OTA Update Complete");
+  publishDebug("Arduino OTA Update Complete");
   setLastRestartReason("OTA Update");
+  _yield();
 }

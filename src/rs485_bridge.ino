@@ -2,6 +2,8 @@
 #include "rs485_bridge.h"
 #include "rs485_driver.h"
 
+#define publishBridge(__VA_ARGS__...) mqtt.publish((mqttTopic + "bridge/msg").c_str(), __VA_ARGS__);
+
 CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_out;
 
 uint8_t message[BALBOA_MESSAGE_SIZE];
@@ -65,7 +67,7 @@ void bridgeLoop()
       if (!clients[i])
       {
         clients[i] = newClient;
-        mqtt.publish((mqttTopic + "bridge/msg").c_str(), ("Bridge Connected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
+        publishDebug(("Bridge Client Connected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
         added = true;
         break;
       }
@@ -73,7 +75,7 @@ void bridgeLoop()
 
     if (!added)
     {
-      mqtt.publish((mqttTopic + "bridge/msg").c_str(), ("Bridge not Connected - no slots " + newClient.remoteIP().toString()).c_str());
+      publishError(("Bridge Client not Connected - no slots " + newClient.remoteIP().toString()).c_str());
       newClient.stop();
     }
   }
@@ -102,19 +104,19 @@ void bridgeLoop()
           else
           {
             //  P_in.clear();
-            mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
+            publishBridge((String(length) + " Msg Received").c_str());
             rs485Send(message, length, false);
           }
         }
         else
         {
-          mqtt.publish((mqttTopic + "bridge/msg").c_str(), "No Msg Received");
+          publishBridge("No Msg Received");
         }
       }
       else if (!clients[i].connected())
       {
         // Client disconnected
-        mqtt.publish((mqttTopic + "bridge/msg").c_str(), ("Client Disconnected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
+        publishDebug(("Client Disconnected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
         clients[i].stop();
         clients[i] = WiFiClient();
       }
@@ -159,6 +161,6 @@ void bridgeSend(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   }
   else
   {
-    mqtt.publish((mqttTopic + "bridge/msg").c_str(), "Client not connected");
+    publishBridge("Client not connected");
   }
 };
