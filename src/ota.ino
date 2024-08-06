@@ -11,7 +11,7 @@ void otaSetup()
                         { esp_task_wdt_reset(); });
   ArduinoOTA.onError([](ota_error_t error)
                      {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), ("OTA Failed " + String(error)).c_str());
+    publishError(("OTA Failed: " + String(error)).c_str());
     Serial.printf("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR)
       Serial.println("Auth Failed");

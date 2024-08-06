@@ -10,7 +10,7 @@
 // #define RLY2 27    // Optional local relay control
 
 // DS18B20 configuration
-#define DS18B20_PIN 4 // uncommment to enable
+// #define DS18B20_PIN 4 // uncommment to enable
 
 // ArduinoLog configuration - Not implemented yet
 
@@ -23,12 +23,19 @@
 #define VERSION "0.37.4"
 #define SAVE_CONN true // save the ip details above to local filesystem
 
+// Timezone configuration
+
+#define GMT_OFFSET -14400
+#define DAYLIGHT_OFFSET 0
+
 // Home Assistant Auto Discovery - uncommment to enable
 
 // #define HASSIO true
 // #define DISCOVERY_TOPIC "homeAssistant/" // MQTT Discovery topic
 
 // No need to edit anything below this line
+
+// --------------------------------------------------------------------------------------------------------------- //
 
 #define BALBOA_MESSAGE_SIZE 50
 
@@ -113,14 +120,6 @@ WiFiClient wifiClient;
 PubSubClient mqtt(wifiClient);
 String mqttTopic = "Spa/";  // root topic, gets appeanded with node mac address
 char gateway_name[20];
-
-#ifndef GMT_OFFSET
-#define GMT_OFFSET -14400
-#endif
-
-#ifndef DAYLIGHT_OFFSET
-#define DAYLIGHT_OFFSET 0
-#endif
 
 const long  gmtOffset_sec = GMT_OFFSET;
 const int   daylightOffset_sec = DAYLIGHT_OFFSET;

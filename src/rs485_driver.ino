@@ -42,7 +42,7 @@ void rs485Send(uint8_t *data, int length, boolean addCrc)
   messageToSend.length = length;
   if (xQueueSend(rs485WriteQueue, &messageToSend, 0) != pdTRUE)
   {
-    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue full");
+    publishError("RS485 Queue full");
   }
   else
   {
@@ -64,7 +64,7 @@ void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCr
   messageToSend.length = data.size();
   if (xQueueSend(rs485WriteQueue, &messageToSend, 0) != pdTRUE)
   {
-    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue full");
+    publishError("RS485 Queue full");
   }
   else
   {

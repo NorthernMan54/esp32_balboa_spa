@@ -110,9 +110,7 @@ void decodeFault()
   mqtt.publish((mqttTopic + "fault/Hours").c_str(), String(SpaFaultLog.hour).c_str());
   mqtt.publish((mqttTopic + "fault/Minutes").c_str(), String(SpaFaultLog.minutes).c_str());
   have_faultlog = 2;
-  // mqtt.publish((mqttTopic + "debug/have_faultlog").c_str(), "have the
-  // faultlog, #2");
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Fault Log Received");
+  publishDebug("Fault Log Received");
 }
 
 void decodeFilterSettings()
@@ -197,7 +195,7 @@ void decodeFilterSettings()
   payld = "{\"start\":\"" + s + "\",\"duration\":\"" + d + "\"}";
   mqtt.publish((mqttTopic + "filter/filter2").c_str(), payld.c_str());
 
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Filter Settings Received");
+  publishDebug("Filter Settings Received");
   have_filtersettings = 2;
 }
 
@@ -234,7 +232,7 @@ void decodeConfig()
   mqtt.publish((mqttTopic + "config/aux2").c_str(), String(SpaConfig.aux2).c_str());
   mqtt.publish((mqttTopic + "config/temp_scale").c_str(), String(SpaConfig.temp_scale).c_str());
   have_config = 2;
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "SPA Config Received");
+  publishDebug( "SPA Config Received");
 }
 
 void decodeStatus()
@@ -437,7 +435,6 @@ void decodeStatus()
       mqtt.publish((mqttTopic + "status/circ").c_str(), STROFF);
   }
 
-  
   if (SpaConfig.blower)
   {
     if (TwoBit(Q_in[18], 2) > 0)
