@@ -27,8 +27,6 @@
 
 uint8_t x, i, j;
 
-uint8_t settemp = 0x00;
-
 void _yield()
 {
   yield();
@@ -51,7 +49,7 @@ void print_msg(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
     s += " ";
   }
   mqtt.publish((mqttTopic + "node/msg").c_str(), s.c_str());
-//  mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
+  //  mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
   _yield();
 }
 
@@ -75,7 +73,7 @@ void mqttPubSub()
   mqtt.subscribe((mqttTopic + "target_temp/set").c_str());
   mqtt.subscribe((mqttTopic + "heatingmode/set").c_str());
   mqtt.subscribe((mqttTopic + "heat_mode/set").c_str());
-  mqtt.subscribe((mqttTopic + "highrange/set").c_str());
+  mqtt.subscribe((mqttTopic + "temprange/set").c_str());
 
   // OPTIONAL ELEMENTS
   if (SpaConfig.pump1 != 0)
@@ -95,8 +93,10 @@ void mqttPubSub()
     mqtt.subscribe((mqttTopic + "light/set").c_str());
   }
 
+#if defined(RLY1) || defined(RLY2)
   mqtt.subscribe((mqttTopic + "relay_1/set").c_str());
   mqtt.subscribe((mqttTopic + "relay_2/set").c_str());
+#endif
 
   // not sure what this is
   last_state_crc = 0x00;
@@ -152,6 +152,7 @@ void mqttCommand(char *p_topic, byte *p_payload, unsigned int p_length)
   // handle message topic
   if (topic.startsWith((mqttTopic + "relay_").c_str()))
   {
+#if defined(RLY1) || defined(RLY2)
     bool newstate = 0;
 
     if (payload.equals("ON"))
@@ -173,6 +174,9 @@ void mqttCommand(char *p_topic, byte *p_payload, unsigned int p_length)
       pinMode(RLY2, OUTPUT);
       digitalWrite(RLY2, newstate);
     }
+#else
+    publishError("Relays not defined");
+#endif
   }
   else if (topic.equals((mqttTopic + "command").c_str()))
   {
@@ -184,60 +188,59 @@ void mqttCommand(char *p_topic, byte *p_payload, unsigned int p_length)
   else if (topic.equals((mqttTopic + "heatingmode/set").c_str()))
   {
     if (payload.equals("ON") && SpaState.restmode == 1)
-      send = 0x51; // ON = Ready; OFF = Rest
+      panelButtonPress(BUTTON_HEAT_MODE); // ON = Ready; OFF = Rest
     else if (payload.equals("OFF") && SpaState.restmode == 0)
-      send = 0x51;
+      panelButtonPress(BUTTON_HEAT_MODE);
   }
   else if (topic.equals((mqttTopic + "heat_mode/set").c_str()))
   {
     if (payload.equals("heat") && SpaState.restmode == 1)
-      send = 0x51; // ON = Ready; OFF = Rest
+      panelButtonPress(BUTTON_HEAT_MODE); // ON = Ready; OFF = Rest
     else if (payload.equals("off") && SpaState.restmode == 0)
-      send = 0x51;
+      panelButtonPress(BUTTON_HEAT_MODE);
   }
   else if (topic.equals((mqttTopic + "light/set").c_str()))
   {
     if (payload.equals("ON") && SpaState.light == 0)
-      send = 0x11;
+      panelButtonPress(BUTTON_LIGHT1);
     else if (payload.equals("OFF") && SpaState.light == 1)
-      send = 0x11;
+      panelButtonPress(BUTTON_LIGHT1);
   }
   else if (topic.equals((mqttTopic + "jet_1/set").c_str()))
   {
     if (payload.equals("ON") && SpaState.jet1 == 0)
-      send = 0x04;
+      panelButtonPress(BUTTON_PUMP1);
     else if (payload.equals("OFF") && SpaState.jet1 == 1)
-      send = 0x04;
+      panelButtonPress(BUTTON_PUMP1);
   }
   else if (topic.equals((mqttTopic + "jet_2/set").c_str()))
   {
     if (payload.equals("ON") && SpaState.jet2 == 0)
-      send = 0x05;
+      panelButtonPress(BUTTON_PUMP2);
     else if (payload.equals("OFF") && SpaState.jet2 == 1)
-      send = 0x05;
+      panelButtonPress(BUTTON_PUMP2);
   }
   else if (topic.equals((mqttTopic + "blower/set").c_str()))
   {
     if (payload.equals("ON") && SpaState.blower == 0)
-      send = 0x0C;
+      panelButtonPress(BUTTON_BLOWER);
     else if (payload.equals("OFF") && SpaState.blower == 1)
-      send = 0x0C;
+      panelButtonPress(BUTTON_BLOWER);
   }
-  else if (topic.equals((mqttTopic + "highrange/set").c_str()))
+  else if (topic.equals((mqttTopic + "temprange/set").c_str()))
   {
-    if (payload.equals("ON") && SpaState.highrange == 0)
-      send = 0x50; // ON = High, OFF = Low
-    else if (payload.equals("OFF") && SpaState.highrange == 1)
-      send = 0x50;
+    if (payload.equals("ON") && SpaState.temprange == 0)
+      panelButtonPress(BUTTON_TEMP_RANGE); // ON = High, OFF = Low
+    else if (payload.equals("OFF") && SpaState.temprange == 1)
+      panelButtonPress(BUTTON_TEMP_RANGE);
   }
   else if (topic.equals((mqttTopic + "target_temp/set").c_str()))
   {
-    // Get new set temperature
-    double d = payload.toDouble();
-    if (d > 0)
-      d *= 2; // Convert to internal representation
-    settemp = d;
-    send = 0xff;
+    setTemperature(payload);
+  }
+  else
+  {
+    publishError(("Unknown MQTT Topic: " + topic).c_str());
   }
 }
 
@@ -306,10 +309,12 @@ void setup()
 
   // Begin RS485 in listening mode -> no longer required with new RS485 chip
 
+#if defined(RLY1) || defined(RLY2)
   pinMode(RLY1, OUTPUT);
   digitalWrite(RLY1, HIGH);
   pinMode(RLY2, OUTPUT);
   digitalWrite(RLY2, HIGH);
+#endif
 
   // Serial log
   Serial.begin(115200);
@@ -386,7 +391,6 @@ void setup()
   }
 
   Q_in.clear();
-  Q_out.clear();
   publishDebug("Awaiting SPA Connection");
 }
 
@@ -431,36 +435,19 @@ void loop()
 #ifndef PRODUCTION
     print_msg(Q_in);
 #endif
-    if (Bridge_Message)
+    if (Bridge_Message) // Send to bridge if it's a message for the bridge
       if (!Clear_to_Send)
       {
-        if (!Status_Update)
-        {
-          bridgeSend(Q_in);
-        }
-        else
-        {
-          //          if (DeDuplicate)
-          bridgeSend(Q_in);
-        }
+        bridgeSend(Q_in);
       }
     // Unregistered or yet in progress
     //    mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
     if (id == 0)
     {
-      //     if (Q_in[2] == 0xFE)
-      //       print_msg(Q_in);
-
-      // FE BF 02:got new client ID
-      // Existing_WiFi_Client_Request
-      // Status_Update
-      if (Status_Update)
+      if (Status_Update)  // This is hacky, but it appears to work
       {
-        Existing_Client_Response
-            id = 0x0a;
-        rs485_send();
-        send = 0x00;
-        publishDebug("Publish Existing Module Response");
+        id = WIFI_MODULE_ID;
+        sendExistingClientResponse(id);
         mqtt.publish((mqttTopic + "node/id").c_str(), String(id, 16).c_str());
         publishDebug("Set SPA id 0x0A");
         esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
@@ -486,74 +473,26 @@ void loop()
     }
     else if (Clear_to_Send) // CTS
     {                       // we have an ID, do clever stuff
-      // id BF 06:Ready to Send
-      if (send == 0xff)
-      {
-        // 0xff marks dirty temperature for now
-        Q_out.push(id);
-        Q_out.push(0xBF);
-        Q_out.push(0x20);
-        Q_out.push(settemp);
+      if (have_config == 0)
+      { // Get configuration of the hot tub
+        requestConfig();
+        have_config = 1;
       }
-      else if (send == 0xfe)
-      {
-        // Bridge message
+      else if (have_faultlog == 0 && have_config == 3)
+      { // Get the fault log
+        requestFaultLog();
+        have_faultlog = 1;
       }
-      else if (send == 0x00)
-      {
-        if (have_config == 0)
-        { // Get configuration of the hot tub
-          Q_out.push(id);
-          Q_out.push(0xBF);
-          Q_out.push(0x22);
-          Q_out.push(0x00);
-          Q_out.push(0x00);
-          Q_out.push(0x01);
-          publishDebug("Requesting SPA Configuration");
-          have_config = 1;
-        }
-        else if (have_faultlog == 0 && have_config == 3)
-        { // Get the fault log
-          Q_out.push(id);
-          Q_out.push(0xBF);
-          Q_out.push(0x22);
-          Q_out.push(0x20);
-          Q_out.push(0xFF);
-          Q_out.push(0x00);
-          have_faultlog = 1;
-          publishDebug("Requesting SPA Fault Log");
-        }
-        else if ((have_filtersettings == 0) &&
-                 (have_faultlog ==
-                  2))
-        { // Get the filter cycles log once we have the faultlog
-          Q_out.push(id);
-          Q_out.push(0xBF);
-          Q_out.push(0x22);
-          Q_out.push(0x01);
-          Q_out.push(0x00);
-          Q_out.push(0x00);
-          publishDebug("Requesting SPA Filter Settings");
-          have_filtersettings = 1;
-        }
-        else
-        {
-          rs485ClearToSend();
-        }
+      else if ((have_filtersettings == 0) &&
+               (have_faultlog ==
+                2))
+      { // Get the filter cycles log once we have the faultlog
+        requestFilterSettings();
+        have_filtersettings = 1;
       }
       else
       {
-        // Send toggle commands
-        Q_out.push(id);
-        Q_out.push(0xBF);
-        Q_out.push(0x11);
-        Q_out.push(send);
-        Q_out.push(0x00);
-      }
-      if (Q_out.size() > 0)
-      {
-        rs485_send();
-        send = 0x00;
+        rs485ClearToSend();
       }
     }
     else if (Configuration_Response)

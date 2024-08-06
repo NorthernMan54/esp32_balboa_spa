@@ -4,36 +4,95 @@
 #include "Analytics.h"
 
 #define BALBOA_MESSAGE_SIZE 50
+#define WIFI_MODULE_ID 0x0a
 
 uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data);
 void ID_request();
 void ID_ack();
-void rs485_send();
+// void rs485_send();
 
 void decodeFault();
 void decodeFilterSettings();
 void decodeConfig();
 void decodeStatus();
 
+void sendExistingClientResponse(uint8_t id);
+void panelButtonPress(uint8_t button);
+void setTemperature(String temp);
+void requestConfig();
+void requestFaultLog();
+void requestFilterSettings();
+
 #define STRON String("ON").c_str()
 #define STROFF String("OFF").c_str()
+#define TwoBit(value, bit) (((value) >> (bit)) & 0x03)
 
 #define DeDuplicate (last_state_crc != Q_in[Q_in[1]])
-#define New_Client_Clear_to_Send (Q_in[2] == 0xFE && Q_in[4] == 0x00 )
-#define Channel_Assignment_Response (Q_in[2] == 0xFE && Q_in[4] == 0x02 )
-#define Existing_WiFi_Client_Request (Q_in[2] == 0x0a && Q_in[4] == 0x04)  // 7e 05 0a bf 04 77 7e
-#define Clear_to_Send (Q_in[2] == id && Q_in[4] == 0x06 )
+#define New_Client_Clear_to_Send (Q_in[2] == 0xFE && Q_in[4] == 0x00)
+#define Channel_Assignment_Response (Q_in[2] == 0xFE && Q_in[4] == 0x02)
+#define Existing_WiFi_Client_Request (Q_in[2] == 0x0a && Q_in[4] == 0x04) // 7e 05 0a bf 04 77 7e
+#define Clear_to_Send (Q_in[2] == id && Q_in[4] == 0x06)
 
 #define Status_Update (Q_in[2] == 0xFF && Q_in[4] == 0x13)
-#define Filter_Cycles_Message Q_in[2] == id && Q_in[4] == 0x23
-#define Fault_Log_Response Q_in[2] == id && Q_in[4] == 0x28 
-#define Configuration_Response Q_in[2] == id && Q_in[4] == 0x2E
+#define Filter_Cycles_Message Q_in[2] == id &&Q_in[4] == 0x23
+#define Fault_Log_Response Q_in[2] == id &&Q_in[4] == 0x28
+#define Configuration_Response Q_in[2] == id &&Q_in[4] == 0x2E
 
 #define Bridge_Message (id > 0 && (Q_in[2] == id || Q_in[2] == 0xFF))
-#define Existing_Client_Response Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x05); Q_out.push(0x04); Q_out.push(0x37); Q_out.push(0x00);  // 08 10 BF 05 04 08 00 - Config request doesn't seem to work
-// #define WiFi_Module_Configuration_Request Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x05); Q_out.push(0x04); Q_out.push(0x08); Q_out.push(0x00);
-// Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95)
-#define WiFi_Module_Configuration_Response Q_out.push(0x7E); Q_out.push(0x1D); Q_out.push(0x0A); Q_out.push(0xBF); Q_out.push(0x94); Q_out.push(0x02); Q_out.push(0x14); Q_out.push(0x80); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x00); Q_out.push(0x15); Q_out.push(0x27); Q_out.push(0xFF); Q_out.push(0xFF); Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95); Q_out.push(0x27); Q_out.push(0x7E);
+
+#define WiFi_Module_Configuration_Response \
+  Q_out.push(0x7E);                        \
+  Q_out.push(0x1D);                        \
+  Q_out.push(0x0A);                        \
+  Q_out.push(0xBF);                        \
+  Q_out.push(0x94);                        \
+  Q_out.push(0x02);                        \
+  Q_out.push(0x14);                        \
+  Q_out.push(0x80);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x15);                        \
+  Q_out.push(0x27);                        \
+  Q_out.push(0x3F);                        \
+  Q_out.push(0x9B);                        \
+  Q_out.push(0x95);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x00);                        \
+  Q_out.push(0x15);                        \
+  Q_out.push(0x27);                        \
+  Q_out.push(0xFF);                        \
+  Q_out.push(0xFF);                        \
+  Q_out.push(0x3F);                        \
+  Q_out.push(0x9B);                        \
+  Q_out.push(0x95);                        \
+  Q_out.push(0x27);                        \
+  Q_out.push(0x7E);
+
+// Button Toggles command 0x11
+
+#define BUTTON_NORMAL 0x01
+#define BUTTON_CLEAR 0x03
+#define BUTTON_PUMP1 0x04
+#define BUTTON_PUMP2 0x05
+#define BUTTON_PUMP3 0x06
+#define BUTTON_PUMP4 0x07
+#define BUTTON_PUMP5 0x08
+#define BUTTON_PUMP6 0x09
+#define BUTTON_BLOWER 0x0C
+#define BUTTON_MISTER 0x0E
+#define BUTTON_LIGHT1 0x11
+#define BUTTON_LIGHT2 0x12
+#define BUTTON_AUX1 0x16
+#define BUTTON_AUX2 0x17
+#define BUTTON_SOAK 0x1D
+#define BUTTON_HOLD 0x3C
+#define BUTTON_TEMP_RANGE 0x50 // Temperature Range (Low/High)
+#define BUTTON_HEAT_MODE 0x51       // Heat Mode (Ready/Rest)
 
 struct
 {
@@ -41,8 +100,8 @@ struct
   uint8_t jet2 : 2;
   uint8_t blower : 1;
   uint8_t light : 1;
-  uint8_t restmode : 1;
-  uint8_t highrange : 1;
+  uint8_t restmode : 2;
+  uint8_t temprange : 1;
   uint8_t padding : 2;
   uint8_t hour : 5;
   uint8_t minutes : 6;

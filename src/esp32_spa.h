@@ -6,8 +6,8 @@
 #define AUTO_TX true   // if your chip needs to pull D1 high/low set this to false
 #define TX485_Rx 16
 #define TX485_Tx 17
-#define RLY1 26
-#define RLY2 27
+// #define RLY1 26    // Optional local relay control
+// #define RLY2 27    // Optional local relay control
 
 // DS18B20 configuration
 #define DS18B20_PIN 4 // uncommment to enable
@@ -55,14 +55,13 @@
 // Leverage ESP32 WDT, to reset the device if the spa is not connected within 5 minutes, and if after connection messages stop coming in for 10 seconds
 
 #define INITIAL_WDT_TIMEOUT 300 // watchdog timeout in seconds
-#define RUNNING_WDT_TIMEOUT 10 // watchdog timeout in seconds
+#define RUNNING_WDT_TIMEOUT 60 // watchdog timeout in seconds
 
 // global variables
 
 CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_in;
-CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_out;
+// CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_out;
 uint8_t id = 0x00;  // spa id
-uint8_t send = 0x00;
 
 uint8_t last_state_crc = 0x00;   // Used the reduce the number of status updates messages processed ( ie if the CRC doesn't change, don't process the message)
 uint8_t have_config = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it

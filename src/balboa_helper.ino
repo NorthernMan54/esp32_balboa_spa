@@ -237,8 +237,6 @@ void decodeConfig()
   mqtt.publish((mqttTopic + "debug/message").c_str(), "SPA Config Received");
 }
 
-#define TwoBit(value, bit) (((value) >> (bit)) & 0x03)
-
 void decodeStatus()
 {
   String s;
@@ -313,16 +311,15 @@ void decodeStatus()
   switch (Q_in[10])
   {
   case 0:
-    mqtt.publish((mqttTopic + "status/heatingmode").c_str(), STRON); // Ready
-    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "heat");  // Ready
+    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "Rest"); // Ready
     SpaState.restmode = 0;
     break;
-  case 3: // Ready-in-Rest
-    SpaState.restmode = 0;
+  case 3:                                                                    // Ready-in-Rest
+    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "Ready-in-Rest"); // Ready
+    SpaState.restmode = 3;
     break;
   case 1:
-    mqtt.publish((mqttTopic + "status/heatingmode").c_str(), STROFF); // Rest
-    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "off");    // Rest
+    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "off"); // Rest
     SpaState.restmode = 1;
     break;
   }
@@ -376,13 +373,13 @@ void decodeStatus()
   d = bitRead(Q_in[15], 2);
   if (d == 0)
   {
-    mqtt.publish((mqttTopic + "status/highrange").c_str(), STROFF); // LOW
-    SpaState.highrange = 0;
+    mqtt.publish((mqttTopic + "status/temprange").c_str(), STROFF); // LOW
+    SpaState.temprange = 0;
   }
   else if (d == 1)
   {
-    mqtt.publish((mqttTopic + "status/highrange").c_str(), STRON); // HIGH
-    SpaState.highrange = 1;
+    mqtt.publish((mqttTopic + "status/temprange").c_str(), STRON); // HIGH
+    SpaState.temprange = 1;
   }
 
   d = bitRead(Q_in[15], 3);
@@ -458,37 +455,120 @@ void decodeStatus()
 
   last_state_crc = Q_in[Q_in[1]];
 
+#ifdef RLY1
   // Publish own relay states
   s = "OFF";
   if (digitalRead(RLY1) == LOW)
     s = "ON";
   mqtt.publish((mqttTopic + "status/relay_1").c_str(), s.c_str());
-
+#endif
+#ifdef RLY2
   s = "OFF";
   if (digitalRead(RLY2) == LOW)
     s = "ON";
   mqtt.publish((mqttTopic + "status/relay_2").c_str(), s.c_str());
+#endif
+}
+
+void sendExistingClientResponse(uint8_t id)
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x05);
+  dataBuffer.push(0x04);
+  dataBuffer.push(0x37);
+  dataBuffer.push(0x00); // 08 10 BF 05 04 08 00 - Config request doesn't seem to work
+
+  rs485Send(dataBuffer, true);
+  publishDebug(("Publish Existing Module Response to: " + String(id, 16)).c_str());
 }
 
 inline void ID_request()
 {
-  Q_out.push(0xFE);
-  Q_out.push(0xBF);
-  Q_out.push(0x01);
-  Q_out.push(0x02);
-  Q_out.push(0xF1);
-  Q_out.push(0x73);
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(0xFE);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x01);
+  dataBuffer.push(0x02);
+  dataBuffer.push(0xF1);
+  dataBuffer.push(0x73);
 
-  rs485_send();
+  rs485Send(dataBuffer, true);
 }
 
 inline void ID_ack()
 {
-  Q_out.push(id);
-  Q_out.push(0xBF);
-  Q_out.push(0x03);
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x03);
 
-  rs485_send();
+  rs485Send(dataBuffer, true);
 }
 
+inline void panelButtonPress(uint8_t button)
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x0A);
+  dataBuffer.push(0x01);
+  dataBuffer.push(button);
 
+  rs485Send(dataBuffer, true);
+}
+
+void setTemperature(String temp)
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  double d = temp.toDouble();
+  if (d > 0)
+    d *= 2; // Convert to internal representation
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x20);
+  dataBuffer.push(d);
+
+  rs485Send(dataBuffer, true);
+}
+
+void requestConfig()
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x22);
+  dataBuffer.push(0x00);
+  dataBuffer.push(0x00);
+  dataBuffer.push(0x01);
+  publishDebug("Requesting SPA Configuration");
+
+  rs485Send(dataBuffer, true);
+}
+
+void requestFaultLog()
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x22);
+  dataBuffer.push(0x20);
+  dataBuffer.push(0xFF);
+  dataBuffer.push(0x00);
+  publishDebug("Requesting SPA Fault Log");
+  rs485Send(dataBuffer, true);
+}
+
+void requestFilterSettings()
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(0x22);
+  dataBuffer.push(0x01);
+  dataBuffer.push(0x00);
+  dataBuffer.push(0x00);
+  publishDebug("Requesting SPA Filter Settings");
+  rs485Send(dataBuffer, true);
+}

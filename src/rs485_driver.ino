@@ -154,7 +154,6 @@ void rs485Write(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
     Serial2.write(data[i]);
 
   Serial2.flush();
-// print_msg(Q_out);
 #ifndef PRODUCTION
   print_outQMsg(data);
 #endif
@@ -167,10 +166,10 @@ void rs485Write(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
     digitalWrite(TX485_Tx, LOW);
   }
 
-  // DEBUG: print_msg(Q_out);
   data.clear();
 }
 
+/*
 void rs485_send()
 {
   // The following is not required for the new RS485 chip
@@ -214,6 +213,7 @@ void rs485_send()
   // DEBUG: print_msg(Q_out);
   Q_out.clear();
 }
+*/
 
 void print_outMsg(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
