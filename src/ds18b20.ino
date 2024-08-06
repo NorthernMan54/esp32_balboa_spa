@@ -2,6 +2,7 @@
 #include <DallasTemperature.h>
 #include "esp32_spa.h"
 
+#ifdef DS18B20_PIN
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(DS18B20_PIN);
 
@@ -48,3 +49,4 @@ void ds18b20loop(void)
     publishError("No DS18B20 devices found");
   }
 }
+#endif
