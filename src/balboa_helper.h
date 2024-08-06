@@ -33,10 +33,17 @@ void requestFilterSettings();
 #define Existing_WiFi_Client_Request (Q_in[2] == 0x0a && Q_in[4] == 0x04) // 7e 05 0a bf 04 77 7e
 #define Clear_to_Send (Q_in[2] == id && Q_in[4] == 0x06)
 
-#define Status_Update (Q_in[2] == 0xFF && Q_in[4] == 0x13)
-#define Filter_Cycles_Message Q_in[2] == id &&Q_in[4] == 0x23
-#define Fault_Log_Response Q_in[2] == id &&Q_in[4] == 0x28
-#define Configuration_Response Q_in[2] == id &&Q_in[4] == 0x2E
+#define Filter_Cycles_Type 0x23
+#define Status_Message_Type 0x13
+#define Fault_Log_Type 0x28
+#define Configuration_Type 0x2E
+
+#define Status_Update (Q_in[2] == 0xFF && Q_in[4] == Status_Message_Type)
+#define Filter_Cycles_Message Q_in[2] == id &&Q_in[4] == Filter_Cycles_Type
+#define Fault_Log_Response Q_in[2] == id &&Q_in[4] == Fault_Log_Type
+#define Configuration_Response Q_in[2] == id &&Q_in[4] == Configuration_Type
+
+
 
 #define Bridge_Message (id > 0 && (Q_in[2] == id || Q_in[2] == 0xFF))
 

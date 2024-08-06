@@ -46,7 +46,7 @@ void rs485Send(uint8_t *data, int length, boolean addCrc)
   }
   else
   {
-  //  mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Send");
+    //  mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Send");
   }
 }
 
@@ -68,13 +68,13 @@ void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCr
   }
   else
   {
-//    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Send");
+    //    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Send");
   }
 }
 
 void rs485ClearToSend()
 {
-//  mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "rs485ClearToSend");
+  //  mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "rs485ClearToSend");
   rs485WriteQueueMessage message;
   CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
   if (xQueueReceive(rs485WriteQueue, &message, 0) == pdTRUE)
@@ -83,7 +83,7 @@ void rs485ClearToSend()
     {
       dataBuffer.push(message.message[i]);
     }
- //   mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Receive");
+    //   mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Receive");
     rs485Write(dataBuffer);
   }
   else
@@ -94,7 +94,7 @@ void rs485ClearToSend()
     dataBuffer.push(0xBF);
     dataBuffer.push(0x07);
     addCRC(dataBuffer);
-//    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Clear to Send");
+    //    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Clear to Send");
     rs485Write(dataBuffer);
   }
 }
@@ -166,54 +166,15 @@ void rs485Write(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
     digitalWrite(TX485_Tx, LOW);
   }
 
+  switch (data[4]) // Command byte
+  {
+  case Filter_Cycles_Type:
+    have_filtersettings = 0; // Reset flag
+    break;
+  }
+
   data.clear();
 }
-
-/*
-void rs485_send()
-{
-  // The following is not required for the new RS485 chip
-  if (AUTO_TX)
-  {
-  }
-  else
-  {
-    digitalWrite(TX485_Tx, HIGH);
-    delay(1);
-  }
-
-  // Add telegram length
-  Q_out.unshift(Q_out.size() + 2);
-
-  // Add CRC
-  Q_out.push(crc8(Q_out));
-
-  // Wrap telegram in SOF/EOF
-  Q_out.unshift(0x7E);
-  Q_out.push(0x7E);
-
-  for (int i = 0; i < Q_out.size(); i++)
-    Serial2.write(Q_out[i]);
-
-// print_msg(Q_out);
-#ifndef PRODUCTION
-  print_outMsg(Q_out);
-#endif
-
-  Serial2.flush();
-
-  if (AUTO_TX)
-  {
-  }
-  else
-  {
-    digitalWrite(TX485_Tx, LOW);
-  }
-
-  // DEBUG: print_msg(Q_out);
-  Q_out.clear();
-}
-*/
 
 void print_outMsg(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
