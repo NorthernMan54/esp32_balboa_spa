@@ -306,12 +306,16 @@ void decodeStatus()
   s += String(Q_in[9]);
   SpaState.minutes = Q_in[9];
   mqtt.publish((mqttTopic + "status/time").c_str(), s.c_str());
+//                                                                                          xx 
+// {"id":"ff","command":"13","crc":"b5","dir":"in","payload":"7e 20 ff af 13 00 00 48 0b 11 01 00 48 00 03 00 00 00 00 00 00 00 00 00 00 35 00 00 02 00 00 00 b5 7e ","diff":213} - Rest
+// {"id":"ff","command":"13","crc":"48","dir":"in","payload":"7e 20 ff af 13 00 00 48 0b 14 00 00 48 00 03 08 01 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 48 7e ","diff":93} - Ready
+
 
   // 10:Flag Byte 5 - Heating Mode
   switch (Q_in[10])
   {
   case 0:
-    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "Rest"); // Ready
+    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "Ready"); // Ready
     SpaState.restmode = 0;
     break;
   case 3:                                                                    // Ready-in-Rest
@@ -319,7 +323,7 @@ void decodeStatus()
     SpaState.restmode = 3;
     break;
   case 1:
-    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "off"); // Rest
+    mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "Rest"); // Rest
     SpaState.restmode = 1;
     break;
   }
