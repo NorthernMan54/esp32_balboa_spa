@@ -68,7 +68,7 @@ int Analytics::getHour()
 }
 
 void Analytics::rollover() {
-  if (getHour() != previousHour) {
+  if (getHour() < previousHour) {
     previousHour = getHour();
     onTimeYesterday = onTimeToday;
     onTimeToday = 0;

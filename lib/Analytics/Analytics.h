@@ -58,8 +58,6 @@ public:
   unsigned long today();
 
   unsigned long yesterday();
-
-
   
 private:
   unsigned long onTimeToday = 0;

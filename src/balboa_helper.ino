@@ -9,22 +9,6 @@
 Analytics heaton;
 Analytics filteron;
 
-void print_outMsg(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
-{
-  String s;
-  // for (i = 0; i < (Q_in[1] + 2); i++) {
-  for (int i = 0; i < data.size(); i++)
-  {
-    int x = data[i];
-    if (x < 0x10)
-      s += "0";
-    s += String(x, HEX);
-    s += " ";
-  }
-  mqtt.publish((mqttTopic + "node/outMsg").c_str(), s.c_str());
-  _yield();
-}
-
 CRC8 crc;
 uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {

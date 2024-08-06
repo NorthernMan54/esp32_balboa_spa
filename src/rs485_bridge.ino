@@ -1,5 +1,6 @@
 #include "esp32_spa.h"
 #include "rs485_bridge.h"
+#include "rs485_driver.h"
 
 CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> P_in;
 CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> P_out;
@@ -103,12 +104,13 @@ void bridgeLoop()
           {
             //  P_in.clear();
             mqtt.publish((mqttTopic + "bridge/msg").c_str(), (String(length) + " Msg Received").c_str());
-            send = 0xfe;
-            Q_out.clear();
-            for (int i = 2; i < length - 2; i++)
-            {
-              Q_out.push(message[i]);
-            }
+            rs485Send(message, length, false);
+            //            send = 0xfe;
+            //            Q_out.clear();
+            //            for (int i = 2; i < length - 2; i++)
+            //            {
+            //              Q_out.push(message[i]);
+            //            }
           }
         }
         else

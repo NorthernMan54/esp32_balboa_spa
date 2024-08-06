@@ -20,6 +20,7 @@
 #include "balboa_helper.h"
 #include "esp32_spa.h"
 #include "rs485_bridge.h"
+#include "rs485_driver.h"
 
 #include <TickTwo.h>
 #include <config.h>
@@ -50,6 +51,7 @@ void print_msg(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
     s += " ";
   }
   mqtt.publish((mqttTopic + "node/msg").c_str(), s.c_str());
+//  mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
   _yield();
 }
 
@@ -257,13 +259,13 @@ TickTwo filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
 
 int getTime()
 {
-time_t now;
-struct tm *now_tm;
-int hour;
+  time_t now;
+  struct tm *now_tm;
+  int hour;
 
-now = time(NULL);
-now_tm = localtime(&now);
-hour = now_tm->tm_hour;
+  now = time(NULL);
+  now_tm = localtime(&now);
+  hour = now_tm->tm_hour;
 
   return hour;
 }
@@ -277,6 +279,8 @@ void nodeStatusReport()
   mqtt.publish((mqttTopic + "node/flashsize").c_str(), String(ESP.getFlashChipSize()).c_str());
   mqtt.publish((mqttTopic + "node/chipid").c_str(), String(ESP.getChipModel()).c_str());
   mqtt.publish((mqttTopic + "node/speed").c_str(), String(ESP.getCpuFreqMHz()).c_str());
+  mqtt.publish((mqttTopic + "node/heap").c_str(), String(ESP.getFreeHeap()).c_str());
+  mqtt.publish((mqttTopic + "node/stack").c_str(), String(uxTaskGetStackHighWaterMark(NULL)).c_str());
 
   String release = String(__DATE__) + " - " + String(__TIME__);
   mqtt.publish((mqttTopic + "node/release").c_str(), release.c_str());
@@ -301,11 +305,6 @@ void setup()
   restartReasonSetup();
 
   // Begin RS485 in listening mode -> no longer required with new RS485 chip
-  if (!AUTO_TX)
-  {
-    pinMode(TX485_Tx, OUTPUT);
-    digitalWrite(TX485_Tx, LOW);
-  }
 
   pinMode(RLY1, OUTPUT);
   digitalWrite(RLY1, HIGH);
@@ -315,8 +314,7 @@ void setup()
   // Serial log
   Serial.begin(115200);
 
-  // Spa communication, 115.200 baud 8N1
-  Serial2.begin(115200, SERIAL_8N1, TX485_Rx, TX485_Tx);
+  rs485Setup();
 
   // Setup gateway name and mqtt topic
 
@@ -406,6 +404,7 @@ void loop()
   // httpServer.handleClient(); needed?
   _yield();
 
+  rs485Loop();
   faultlogTimer.update();
   filterStatusTimer.update();
   nodeStatusTimer.update();
@@ -441,8 +440,8 @@ void loop()
         }
         else
         {
-//          if (DeDuplicate)
-            bridgeSend(Q_in);
+          //          if (DeDuplicate)
+          bridgeSend(Q_in);
         }
       }
     // Unregistered or yet in progress
@@ -539,11 +538,7 @@ void loop()
         }
         else
         {
-          // A Nothing to Send message is sent by a client immediately after a
-          // Clear to Send message if the client has no messages to send.
-          Q_out.push(id);
-          Q_out.push(0xBF);
-          Q_out.push(0x07);
+          rs485ClearToSend();
         }
       }
       else
