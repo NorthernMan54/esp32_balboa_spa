@@ -85,8 +85,8 @@ void getLastRestartReason()
   String espResetReason = "";
   esp_reset_reason_t reason = esp_reset_reason();
 
-//  Serial.print("Reset/Boot Reason was: ");
-//  Serial.println(reason);
+  //  Serial.print("Reset/Boot Reason was: ");
+  //  Serial.println(reason);
 
   switch (reason)
   {
@@ -141,7 +141,7 @@ void getLastRestartReason()
   mqtt.publish((mqttTopic + "debug/espResetReason").c_str(), (espResetReason).c_str());
   if (!LittleFS.begin())
   {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), "LittleFS Error");
+    publishError("LittleFS Error");
     return; // Stop if file system can't be initialized
   }
 
@@ -149,7 +149,7 @@ void getLastRestartReason()
       LittleFS.open("/restartReason.txt", "r"); // Open the file for reading
   if (!file)
   {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), "Failed to open restartReason.txt file for reading");
+    publishError("Failed to open restartReason.txt file for reading");
   }
   else
   {
@@ -165,7 +165,7 @@ void setLastRestartReason(const String &reason)
 {
   if (!LittleFS.begin())
   {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), "LittleFS Error");
+    publishError("LittleFS Error");
     return; // Stop if file system can't be initialized
   }
 
@@ -173,14 +173,14 @@ void setLastRestartReason(const String &reason)
       LittleFS.open("/restartReason.txt", "w"); // Open the file for writing
   if (!file)
   {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), "Failed to open restartReason.txt file for writing");
+    publishError("Failed to open restartReason.txt file for writing");
   }
   else
   {
     file.print(reason); // Write the new reason
     file.close();
   }
-  mqtt.publish((mqttTopic + "debug/message").c_str(), (String("Restart due to - ") + reason).c_str());
+  publishDebug((String("Restart due to - ") + reason).c_str());
 
   LittleFS.end(); // Close the file system
 }

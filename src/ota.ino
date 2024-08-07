@@ -9,9 +9,11 @@ void otaSetup()
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
                         { esp_task_wdt_reset(); });
   ArduinoOTA.onEnd(notifyOfUpdateEnded);
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+                        { esp_task_wdt_reset(); });
   ArduinoOTA.onError([](ota_error_t error)
                      {
-    mqtt.publish((mqttTopic + "debug/error").c_str(), ("OTA Failed " + String(error)).c_str());
+    publishError(("OTA Failed: " + String(error)).c_str());
     Serial.printf("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR)
       Serial.println("Auth Failed");
@@ -27,11 +29,13 @@ void otaSetup()
 
 void notifyOfUpdateStarted()
 {
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Arduino OTA Update Start");
+  publishDebug("Arduino OTA Update Start");
+  _yield();
 }
 
 void notifyOfUpdateEnded()
 {
-  mqtt.publish((mqttTopic + "debug/message").c_str(), "Arduino OTA Update Complete");
+  publishDebug("Arduino OTA Update Complete");
   setLastRestartReason("OTA Update");
+  _yield();
 }
