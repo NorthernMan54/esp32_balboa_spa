@@ -289,8 +289,56 @@ void decodeStatus()
 
   // 5:Flag Byte 0 - ?Spa State? 0x00=Running, 0x01=Initializing, 0x05=Hold Mode, ?0x14=A/B Temps ON?, 0x17=Test Mode
   mqtt.publish((mqttTopic + "status/spa_state").c_str(), String(Q_in[5]).c_str());
+  switch (Q_in[5])
+  {
+  case 0:
+    mqtt.publish((mqttTopic + "status/spaState").c_str(), "Running");
+    break;
+  case 1:
+    mqtt.publish((mqttTopic + "status/spaState").c_str(), "Initializing");
+    break;
+  case 5:
+    mqtt.publish((mqttTopic + "status/spaState").c_str(), "Hold Mode");
+    break;
+  case 0x14:
+    mqtt.publish((mqttTopic + "status/spaState").c_str(), "A/B Temps ON");
+    break;
+  case 0x17:
+    mqtt.publish((mqttTopic + "status/spaState").c_str(), "Test Mode");
+    break;
+  default:
+    mqtt.publish((mqttTopic + "status/spaState").c_str(), "Unknown");
+    break;
+  }
   // 6:Flag Byte 1 - ?Initialization Mode? 0x00=Idle, 0x01=Priming Mode, 0x02=?Fault?, 0x03=Reminder, 0x04=?Stage 1?, 0x05=?Stage 3?, 0x42=?Stage 2?
   mqtt.publish((mqttTopic + "status/spa_mode").c_str(), String(Q_in[6]).c_str());
+  switch (Q_in[6])
+  {
+  case 0:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Idle");
+    break;
+  case 1:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Priming Mode");
+    break;
+  case 2:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Fault");
+    break;
+  case 3:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Reminder");
+    break;
+  case 4:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Stage 1");
+    break;
+  case 5:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Stage 3");
+    break;
+  case 0x42:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Stage 2");
+    break;
+  default:
+    mqtt.publish((mqttTopic + "status/spaMode").c_str(), "Unknown");
+    break;
+  }
 
   // 8:Flag Byte 3 Hour & 9:Flag Byte 4 Minute => Time
   if (Q_in[8] < 10)
@@ -304,10 +352,16 @@ void decodeStatus()
   s += String(Q_in[9]);
   SpaState.minutes = Q_in[9];
   mqtt.publish((mqttTopic + "status/time").c_str(), s.c_str());
-  //                                                                            0  1  2  3  4  xx  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+
+  //                                                                            0  1  2  3  4 xx  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
   // {"id":"ff","command":"13","crc":"b5","dir":"in","payload":"7e 20 ff af 13 00 00 48 0b 11 01 00 48 00 03 00 00 00 00 00 00 00 00 00 00 35 00 00 02 00 00 00 b5 7e ","diff":213} - Rest
   // {"id":"ff","command":"13","crc":"48","dir":"in","payload":"7e 20 ff af 13 00 00 48 0b 14 00 00 48 00 03 08 01 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 48 7e ","diff":93} - Ready
   // {"id":"ff","command":"13","crc":"e1","dir":"ot","payload":"7e 20 ff af 13 00 00 48 09 24 02 00 20 00 89 08 01 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 e1 7e ","diff":5241} - Ready-in-Rest
+  //{"id":"ff","command":"13","crc":"7b","dir":"out","payload":"7e 20 ff af 13 05 00 48 0a 0a 02 00 3c 00 8b 00 00 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 7b 7e ","diff":539} - Holding for
+  //{"id":"ff","command":"13","crc":"20","dir":"out","payload":"7e 20 ff af 13 05 00 48 0a 0c 02 00 3b 00 8b 00 00 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 20 7e ","diff":5010} - Holding for
+  // {"id":"ff","command":"13","crc":"58","dir":"ot","payload":"7e 20 ff af 13 00 00 48 0a 0f 02 00 3b 00 8b 08 01 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 58 7e ","diff":5298} - Hold released
+  // {"id":"ff","command":"13","crc":"aa","dir":"ot","payload":"7e 20 ff af 13 00 01 ff 0c 31 01 26 3b 00 83 00 00 00 00 00 00 00 00 02 00 35 00 00 02 00 00 00 aa 7e ","diff":5354} - Run Pumps for Temperature ( Rest )
+  // {"id":"ff","command":"13","crc":"86","dir":"ot","payload":"7e 20 ff af 13 00 00 ff 0d 05 02 00 3b 00 83 00 00 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 86 7e ","diff":5164} - No temperature on display ( Ready-in-Rest )
 
   // 10:Flag Byte 5 - Heating Mode
   switch (Q_in[5 + 5])
@@ -328,7 +382,7 @@ void decodeStatus()
 
   mqtt.publish((mqttTopic + "status/Reminder").c_str(), ("0x" + String(Q_in[11], 16)).c_str()); // 0x00=None, 0x04=Clean filter, 0x0A=Check the pH, 0x09=Check the sanitizer, 0x1E=?Fault?
 
-  mqtt.publish((mqttTopic + "status/tempA").c_str(), ("0x" + String(Q_in[12], 16)).c_str()); // Minutes if Hold Mode else Temperature (scaled by Temperature Scale) if A/B Temps else 0x01 if Test Mode else 0x00
+  mqtt.publish((mqttTopic + "status/holdTime").c_str(), (String(Q_in[7 + 5])).c_str()); // Minutes if Hold Mode else Temperature (scaled by Temperature Scale) if A/B Temps else 0x01 if Test Mode else 0x00
 
   mqtt.publish((mqttTopic + "status/tempB").c_str(), ("0x" + String(Q_in[13], 16)).c_str()); // Temperature (scaled by Temperature Scale) if A/B Temps else 0x00
 
