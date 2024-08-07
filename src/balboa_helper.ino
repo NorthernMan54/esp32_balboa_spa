@@ -232,7 +232,7 @@ void decodeConfig()
   mqtt.publish((mqttTopic + "config/aux2").c_str(), String(SpaConfig.aux2).c_str());
   mqtt.publish((mqttTopic + "config/temp_scale").c_str(), String(SpaConfig.temp_scale).c_str());
   have_config = 2;
-  publishDebug( "SPA Config Received");
+  publishDebug("SPA Config Received");
 }
 
 void decodeStatus()
@@ -304,18 +304,19 @@ void decodeStatus()
   s += String(Q_in[9]);
   SpaState.minutes = Q_in[9];
   mqtt.publish((mqttTopic + "status/time").c_str(), s.c_str());
-  //                                                                                          xx
+  //                                                                            0  1  2  3  4  xx  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
   // {"id":"ff","command":"13","crc":"b5","dir":"in","payload":"7e 20 ff af 13 00 00 48 0b 11 01 00 48 00 03 00 00 00 00 00 00 00 00 00 00 35 00 00 02 00 00 00 b5 7e ","diff":213} - Rest
   // {"id":"ff","command":"13","crc":"48","dir":"in","payload":"7e 20 ff af 13 00 00 48 0b 14 00 00 48 00 03 08 01 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 48 7e ","diff":93} - Ready
+  // {"id":"ff","command":"13","crc":"e1","dir":"ot","payload":"7e 20 ff af 13 00 00 48 09 24 02 00 20 00 89 08 01 00 00 00 00 00 00 00 00 35 00 00 02 1e 00 00 e1 7e ","diff":5241} - Ready-in-Rest
 
   // 10:Flag Byte 5 - Heating Mode
-  switch (Q_in[10])
+  switch (Q_in[5 + 5])
   {
   case 0:
     mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "Ready"); // Ready
     SpaState.restmode = 0;
     break;
-  case 3:                                                                    // Ready-in-Rest
+  case 2:                                                                    // Ready-in-Rest
     mqtt.publish((mqttTopic + "status/heat_mode").c_str(), "Ready-in-Rest"); // Ready
     SpaState.restmode = 3;
     break;
@@ -325,28 +326,38 @@ void decodeStatus()
     break;
   }
 
+  mqtt.publish((mqttTopic + "status/Reminder").c_str(), ("0x" + String(Q_in[11], 16)).c_str()); // 0x00=None, 0x04=Clean filter, 0x0A=Check the pH, 0x09=Check the sanitizer, 0x1E=?Fault?
+
+  mqtt.publish((mqttTopic + "status/tempA").c_str(), ("0x" + String(Q_in[12], 16)).c_str()); // Minutes if Hold Mode else Temperature (scaled by Temperature Scale) if A/B Temps else 0x01 if Test Mode else 0x00
+
+  mqtt.publish((mqttTopic + "status/tempB").c_str(), ("0x" + String(Q_in[13], 16)).c_str()); // Temperature (scaled by Temperature Scale) if A/B Temps else 0x00
+
   // 14:Flag Byte 9 - Temperature Scale, Clock Mode, Filter Mode
   // 0  Temperature Scale	0=1°F, 1=0.5°C
   SpaConfig.temp_scale = Q_in[14] & 0x01;
   // 1	Clock Mode	0=12-hour, 1=24-hour
   // 2		??
   // 3-4	Filter Mode	0=OFF, 1=Cycle 1, 2=Cycle 2, 3=Cycle 1 and 2  ( Docs said bits 3-4, but I found mine is 2-3 )
+  // 5	Panel Locked	0=No, 1=Yes
+  mqtt.publish((mqttTopic + "status/tempUnits").c_str(), (bitRead(Q_in[14], 0)) ? "C" : "F");
+  mqtt.publish((mqttTopic + "status/clockMode").c_str(), (bitRead(Q_in[14], 1)) ? "24 Hour" : "12 Hour");
+  mqtt.publish((mqttTopic + "status/panelLock").c_str(), (bitRead(Q_in[14], 5)) ? "Locked" : "Unlocked");
   switch (TwoBit(Q_in[14], 2))
   {
   case 0:
-    mqtt.publish((mqttTopic + "status/filterMode").c_str(), STROFF); // Ready
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), STROFF);
     filteron.off();
     break;
-  case 1:                                                               // Ready-in-Rest
-    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1"); // Ready
+  case 1:
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1");
     filteron.on();
     break;
   case 2:
-    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 2"); // Ready
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 2");
     filteron.on();
     break;
-  case 3:                                                                   // Ready-in-Rest
-    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1 & 2"); // Ready
+  case 3:
+    mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1 & 2");
     filteron.on();
     break;
   }
@@ -460,6 +471,17 @@ void decodeStatus()
     SpaState.light = 0;
   }
 
+  // Flags Byte 18
+  mqtt.publish((mqttTopic + "status/flagByte18").c_str(), String(Q_in[18 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/flagByte19").c_str(), String(Q_in[19 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/flagByte20").c_str(), String(Q_in[20 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/flagByte21").c_str(), String(Q_in[21 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/settingsLock").c_str(), (bitRead(Q_in[21 + 5], 3)) ? "Locked" : "Unlocked");
+  mqtt.publish((mqttTopic + "status/flagByte22").c_str(), String(Q_in[22 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/flagByte23").c_str(), String(Q_in[23 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/flagByte24").c_str(), String(Q_in[24 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/flagByte25").c_str(), String(Q_in[25 + 5], 16).c_str());
+
   last_state_crc = Q_in[Q_in[1]];
 
 #ifdef RLY1
@@ -475,6 +497,44 @@ void decodeStatus()
     s = "ON";
   mqtt.publish((mqttTopic + "status/relay_2").c_str(), s.c_str());
 #endif
+}
+
+/*
+0	??	0
+1	Reminders	0=OFF, 1=OFF
+2	??	0
+3	Temperature Scale	0=1°F, 1=0.5°C
+4	Clock Mode	0=12-hour, 1=24-hour
+5	Cleanup Cycle	0=OFF, 1-8 (30 minute increments)
+6	Dolphin Address	0=none, 1-7=address
+7	??	0
+8	M8 Artificial Intelligence	0=OFF, 1=ON
+9-17	??	0
+*/
+
+// 7e 17 0a bf 26 00 87 01 01 01 01 00 00 01 00 00 00 00 00 00 00 00 00 e0 7e
+void decodePreferences(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
+{
+  mqtt.publish((mqttTopic + "preferences/0").c_str(), ("0x" + String(data[5], 16)).c_str());                // 0
+  mqtt.publish((mqttTopic + "preferences/reminders").c_str(), ("0x" + String(data[6], 16)).c_str());        // 1 - Reminders	0=OFF, 1=OFF
+  mqtt.publish((mqttTopic + "preferences/2").c_str(), ("0x" + String(data[7], 16)).c_str());                // 2 - ??	0
+  mqtt.publish((mqttTopic + "preferences/temperatureScale").c_str(), ("0x" + String(data[8], 16)).c_str()); // 3 - Temperature Scale	0=1°F, 1=0.5°C
+  mqtt.publish((mqttTopic + "preferences/clockMode").c_str(), ("0x" + String(data[9], 16)).c_str());        // 4 - Clock Mode	0=12-hour, 1=24-hour
+  mqtt.publish((mqttTopic + "preferences/cleanUpCycle").c_str(), ("0x" + String(data[10], 16)).c_str());    // 5 - Cleanup Cycle	0=OFF, 1-8 (30 minute increments)
+  mqtt.publish((mqttTopic + "preferences/Dolphin").c_str(), ("0x" + String(data[11], 16)).c_str());         // 6 - Dolphin Address	0=none, 1-7=address
+  mqtt.publish((mqttTopic + "preferences/7").c_str(), ("0x" + String(data[12], 16)).c_str());               // 7 - ??	0
+  mqtt.publish((mqttTopic + "preferences/M8").c_str(), ("0x" + String(data[13], 16)).c_str());              // 8 - M8 Artificial Intelligence	0=OFF, 1=ON
+  mqtt.publish((mqttTopic + "preferences/9").c_str(), ("0x" + String(data[14], 16)).c_str());               // 9-17 - ??	0
+}
+
+void decodeInformation(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
+{
+  mqtt.publish((mqttTopic + "information/softwareID ").c_str(), ("M" + String(data[5]) + "_" + String(data[6]) + " V" + String(data[7]) + "." + String(data[8])).c_str());                                                                                                  // "M<byte 0>_<byte 1> V<byte 2>[.<byte 3>]" M100_210 V6
+  mqtt.publish((mqttTopic + "information/model ").c_str(), (String(char(data[9])) + String(char(data[10])) + String(char(data[11])) + String(char(data[12])) + String(char(data[13])) + String(char(data[14])) + String(char(data[15])) + String(char(data[16]))).c_str()); // "byte 4-11"  54100000
+  mqtt.publish((mqttTopic + "information/setupNumber ").c_str(), (String(data[17], 16)).c_str());                                                                                                                                                                           // "byte 12"  0x00
+  mqtt.publish((mqttTopic + "information/voltage").c_str(), (String(data[22], 16)).c_str());                                                                                                                                                                                // "17"  ?0x01=240?
+  mqtt.publish((mqttTopic + "information/heaterType").c_str(), (String(data[23], 16)).c_str());                                                                                                                                                                             // "18" ?0x06,0x0A=Standard?
+  mqtt.publish((mqttTopic + "information/dipSwitch").c_str(), (String(data[24], 16) + " " + String(data[25], 16)).c_str());                                                                                                                                                 // "19-20" LSB-first (bit 0 of Byte 19 is position 1)
 }
 
 void sendExistingClientResponse(uint8_t id)
@@ -517,11 +577,12 @@ inline void ID_ack()
 inline void panelButtonPress(uint8_t button)
 {
   CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+
   dataBuffer.push(id);
   dataBuffer.push(0xBF);
-  dataBuffer.push(0x0A);
-  dataBuffer.push(0x01);
+  dataBuffer.push(Toggle_Item_Request_Type);
   dataBuffer.push(button);
+  dataBuffer.push(0x00);
 
   rs485Send(dataBuffer, true);
 }
@@ -534,8 +595,20 @@ void setTemperature(String temp)
     d *= 2; // Convert to internal representation
   dataBuffer.push(id);
   dataBuffer.push(0xBF);
-  dataBuffer.push(0x20);
+  dataBuffer.push(Set_Temperature_Type);
   dataBuffer.push(d);
+
+  rs485Send(dataBuffer, true);
+}
+
+void setTime(uint8_t hour, uint8_t minute)
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(Set_Time_Type);
+  dataBuffer.push(hour);
+  dataBuffer.push(minute);
 
   rs485Send(dataBuffer, true);
 }
@@ -545,7 +618,7 @@ void requestConfig()
   CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
   dataBuffer.push(id);
   dataBuffer.push(0xBF);
-  dataBuffer.push(0x22);
+  dataBuffer.push(Settings_Request_Type);
   dataBuffer.push(0x00);
   dataBuffer.push(0x00);
   dataBuffer.push(0x01);
@@ -559,7 +632,7 @@ void requestFaultLog()
   CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
   dataBuffer.push(id);
   dataBuffer.push(0xBF);
-  dataBuffer.push(0x22);
+  dataBuffer.push(Settings_Request_Type);
   dataBuffer.push(0x20);
   dataBuffer.push(0xFF);
   dataBuffer.push(0x00);
@@ -572,10 +645,23 @@ void requestFilterSettings()
   CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
   dataBuffer.push(id);
   dataBuffer.push(0xBF);
-  dataBuffer.push(0x22);
+  dataBuffer.push(Settings_Request_Type);
   dataBuffer.push(0x01);
   dataBuffer.push(0x00);
   dataBuffer.push(0x00);
   publishDebug("Requesting SPA Filter Settings");
+  rs485Send(dataBuffer, true);
+}
+
+void requestPreferences()
+{
+  CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
+  dataBuffer.push(id);
+  dataBuffer.push(0xBF);
+  dataBuffer.push(Settings_Request_Type);
+  dataBuffer.push(0x08);
+  dataBuffer.push(0x00);
+  dataBuffer.push(0x00);
+  publishDebug("Requesting Preferences");
   rs485Send(dataBuffer, true);
 }

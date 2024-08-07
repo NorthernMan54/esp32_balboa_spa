@@ -444,7 +444,7 @@ void loop()
     //    mqtt.publish((mqttTopic + "node/send").c_str(), String(send, 16).c_str());
     if (id == 0)
     {
-      if (Status_Update)  // This is hacky, but it appears to work
+      if (Status_Update) // This is hacky, but it appears to work
       {
         id = WIFI_MODULE_ID;
         sendExistingClientResponse(id);
@@ -509,10 +509,18 @@ void loop()
       decodeStatus();
     }
     else if (Filter_Cycles_Message)
-    { // FF AF 23:Filter Cycle Message - Packet
-      // index offset 5
+    {
       decodeFilterSettings();
+      requestPreferences();
     }
+    else if (Preferences_Response)
+    {
+      decodePreferences(Q_in);
+    } // 0x26
+    else if (Information_Response)
+    {
+      decodeInformation(Q_in);
+    } // 0x24
     else
     {
 #ifndef PRODUCTION
