@@ -150,6 +150,7 @@ void bridgeSend(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
       uint8_t output[BALBOA_MESSAGE_SIZE];
       data.copyToArray(output);
       clients[i].write(output, data.size());
+      clients[i].flush();
     }
     else
     {
