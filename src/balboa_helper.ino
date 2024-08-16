@@ -6,8 +6,10 @@
 #include "CRC8.h"
 #include "CRC.h"
 
-Analytics heatOn(0);
-Analytics filterOn(1);
+RTC_NOINIT_ATTR AnalyticsData heatOnData;
+Analytics heatOn(&heatOnData);
+RTC_NOINIT_ATTR AnalyticsData filterOnData;
+Analytics filterOn(&filterOnData);
 
 CRC8 crc;
 uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)

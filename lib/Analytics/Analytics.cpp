@@ -25,20 +25,20 @@
 #include "Analytics.h"
 
 // Store data in ESP32 RTC memory, it will survive restarts but not power cycles
-RTC_NOINIT_ATTR AnalyticsData data[MAX_ANALYTICS];
+// RTC_NOINIT_ATTR AnalyticsData data;
 
-Analytics::Analytics(int instance)
+Analytics::Analytics(AnalyticsData *data)
 {
-  analyticsInstance = instance;
+  analyticsInstance = data;
   esp_reset_reason_t reason = esp_reset_reason();
-  
+
   if (reason == ESP_RST_POWERON)
   {
-    data[analyticsInstance].onTimeToday = 0;
-    data[analyticsInstance].onTimeYesterday = 0;
-    data[analyticsInstance].previousReading = millis();
+    analyticsInstance->onTimeToday = 0;
+    analyticsInstance->onTimeYesterday = 0;
+    analyticsInstance->previousReading = millis();
   }
-  data[analyticsInstance].previousHour = getHour();
+  analyticsInstance->previousHour = getHour();
 }
 
 Analytics::~Analytics() {}
@@ -46,24 +46,24 @@ Analytics::~Analytics() {}
 void Analytics::on()
 {
   rollover();
-  data[analyticsInstance].onTimeToday += millis() - data[analyticsInstance].previousReading;
-  data[analyticsInstance].previousReading = millis();
+  analyticsInstance->onTimeToday += millis() - analyticsInstance->previousReading;
+  analyticsInstance->previousReading = millis();
 }
 
 void Analytics::off()
 {
   rollover();
-  data[analyticsInstance].previousReading = millis();
+  analyticsInstance->previousReading = millis();
 }
 
 unsigned long Analytics::today()
 {
-  return data[analyticsInstance].onTimeToday / 1000;
+  return analyticsInstance->onTimeToday / 1000;
 }
 
 unsigned long Analytics::yesterday()
 {
-  return data[analyticsInstance].onTimeYesterday / 1000;
+  return analyticsInstance->onTimeYesterday / 1000;
 }
 
 int Analytics::getHour()
@@ -81,10 +81,10 @@ int Analytics::getHour()
 
 void Analytics::rollover()
 {
-  if (getHour() < data[analyticsInstance].previousHour)
+  if (getHour() < analyticsInstance->previousHour)
   {
-    data[analyticsInstance].previousHour = getHour();
-    data[analyticsInstance].onTimeYesterday = data[analyticsInstance].onTimeToday;
-    data[analyticsInstance].onTimeToday = 0;
+    analyticsInstance->previousHour = getHour();
+    analyticsInstance->onTimeYesterday = analyticsInstance->onTimeToday;
+    analyticsInstance->onTimeToday = 0;
   }
 }

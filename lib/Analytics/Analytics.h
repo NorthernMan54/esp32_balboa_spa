@@ -27,14 +27,12 @@
 
 #include "Arduino.h"
 
-#define MAX_ANALYTICS 10
-
 typedef struct
 {
-  unsigned long onTimeToday;
-  unsigned long previousReading;
-  unsigned long onTimeYesterday;
-  int previousHour;
+  unsigned long onTimeToday = 0;
+  unsigned long previousReading = 0;
+  unsigned long onTimeYesterday = 0;
+  int previousHour = 0;
 } AnalyticsData;
 
 class Analytics
@@ -45,7 +43,7 @@ public:
    *
    *
    */
-  Analytics(int);
+  Analytics(AnalyticsData *data);
 
   /** destructor for the Analytics object
    *
@@ -70,7 +68,7 @@ public:
   unsigned long yesterday();
 
 private:
-  int analyticsInstance = 0;
+  AnalyticsData *analyticsInstance;
   void rollover();
   int getHour();
 };
