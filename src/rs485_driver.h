@@ -7,12 +7,13 @@ void rs485Setup();
 void rs485Loop();
 void rs485ClearToSend();
 
-void rs485Send(uint8_t *data, int length, boolean addCrc);
-void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCrc);
+void rs485Send(uint8_t *data, int length, boolean addCrc, boolean force = false);
+void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCrc, boolean force = false);
 
 void rs485_send();
 
-struct rs485WriteQueueMessage {
+struct rs485WriteQueueMessage
+{
   char message[BALBOA_MESSAGE_SIZE];
   int length;
 } rs485WriteQueueMessage_t;

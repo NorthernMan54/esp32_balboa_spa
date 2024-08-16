@@ -23,7 +23,7 @@ void rs485Setup()
 void rs485Loop() {
 };
 
-void rs485Send(uint8_t *data, int length, boolean addCrc)
+void rs485Send(uint8_t *data, int length, boolean addCrc, boolean force)
 {
   if (addCrc)
   {
@@ -32,7 +32,7 @@ void rs485Send(uint8_t *data, int length, boolean addCrc)
     {
       dataBuffer.push(data[i]);
     }
-    rs485Send(dataBuffer, true);
+    rs485Send(dataBuffer, true, force);
   }
   rs485WriteQueueMessage messageToSend;
   for (int i = 0; i < length; i++)
@@ -50,25 +50,32 @@ void rs485Send(uint8_t *data, int length, boolean addCrc)
   }
 }
 
-void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCrc)
+void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCrc, boolean force)
 {
   if (addCrc)
   {
     addCRC(data);
   }
-  rs485WriteQueueMessage messageToSend;
-  for (int i = 0; i < data.size(); i++)
+  if (!force)
   {
-    messageToSend.message[i] = data[i];
-  }
-  messageToSend.length = data.size();
-  if (xQueueSend(rs485WriteQueue, &messageToSend, 0) != pdTRUE)
-  {
-    publishError("RS485 Queue full");
+    rs485WriteQueueMessage messageToSend;
+    for (int i = 0; i < data.size(); i++)
+    {
+      messageToSend.message[i] = data[i];
+    }
+    messageToSend.length = data.size();
+    if (xQueueSend(rs485WriteQueue, &messageToSend, 0) != pdTRUE)
+    {
+      publishError("RS485 Queue full");
+    }
+    else
+    {
+      //    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Send");
+    }
   }
   else
   {
-    //    mqtt.publish((mqttTopic + "node/rs485Queue").c_str(), "Queue Send");
+    rs485Write(data);
   }
 }
 

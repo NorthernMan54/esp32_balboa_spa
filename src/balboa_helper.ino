@@ -6,6 +6,8 @@
 #include "CRC8.h"
 #include "CRC.h"
 
+RTC_NOINIT_ATTR AnalyticsData placeHolder;
+
 RTC_NOINIT_ATTR AnalyticsData heatOnData;
 Analytics heatOn(&heatOnData);
 RTC_NOINIT_ATTR AnalyticsData filterOnData;
@@ -593,7 +595,7 @@ void decodeInformation(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   mqtt.publish((mqttTopic + "information/dipSwitch").c_str(), (String(data[24], 16) + " " + String(data[25], 16)).c_str());                                                                                                                                                 // "19-20" LSB-first (bit 0 of Byte 19 is position 1)
 }
 
-void sendExistingClientResponse(uint8_t id)
+void sendExistingClientResponse(uint8_t id) 
 {
   CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
   dataBuffer.push(id);
@@ -603,7 +605,7 @@ void sendExistingClientResponse(uint8_t id)
   dataBuffer.push(0x37);
   dataBuffer.push(0x00); // 08 10 BF 05 04 08 00 - Config request doesn't seem to work
 
-  rs485Send(dataBuffer, true);
+  rs485Send(dataBuffer, true, true);  // Force sending
   publishDebug(("Publish Existing Module Response to: " + String(id, 16)).c_str());
 }
 
