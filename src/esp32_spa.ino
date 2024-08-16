@@ -120,16 +120,16 @@ void reconnect()
     // time to connect
     delay(1000);
 
-    // have_config = 2;
-    if (have_config >= 2)
-    {
-      // have_config = 2; we have disconnected, let's republish our configuration
-      mqttPubSub();
-    }
     if (mqtt.connected())
     {
       publishError("MQTT Timeout - Reconnect Successfully Run");
       mqtt.publish((mqttTopic + "node/state").c_str(), "ON");
+      // have_config = 2;
+      if (have_config >= 2)
+      {
+        // have_config = 2; we have disconnected, let's republish our configuration
+        mqttPubSub();
+      }
     }
   }
   mqtt.setBufferSize(512); // increase pubsubclient buffer size

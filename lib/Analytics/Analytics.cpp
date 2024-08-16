@@ -24,9 +24,21 @@
 
 #include "Analytics.h"
 
-Analytics::Analytics()
+// Store data in ESP32 RTC memory, it will survive restarts but not power cycles
+RTC_NOINIT_ATTR AnalyticsData data[MAX_ANALYTICS];
+
+Analytics::Analytics(int instance)
 {
-  previousHour = getHour();
+  analyticsInstance = instance;
+  esp_reset_reason_t reason = esp_reset_reason();
+  
+  if (reason == ESP_RST_POWERON)
+  {
+    data[analyticsInstance].onTimeToday = 0;
+    data[analyticsInstance].onTimeYesterday = 0;
+    data[analyticsInstance].previousReading = millis();
+  }
+  data[analyticsInstance].previousHour = getHour();
 }
 
 Analytics::~Analytics() {}
@@ -34,24 +46,24 @@ Analytics::~Analytics() {}
 void Analytics::on()
 {
   rollover();
-  onTimeToday += millis() - previousReading;
-  previousReading = millis();
+  data[analyticsInstance].onTimeToday += millis() - data[analyticsInstance].previousReading;
+  data[analyticsInstance].previousReading = millis();
 }
 
 void Analytics::off()
 {
   rollover();
-  previousReading = millis();
+  data[analyticsInstance].previousReading = millis();
 }
 
 unsigned long Analytics::today()
 {
-  return onTimeToday / 1000;
+  return data[analyticsInstance].onTimeToday / 1000;
 }
 
 unsigned long Analytics::yesterday()
 {
-  return onTimeYesterday / 1000;
+  return data[analyticsInstance].onTimeYesterday / 1000;
 }
 
 int Analytics::getHour()
@@ -67,11 +79,12 @@ int Analytics::getHour()
   return hour;
 }
 
-void Analytics::rollover() {
-  if (getHour() < previousHour) {
-    previousHour = getHour();
-    onTimeYesterday = onTimeToday;
-    onTimeToday = 0;
+void Analytics::rollover()
+{
+  if (getHour() < data[analyticsInstance].previousHour)
+  {
+    data[analyticsInstance].previousHour = getHour();
+    data[analyticsInstance].onTimeYesterday = data[analyticsInstance].onTimeToday;
+    data[analyticsInstance].onTimeToday = 0;
   }
 }
-

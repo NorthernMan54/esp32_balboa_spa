@@ -61,8 +61,8 @@
 
 // Leverage ESP32 WDT, to reset the device if the spa is not connected within 5 minutes, and if after connection messages stop coming in for 10 seconds
 
-#define INITIAL_WDT_TIMEOUT 300 // watchdog timeout in seconds
-#define RUNNING_WDT_TIMEOUT 60 // watchdog timeout in seconds
+#define INITIAL_WDT_TIMEOUT 300 // Reset ESP32 if wifi is not connected within 5 minutes
+#define RUNNING_WDT_TIMEOUT 60 // Reset ESP32 if no SPA messages are received for 60 seconds
 
 // global variables
 

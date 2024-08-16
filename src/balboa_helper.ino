@@ -6,8 +6,8 @@
 #include "CRC8.h"
 #include "CRC.h"
 
-Analytics heaton;
-Analytics filteron;
+Analytics heatOn(0);
+Analytics filterOn(1);
 
 CRC8 crc;
 uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
@@ -400,23 +400,23 @@ void decodeStatus()
   {
   case 0:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), STROFF);
-    filteron.off();
+    filterOn.off();
     break;
   case 1:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1");
-    filteron.on();
+    filterOn.on();
     break;
   case 2:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 2");
-    filteron.on();
+    filterOn.on();
     break;
   case 3:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1 & 2");
-    filteron.on();
+    filterOn.on();
     break;
   }
-  mqtt.publish((mqttTopic + "status/filterOnTimeToday").c_str(), String(filteron.today()).c_str());
-  mqtt.publish((mqttTopic + "status/filterOnTimeYesterday").c_str(), String(filteron.yesterday()).c_str());
+  mqtt.publish((mqttTopic + "status/filterOnTimeToday").c_str(), String(filterOn.today()).c_str());
+  mqtt.publish((mqttTopic + "status/filterOnTimeYesterday").c_str(), String(filterOn.yesterday()).c_str());
   // 5	Panel Locked	0=No, 1=Yes
   // 6	??	0
   // 7	??	0
@@ -426,15 +426,15 @@ void decodeStatus()
   if (d == 0)
   {
     mqtt.publish((mqttTopic + "status/heatState").c_str(), STROFF);
-    heaton.off();
+    heatOn.off();
   }
   else if (d == 1 || d == 2)
   {
     mqtt.publish((mqttTopic + "status/heatState").c_str(), STRON);
-    heaton.on();
+    heatOn.on();
   }
-  mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heaton.today()).c_str());
-  mqtt.publish((mqttTopic + "status/heaterOnTimeYesterday").c_str(), String(heaton.yesterday()).c_str());
+  mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heatOn.today()).c_str());
+  mqtt.publish((mqttTopic + "status/heaterOnTimeYesterday").c_str(), String(heatOn.yesterday()).c_str());
 
   d = bitRead(Q_in[15], 2);
   if (d == 0)
