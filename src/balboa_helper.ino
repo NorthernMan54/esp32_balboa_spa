@@ -6,14 +6,20 @@
 #include "CRC8.h"
 #include "CRC.h"
 
-RTC_NOINIT_ATTR AnalyticsData placeHolder;
-
 RTC_NOINIT_ATTR AnalyticsData heatOnData;
-Analytics heatOn(&heatOnData);
 RTC_NOINIT_ATTR AnalyticsData filterOnData;
-Analytics filterOn(&filterOnData);
+
+Analytics *heatOn;
+Analytics *filterOn;
 
 CRC8 crc;
+
+void balboaSetup()
+{
+  heatOn = new Analytics(&heatOnData);
+  filterOn = new Analytics(&filterOnData);
+};
+
 uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   if (data.size() > 3)
@@ -404,23 +410,23 @@ void decodeStatus()
   {
   case 0:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), STROFF);
-    filterOn.off();
+    filterOn->off();
     break;
   case 1:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1");
-    filterOn.on();
+    filterOn->on();
     break;
   case 2:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 2");
-    filterOn.on();
+    filterOn->on();
     break;
   case 3:
     mqtt.publish((mqttTopic + "status/filterMode").c_str(), "Cycle 1 & 2");
-    filterOn.on();
+    filterOn->on();
     break;
   }
-  mqtt.publish((mqttTopic + "status/filterOnTimeToday").c_str(), String(filterOn.today()).c_str());
-  mqtt.publish((mqttTopic + "status/filterOnTimeYesterday").c_str(), String(filterOn.yesterday()).c_str());
+  mqtt.publish((mqttTopic + "status/filterOnTimeToday").c_str(), String(filterOn->today()).c_str());
+  mqtt.publish((mqttTopic + "status/filterOnTimeYesterday").c_str(), String(filterOn->yesterday()).c_str());
   // 5	Panel Locked	0=No, 1=Yes
   // 6	??	0
   // 7	??	0
@@ -430,15 +436,15 @@ void decodeStatus()
   if (d == 0)
   {
     mqtt.publish((mqttTopic + "status/heatState").c_str(), STROFF);
-    heatOn.off();
+    heatOn->off();
   }
   else if (d == 1 || d == 2)
   {
     mqtt.publish((mqttTopic + "status/heatState").c_str(), STRON);
-    heatOn.on();
+    heatOn->on();
   }
-  mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heatOn.today()).c_str());
-  mqtt.publish((mqttTopic + "status/heaterOnTimeYesterday").c_str(), String(heatOn.yesterday()).c_str());
+  mqtt.publish((mqttTopic + "status/heaterOnTimeToday").c_str(), String(heatOn->today()).c_str());
+  mqtt.publish((mqttTopic + "status/heaterOnTimeYesterday").c_str(), String(heatOn->yesterday()).c_str());
 
   d = bitRead(Q_in[15], 2);
   if (d == 0)
@@ -595,7 +601,7 @@ void decodeInformation(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   mqtt.publish((mqttTopic + "information/dipSwitch").c_str(), (String(data[24], 16) + " " + String(data[25], 16)).c_str());                                                                                                                                                 // "19-20" LSB-first (bit 0 of Byte 19 is position 1)
 }
 
-void sendExistingClientResponse(uint8_t id) 
+void sendExistingClientResponse(uint8_t id)
 {
   CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> dataBuffer;
   dataBuffer.push(id);
@@ -605,7 +611,7 @@ void sendExistingClientResponse(uint8_t id)
   dataBuffer.push(0x37);
   dataBuffer.push(0x00); // 08 10 BF 05 04 08 00 - Config request doesn't seem to work
 
-  rs485Send(dataBuffer, true, true);  // Force sending
+  rs485Send(dataBuffer, true, true); // Force sending
   publishDebug(("Publish Existing Module Response to: " + String(id, 16)).c_str());
 }
 

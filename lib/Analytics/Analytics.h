@@ -27,12 +27,16 @@
 
 #include "Arduino.h"
 
+#define ANALYTICS_VERSION "0.1.0"
+#define ANALYTICS_INIT 0x12345678B
+
 typedef struct
 {
-  unsigned long onTimeToday = 0;
-  unsigned long previousReading = 0;
-  unsigned long onTimeYesterday = 0;
-  int previousHour = 0;
+  unsigned long long int initialized;
+  int previousHour;
+  unsigned long previousReading;
+  unsigned long onTimeToday;
+  unsigned long onTimeYesterday;
 } AnalyticsData;
 
 class Analytics
@@ -70,6 +74,7 @@ public:
 private:
   AnalyticsData *analyticsInstance;
   void rollover();
+  void reset();
   int getHour();
 };
 

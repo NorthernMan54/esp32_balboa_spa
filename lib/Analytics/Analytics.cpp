@@ -29,14 +29,14 @@
 
 Analytics::Analytics(AnalyticsData *data)
 {
+  // Serial.printf("Analytics constructor");
+  // Serial.printf("%p\n", data);
   analyticsInstance = data;
-  esp_reset_reason_t reason = esp_reset_reason();
 
-  if (reason == ESP_RST_POWERON)
+  if (analyticsInstance->initialized != ANALYTICS_INIT)
   {
-    analyticsInstance->onTimeToday = 0;
-    analyticsInstance->onTimeYesterday = 0;
-    analyticsInstance->previousReading = millis();
+    // Serial.println("\nAnalytics initialized");
+    reset();
   }
   analyticsInstance->previousHour = getHour();
 }
@@ -58,6 +58,16 @@ void Analytics::off()
 
 unsigned long Analytics::today()
 {
+  // Serial.println("\nAnalytics today");
+  // Serial.printf("analyticsInstance %p\n", analyticsInstance);
+  // Serial.print("initialized ");
+  // Serial.println(analyticsInstance->initialized);
+  // Serial.print("onTimeToday ");
+  // Serial.println(analyticsInstance->onTimeToday);
+  // Serial.print("onTimeYesterday ");
+  // Serial.println(analyticsInstance->onTimeYesterday);
+  // Serial.print("previousReading ");
+  // Serial.println(analyticsInstance->previousReading);
   return analyticsInstance->onTimeToday / 1000;
 }
 
@@ -77,6 +87,26 @@ int Analytics::getHour()
   hour = now_tm->tm_hour;
 
   return hour;
+}
+
+void Analytics::reset()
+{
+  analyticsInstance->onTimeToday = 0;
+  analyticsInstance->onTimeYesterday = 0;
+  analyticsInstance->previousReading = millis();
+  analyticsInstance->initialized = ANALYTICS_INIT;
+  analyticsInstance->previousHour = getHour();
+
+  // Serial.println("\nAnalytics reset");
+  // Serial.printf("analyticsInstance %p\n", analyticsInstance);
+  // Serial.print("initialized ");
+  // Serial.println(analyticsInstance->initialized);
+  // Serial.print("onTimeToday ");
+  // Serial.println(analyticsInstance->onTimeToday);
+  // Serial.print("onTimeYesterday ");
+  // Serial.println(analyticsInstance->onTimeYesterday);
+  // Serial.print("previousReading ");
+  // Serial.println(analyticsInstance->previousReading);
 }
 
 void Analytics::rollover()

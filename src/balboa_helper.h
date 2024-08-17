@@ -9,8 +9,8 @@
 uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data);
 void ID_request();
 void ID_ack();
-// void rs485_send();
 
+void balboaSetup();
 void decodeFault();
 void decodeFilterSettings();
 void decodeConfig();

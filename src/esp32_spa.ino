@@ -304,7 +304,7 @@ TickTwo ds18b20Timer(ds18b20loop, 5 * 60 * 1000); // 5 minutes
 
 void setup()
 {
-
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_ON);
   restartReasonSetup();
 
   // Begin RS485 in listening mode -> no longer required with new RS485 chip
@@ -351,6 +351,7 @@ void setup()
 
   configTime(gmtOffset_sec, daylightOffset_sec, "pool.ntp.org");
   bridgeSetup();
+  balboaSetup();
   //  httpUpdater.setup(&httpServer, "admin", "");
   httpServer.begin();
 
@@ -432,8 +433,8 @@ void loop()
 
   if (x == 0x7E && Q_in.size() > 2 && Q_in.size() == Q_in[1] + 2 && validateCRC8(Q_in) == Q_in[Q_in[1]])
   {
-  //  print_msg(Q_in);
-  //  publishDebug(("Q_in.size()=" + String(Q_in.size(), 16) + ", Q_in[1]=" + String(Q_in[1], 16) + ", validateCRC8(Q_in)=" + String(validateCRC8(Q_in), 16) + ", Q_in[Q_in[1]]=" + String(Q_in[Q_in[1]], 16)).c_str());
+    //  print_msg(Q_in);
+    //  publishDebug(("Q_in.size()=" + String(Q_in.size(), 16) + ", Q_in[1]=" + String(Q_in[1], 16) + ", validateCRC8(Q_in)=" + String(validateCRC8(Q_in), 16) + ", Q_in[Q_in[1]]=" + String(Q_in[Q_in[1]], 16)).c_str());
     //  if (x == 0x7E && Q_in.size() > 2 && validateCRC8(Q_in) == Q_in[(Q_in[1] < Q_in.size() ? Q_in[Q_in[1]] : 0)])
 
 #ifndef PRODUCTION
