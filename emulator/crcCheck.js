@@ -1,7 +1,7 @@
 import { SerialPort } from 'serialport';
 import crc from 'crc';
 
-const port = new SerialPort({ path: '/dev/null', baudRate: 115200 })
+// const port = new SerialPort({ path: '/dev/null', baudRate: 115200 })
 
 const id = Buffer.from([0x7E, 0x00, 0xFE, 0xFA, 0x02, 0x0f, 0x7E]);
 
@@ -35,85 +35,22 @@ const status2b = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x
 const status2g = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x16, 0x04, 0x00, 0x00, 0x01, 0x00, 0x85, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x4a, 0x00, 0x00, 0x02, 0x1e, 0x00, 0x00, 0x6e, 0x7e]);
 
 
-setInterval(() => {
-  port.write(id, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    // console.log('ID Transmitted', id.toString('hex'))
-  })
-}, 5000);
+checkChecksum(status);
+checkChecksum(status1b);
+checkChecksum(status1g);
+checkChecksum(status2b);
+checkChecksum(status2g);
 
-// Open errors will be emitted as an error event
-port.on('error', function (err) {
-  console.log('Error: ', err.message)
-})
+function checkChecksum(data) {
+  console.log('data', data);
 
-port.on('data', function (data) {
-
-  if (data[3] === 0xBF && data[5] === 0x00 && data[6] === 0x00) {
-    console.log('Get Config', data)
-    sendConfig()
-  } else if (data[3] === 0xBF && data[5] === 0x20 && data[6] === 0xff) {
-    console.log('Get Fault log', data)
-  } else if (data[3] === 0xBF && data[4] === 0x07) {
-    // console.log('CTS', data)
-  } else {
-    console.log('Data:', data)
-  }
-})
-
-setInterval(() => {
-  port.write(rts, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    // console.log('RTS Transmitted', rts)
-  })
-}, 1000);
-
-setInterval(() => {
-  const d = new Date();
-  let hour = d.getHours();
-  let minute = d.getMinutes();
-  let second = d.getSeconds();
-
-  status[8] = minute;
-  status[9] = second;
-
-  // 0xbe
-
-  var checksum = compute_checksum(status.slice(1, status.length - 2));
-  status[status.length - 2] = checksum;
-  console.log('status to Transmit', status)
-
-  port.write(status, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    console.log('status Transmitted', status)
-  })
-}, 300);
-
-function sendConfig() {
-
-  port.write(config, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    console.log('Config Transmitted', config)
-  })
+  console.log('origChecksum', data[data.length - 2], 'checksum', compute_checksum(data.slice(1, data.length - 2)));
+  console.log();
 }
+
 
 function compute_checksum(bytes) {
   // console.log('compute_checksum', bytes, bytes.length);
   const checksum = crc.crc8(bytes, 0x02);
   return checksum ^ 0x02;
-}
-
-function concat(a, b) {
-  const c = new Uint8Array(a.length + b.length);
-  c.set(a);
-  c.set(b, a.length);
-  return c;
 }
