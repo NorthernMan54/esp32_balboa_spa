@@ -29,14 +29,27 @@
 
 Analytics::Analytics(AnalyticsData *data)
 {
-  // Serial.printf("Analytics constructor");
+  // Serial.printf("\nAnalytics constructor ");
   // Serial.printf("%p\n", data);
   analyticsInstance = data;
 
-  if (analyticsInstance->initialized != ANALYTICS_INIT)
+  if (analyticsInstance->initialized != ANALYTICS_MAGIC_NUMBER)
   {
     // Serial.println("\nAnalytics initialized");
     reset();
+  }
+  else
+  {
+    // Serial.println("Analytics On Start");
+    // Serial.printf("analyticsInstance %p\n", analyticsInstance);
+    // Serial.print("initialized ");
+    // Serial.println(analyticsInstance->initialized);
+    // Serial.print("onTimeToday ");
+    // Serial.println(analyticsInstance->onTimeToday);
+    // Serial.print("onTimeYesterday ");
+    // Serial.println(analyticsInstance->onTimeYesterday);
+    // Serial.print("previousReading ");
+    // Serial.println(analyticsInstance->previousReading);
   }
   analyticsInstance->previousHour = getHour();
 }
@@ -45,13 +58,15 @@ Analytics::~Analytics() {}
 
 void Analytics::on()
 {
+  // Serial.println("\nAnalytics on");
   rollover();
-  analyticsInstance->onTimeToday += millis() - analyticsInstance->previousReading;
+  analyticsInstance->onTimeToday += (millis() > analyticsInstance->previousReading ? millis() - analyticsInstance->previousReading : millis());
   analyticsInstance->previousReading = millis();
 }
 
 void Analytics::off()
 {
+  // Serial.println("\nAnalytics off");
   rollover();
   analyticsInstance->previousReading = millis();
 }
@@ -86,6 +101,8 @@ int Analytics::getHour()
   now_tm = localtime(&now);
   hour = now_tm->tm_hour;
 
+  // hour = now_tm->tm_min % 5;
+
   return hour;
 }
 
@@ -94,7 +111,7 @@ void Analytics::reset()
   analyticsInstance->onTimeToday = 0;
   analyticsInstance->onTimeYesterday = 0;
   analyticsInstance->previousReading = millis();
-  analyticsInstance->initialized = ANALYTICS_INIT;
+  analyticsInstance->initialized = ANALYTICS_MAGIC_NUMBER;
   analyticsInstance->previousHour = getHour();
 
   // Serial.println("\nAnalytics reset");
@@ -113,6 +130,7 @@ void Analytics::rollover()
 {
   if (getHour() < analyticsInstance->previousHour)
   {
+    // Serial.println("\nAnalytics rollover");
     analyticsInstance->previousHour = getHour();
     analyticsInstance->onTimeYesterday = analyticsInstance->onTimeToday;
     analyticsInstance->onTimeToday = 0;
