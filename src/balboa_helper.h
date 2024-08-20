@@ -6,7 +6,7 @@
 #define BALBOA_MESSAGE_SIZE 50
 #define WIFI_MODULE_ID 0x0a
 
-uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data);
+bool isStatusMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data);
 void ID_request();
 void ID_ack();
 
@@ -69,6 +69,10 @@ void requestPreferences();
 #define Information_Response (Q_in[2] == id && Q_in[4] == Information_Response_Type)
 
 #define Bridge_Message (id > 0 && (Q_in[2] == id || Q_in[2] == 0xFF))
+
+#define STATUS_TIME_VALID (data[8] < 24 && data[9] < 60)
+#define STATUS_TEMP_VALID (data[7] < 110 || data[7] == 0xFF)
+#define STATUS_TARGET_TEMP_VALID (data[25] < 110 || data[25] == 0xFF)
 
 #define WiFi_Module_Configuration_Response \
   Q_out.push(0x7E);                        \

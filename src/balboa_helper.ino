@@ -20,24 +20,22 @@ void balboaSetup()
   filterOn = new Analytics(&filterOnData);
 };
 
-uint8_t validateCRC8(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
+bool isCrcValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
-  if (data.size() > 3)
+  byte array[70];
+  for (int i = 0; i < data.size() - 2; i++)
   {
+    array[i] = data[i + 1];
+  }
+  // polynome, initial, xorOut, reverseIn, reverseOut)
+  //  print_msg((uint8_t *)array, data.size() - 3);
+  return (calcCRC8((uint8_t *)array, data.size() - 3, 0x07, 0x02, 0x02) == data[data[1]]);
+}
 
-    byte array[70];
-    for (int i = 0; i < data.size() - 2; i++)
-    {
-      array[i] = data[i + 1];
-    }
-    // polynome, initial, xorOut, reverseIn, reverseOut)
-    //  print_msg((uint8_t *)array, data.size() - 3);
-    return calcCRC8((uint8_t *)array, data.size() - 3, 0x07, 0x02, 0x02);
-  }
-  else
-  {
-    return 0;
-  }
+bool isStatusMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
+{
+  // return (isCrcValid(data) && STATUS_TIME_VALID && STATUS_TEMP_VALID && STATUS_TARGET_TEMP_VALID);
+  return (isCrcValid(data));
 }
 
 void decodeFault()
