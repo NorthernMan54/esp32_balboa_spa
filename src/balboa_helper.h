@@ -6,7 +6,7 @@
 #define BALBOA_MESSAGE_SIZE 50
 #define WIFI_MODULE_ID 0x0a
 
-bool isStatusMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data);
+bool isMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data);
 void ID_request();
 void ID_ack();
 

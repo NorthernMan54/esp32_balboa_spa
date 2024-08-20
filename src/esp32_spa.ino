@@ -431,7 +431,7 @@ void loop()
   if (Q_in[1] == 0x7E && Q_in.size() > 1)
     Q_in.pop();
 
-  if (x == 0x7E && Q_in.size() > 4 && Q_in.size() == Q_in[1] + 2 && isStatusMessageValid(Q_in))
+  if (x == 0x7E && Q_in.size() > 4 && Q_in.size() == Q_in[1] + 2 && isMessageValid(Q_in))
   {
     //  print_msg(Q_in);
     //  publishDebug(("Q_in.size()=" + String(Q_in.size(), 16) + ", Q_in[1]=" + String(Q_in[1], 16) + ", validateCRC8(Q_in)=" + String(validateCRC8(Q_in), 16) + ", Q_in[Q_in[1]]=" + String(Q_in[Q_in[1]], 16)).c_str());

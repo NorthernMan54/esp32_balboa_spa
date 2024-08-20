@@ -32,10 +32,21 @@ bool isCrcValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   return (calcCRC8((uint8_t *)array, data.size() - 3, 0x07, 0x02, 0x02) == data[data[1]]);
 }
 
-bool isStatusMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
+bool isMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
   // return (isCrcValid(data) && STATUS_TIME_VALID && STATUS_TEMP_VALID && STATUS_TARGET_TEMP_VALID);
-  return (isCrcValid(data));
+  if (isCrcValid(data))
+  {
+    if (Q_in[2] == 0xFF && Q_in[4] == 0x13) // Status Message
+    {
+      return (STATUS_TIME_VALID && STATUS_TEMP_VALID && STATUS_TARGET_TEMP_VALID);
+    }
+    else
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 void decodeFault()
