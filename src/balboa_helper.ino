@@ -34,7 +34,6 @@ bool isCrcValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 
 bool isMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
 {
-  // return (isCrcValid(data) && STATUS_TIME_VALID && STATUS_TEMP_VALID && STATUS_TARGET_TEMP_VALID);
   if (isCrcValid(data))
   {
     if (Q_in[2] == 0xFF && Q_in[4] == 0x13) // Status Message
