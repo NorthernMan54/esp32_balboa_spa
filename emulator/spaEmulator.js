@@ -1,7 +1,8 @@
 import { SerialPort } from 'serialport';
 import crc from 'crc';
 
-const port = new SerialPort({ path: '/dev/null', baudRate: 115200 })
+// const port = new SerialPort({ path: '/dev/null', baudRate: 115200 })
+const port = new SerialPort({ path: '/dev/cu.usbserial-3', baudRate: 115200 })
 
 const id = Buffer.from([0x7E, 0x00, 0xFE, 0xFA, 0x02, 0x0f, 0x7E]);
 
@@ -78,14 +79,15 @@ setInterval(() => {
   let minute = d.getMinutes();
   let second = d.getSeconds();
 
-  status[8] = minute;
-  status[9] = second;
+
+    status[8] = minute;
+    status[9] = second;
 
   // 0xbe
 
   var checksum = compute_checksum(status.slice(1, status.length - 2));
   status[status.length - 2] = checksum;
-  console.log('status to Transmit', status)
+  // console.log('status to Transmit', status)
 
   port.write(status, function (err) {
     if (err) {
