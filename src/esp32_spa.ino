@@ -252,13 +252,13 @@ void resetConfigStatus()
     mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
   }
 }
-TickTwo resetConfig(resetConfigStatus, 1 * 60 * 1000); // 1 minutes
+TickTwo resetConfig(resetConfigStatus, 5 * 60 * 1000); // 5 minutes
 
 void resetFaultLog() { have_faultlog = 0; }
-TickTwo faultlogTimer(resetFaultLog, 5 * 60 * 1000); // 5 minutes
+TickTwo faultlogTimer(resetFaultLog, 60 * 60 * 1000); // 60 minutes
 
 void resetFilterStatus() { have_filtersettings = 0; }
-TickTwo filterStatusTimer(resetFilterStatus, 5 * 60 * 1000); // 5 minutes
+TickTwo filterStatusTimer(resetFilterStatus, 60 * 60 * 1000); // 60 minutes
 
 int getTime()
 {
@@ -293,6 +293,8 @@ void nodeStatusReport()
   mqtt.publish((mqttTopic + "node/have_config").c_str(), String(have_config, 16).c_str());
   mqtt.publish((mqttTopic + "node/have_faultlog").c_str(), String(have_faultlog, 16).c_str());
   mqtt.publish((mqttTopic + "node/have_filtersettings").c_str(), String(have_filtersettings, 16).c_str());
+  mqtt.publish((mqttTopic + "node/have_preferences").c_str(), String(have_preferences, 16).c_str());
+  mqtt.publish((mqttTopic + "node/have_information").c_str(), String(have_information, 16).c_str());
 }
 TickTwo nodeStatusTimer(nodeStatusReport, 1 * 60 * 1000); // 1 minutes
 

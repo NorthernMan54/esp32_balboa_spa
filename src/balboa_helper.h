@@ -71,8 +71,8 @@ void requestPreferences();
 #define Bridge_Message (id > 0 && (Q_in[2] == id || Q_in[2] == 0xFF))
 
 #define STATUS_TIME_VALID (data[8] < 24 && data[9] < 60)
-#define STATUS_TEMP_VALID (data[7] < 110 || data[7] == 0xFF)
-#define STATUS_TARGET_TEMP_VALID (data[25] < 110 || data[25] == 0xFF)
+#define STATUS_TEMP_VALID ((data[7] > 0x0a && data[7] < 110) || data[7] == 0xFF)
+#define STATUS_TARGET_TEMP_VALID ((data[25] > 0x28 && data[25] < 110) || data[25] == 0xFF)
 
 #define WiFi_Module_Configuration_Response \
   Q_out.push(0x7E);                        \

@@ -546,12 +546,12 @@ void decodeStatus()
   // Flags Byte 18
   mqtt.publish((mqttTopic + "status/flagByte18").c_str(), String(Q_in[18 + 5], 16).c_str());
   mqtt.publish((mqttTopic + "status/flagByte19").c_str(), String(Q_in[19 + 5], 16).c_str());
-  mqtt.publish((mqttTopic + "status/flagByte20").c_str(), String(Q_in[20 + 5], 16).c_str());
+  //  mqtt.publish((mqttTopic + "status/flagByte20").c_str(), String(Q_in[20 + 5], 16).c_str()); // Set temperature
   mqtt.publish((mqttTopic + "status/flagByte21").c_str(), String(Q_in[21 + 5], 16).c_str());
   mqtt.publish((mqttTopic + "status/settingsLock").c_str(), (bitRead(Q_in[21 + 5], 3)) ? "Locked" : "Unlocked");
   mqtt.publish((mqttTopic + "status/flagByte22").c_str(), String(Q_in[22 + 5], 16).c_str());
   mqtt.publish((mqttTopic + "status/flagByte23").c_str(), String(Q_in[23 + 5], 16).c_str());
-  mqtt.publish((mqttTopic + "status/flagByte24").c_str(), String(Q_in[24 + 5], 16).c_str());
+  mqtt.publish((mqttTopic + "status/M8cycleTime").c_str(), String(Q_in[24 + 5]).c_str());
   mqtt.publish((mqttTopic + "status/flagByte25").c_str(), String(Q_in[25 + 5], 16).c_str());
 
   last_state_crc = Q_in[Q_in[1]];
@@ -592,11 +592,14 @@ void decodePreferences(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   mqtt.publish((mqttTopic + "preferences/2").c_str(), ("0x" + String(data[7], 16)).c_str());                // 2 - ??	0
   mqtt.publish((mqttTopic + "preferences/temperatureScale").c_str(), ("0x" + String(data[8], 16)).c_str()); // 3 - Temperature Scale	0=1°F, 1=0.5°C
   mqtt.publish((mqttTopic + "preferences/clockMode").c_str(), ("0x" + String(data[9], 16)).c_str());        // 4 - Clock Mode	0=12-hour, 1=24-hour
-  mqtt.publish((mqttTopic + "preferences/cleanUpCycle").c_str(), ("0x" + String(data[10], 16)).c_str());    // 5 - Cleanup Cycle	0=OFF, 1-8 (30 minute increments)
+  mqtt.publish((mqttTopic + "preferences/cleanUpCycle").c_str(), (String(data[10] * 30)).c_str());          // 5 - Cleanup Cycle	0=OFF, 1-8 (30 minute increments)
   mqtt.publish((mqttTopic + "preferences/Dolphin").c_str(), ("0x" + String(data[11], 16)).c_str());         // 6 - Dolphin Address	0=none, 1-7=address
   mqtt.publish((mqttTopic + "preferences/7").c_str(), ("0x" + String(data[12], 16)).c_str());               // 7 - ??	0
-  mqtt.publish((mqttTopic + "preferences/M8").c_str(), ("0x" + String(data[13], 16)).c_str());              // 8 - M8 Artificial Intelligence	0=OFF, 1=ON
+  mqtt.publish((mqttTopic + "preferences/M8").c_str(), (data[13] ? STRON : STROFF));                        // 8 - M8 Artificial Intelligence	0=OFF, 1=ON
   mqtt.publish((mqttTopic + "preferences/9").c_str(), ("0x" + String(data[14], 16)).c_str());               // 9-17 - ??	0
+
+  publishDebug("Preferences Received");
+  have_preferences = 2;
 }
 
 void decodeInformation(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
@@ -607,6 +610,8 @@ void decodeInformation(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   mqtt.publish((mqttTopic + "information/voltage").c_str(), (String(data[22], 16)).c_str());                                                                                                                                                                                // "17"  ?0x01=240?
   mqtt.publish((mqttTopic + "information/heaterType").c_str(), (String(data[23], 16)).c_str());                                                                                                                                                                             // "18" ?0x06,0x0A=Standard?
   mqtt.publish((mqttTopic + "information/dipSwitch").c_str(), (String(data[24], 16) + " " + String(data[25], 16)).c_str());                                                                                                                                                 // "19-20" LSB-first (bit 0 of Byte 19 is position 1)
+  publishDebug("Information Received");
+  have_information = 2;
 }
 
 void sendExistingClientResponse(uint8_t id)
@@ -634,6 +639,7 @@ inline void ID_request()
   dataBuffer.push(0x73);
 
   rs485Send(dataBuffer, true);
+  publishDebug("Requesting ID");
 }
 
 inline void ID_ack()
@@ -644,6 +650,7 @@ inline void ID_ack()
   dataBuffer.push(0x03);
 
   rs485Send(dataBuffer, true);
+  publishDebug("Acknowledging ID");
 }
 
 inline void panelButtonPress(uint8_t button)
@@ -657,6 +664,7 @@ inline void panelButtonPress(uint8_t button)
   dataBuffer.push(0x00);
 
   rs485Send(dataBuffer, true);
+  publishDebug(("Button Press: " + String(button)).c_str());
 }
 
 void setTemperature(String temp)
@@ -671,6 +679,7 @@ void setTemperature(String temp)
   dataBuffer.push(d);
 
   rs485Send(dataBuffer, true);
+  publishDebug(("Set Temperature: " + temp).c_str());
 }
 
 void setTime(uint8_t hour, uint8_t minute)
@@ -683,6 +692,7 @@ void setTime(uint8_t hour, uint8_t minute)
   dataBuffer.push(minute);
 
   rs485Send(dataBuffer, true);
+  publishDebug(("Set Time: " + String(hour) + ":" + String(minute)).c_str());
 }
 
 void requestConfig()
@@ -736,4 +746,6 @@ void requestPreferences()
   dataBuffer.push(0x00);
   publishDebug("Requesting Preferences");
   rs485Send(dataBuffer, true);
+
+  have_preferences = 1;
 }

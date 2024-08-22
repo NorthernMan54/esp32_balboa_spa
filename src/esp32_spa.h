@@ -71,9 +71,13 @@ CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_in;
 uint8_t id = 0x00;  // spa id
 
 uint8_t last_state_crc = 0x00;   // Used the reduce the number of status updates messages processed ( ie if the CRC doesn't change, don't process the message)
+
 uint8_t have_config = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
 uint8_t have_faultlog = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
 uint8_t have_filtersettings = 0;    // stages: 0-> want it; 1-> requested it; 2-> gotit; 3-> further processed it
+uint8_t have_preferences = 0;       // stages: 0-> want it; 1-> requested it; 2-> gotit; 3-> further processed it
+uint8_t have_information = 0;       // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
+
 uint8_t ip_settings = 0;            // stages: 0-> want it; 1-> requested it; 2-> got it; 3->further processed it
 uint8_t wifi_settings = 0;          // stages: 0-> want it; 1-> requested it; 2-> got it;3-> further processed it
 
