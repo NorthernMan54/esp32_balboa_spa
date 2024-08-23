@@ -332,7 +332,9 @@ void setup()
   mqttTopic = mqttTopic + String(gateway_name) + "/";
 
   WiFi.setTxPower(WIFI_POWER_19_5dBm); // this sets wifi to highest power
+  WiFi.setHostname(gateway_name);
   WiFi.begin(WIFI_SSID.c_str(), WIFI_PASSWORD.c_str());
+
   unsigned long timeout = millis() + 10000;
 
   while (WiFi.status() != WL_CONNECTED && millis() < timeout)
