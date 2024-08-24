@@ -42,11 +42,14 @@ WiFiServer bridge(BALBOA_PORT);         // Port number for the server
 WiFiClient clients[MAX_BRIDGE_CLIENTS]; // Array to hold the clients
 WiFiUDP Discovery;
 
-char packetBuffer[255];                                 // buffer to hold incoming packet
-char ReplyBuffer[] = "BWGSPA\r\n00-15-27-00-00-01\r\n"; // a string to send back Q_out.push(0x3F); Q_out.push(0x9B); Q_out.push(0x95)
+
+char packetBuffer[255]; // buffer to hold incoming packet
+char replyBuffer[30];
 
 void bridgeSetup()
 {
+  String s = WiFi.macAddress();
+  sprintf(replyBuffer, "BWGSPA\r\n00-15-27-%.2s-%.2s-%.2s\r\n", s.c_str() + 9, s.c_str() + 12, s.c_str() + 15);
   bridge.begin();
 #ifdef LOCAL_CONNECT
   Discovery.begin(BALBOA_UDP_DISCOVERY_PORT);
@@ -131,7 +134,7 @@ void bridgeLoop()
     // receive incoming UDP packets
     Discovery.read(packetBuffer, 255);
     Discovery.beginPacket(Discovery.remoteIP(), Discovery.remotePort());
-    Discovery.write((const uint8_t *)ReplyBuffer, strlen(ReplyBuffer));
+    Discovery.write((const uint8_t *)replyBuffer, strlen(replyBuffer));
     Discovery.endPacket();
     mqtt.publish((mqttTopic + "bridge/udpMsg").c_str(), packetBuffer);
   }
