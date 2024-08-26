@@ -69,6 +69,7 @@ void bridgeLoop()
     {
       if (!clients[i])
       {
+//        newClient.setNoDelay(true);
         clients[i] = newClient;
         publishDebug(("Bridge Client Connected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
         added = true;
