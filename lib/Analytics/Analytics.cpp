@@ -56,6 +56,18 @@ Analytics::Analytics(AnalyticsData *data)
 
 Analytics::~Analytics() {}
 
+void Analytics::add(uint8_t state)
+{
+  if(state)
+  {
+    on();
+  }
+  else
+  {
+    off();
+  }
+}
+
 void Analytics::on()
 {
   // Serial.println("\nAnalytics on");

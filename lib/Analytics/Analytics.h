@@ -54,6 +54,7 @@ public:
    */
   ~Analytics();
 
+void add(uint8_t);
   /** start the Analytics
    *
    */

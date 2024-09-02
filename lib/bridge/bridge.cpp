@@ -1,65 +1,50 @@
-#include "esp32_spa.h"
-#include "rs485_bridge.h"
-#include "rs485_driver.h"
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
+#include <ArduinoLog.h>
 
-#define publishBridge(__VA_ARGS__...) mqtt.publish((mqttTopic + "bridge/msg").c_str(), __VA_ARGS__);
+#include <utilities.h>
+#include <mqttModule.h>
+#include <rs485.h>
+#include <cacheRead.h>
+
+#include "bridge.h"
+#include "spaMessage.h"
+#include "balboa.h"
+
+#define publishBridge(...) mqtt.publish((mqttTopic + "bridge/msg").c_str(), __VA_ARGS__)
 
 CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> Q_out;
 
 uint8_t message[BALBOA_MESSAGE_SIZE];
 
-void print_msg(String topic, uint8_t *Q_in, int length)
-{
-  String s;
-  // for (i = 0; i < (Q_in[1] + 2); i++) {
-  for (int i = 0; i < length; i++)
-  {
-    int x = Q_in[i];
-    if (x < 0x10)
-      s += "0";
-    s += String(x, HEX);
-    s += " ";
-  }
-  mqtt.publish((mqttTopic + topic).c_str(), s.c_str());
-}
-
-void print_msg(String topic, CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
-{
-  String s;
-  // for (i = 0; i < (Q_in[1] + 2); i++) {
-  for (int i = 0; i < data.size(); i++)
-  {
-    int x = data[i];
-    if (x < 0x10)
-      s += "0";
-    s += String(x, HEX);
-    s += " ";
-  }
-  mqtt.publish((mqttTopic + topic).c_str(), s.c_str());
-}
-
 WiFiServer bridge(BALBOA_PORT);         // Port number for the server
 WiFiClient clients[MAX_BRIDGE_CLIENTS]; // Array to hold the clients
 WiFiUDP Discovery;
 
-
 char packetBuffer[255]; // buffer to hold incoming packet
 char replyBuffer[30];
+
+bool bridgeStarted = false;
 
 void bridgeSetup()
 {
   String s = WiFi.macAddress();
   sprintf(replyBuffer, "BWGSPA\r\n00-15-27-%.2s-%.2s-%.2s\r\n", s.c_str() + 9, s.c_str() + 12, s.c_str() + 15);
-  bridge.begin();
-#ifdef LOCAL_CONNECT
-  Discovery.begin(BALBOA_UDP_DISCOVERY_PORT);
-#endif
   //  bridge.setNoDelay(true);
 };
 
 void bridgeLoop()
 {
 
+  if (!bridgeStarted && WiFi.status() == WL_CONNECTED)
+  {
+    bridgeStarted = true;
+    bridge.begin();
+#ifdef LOCAL_CONNECT
+    Discovery.begin(BALBOA_UDP_DISCOVERY_PORT);
+#endif
+  }
   WiFiClient newClient = bridge.available();
   if (newClient)
   {
@@ -69,7 +54,7 @@ void bridgeLoop()
     {
       if (!clients[i])
       {
-//        newClient.setNoDelay(true);
+        //        newClient.setNoDelay(true);
         clients[i] = newClient;
         publishDebug(("Bridge Client Connected (" + String(i) + ") " + clients[i].remoteIP().toString()).c_str());
         added = true;
@@ -97,19 +82,19 @@ void bridgeLoop()
         length = clients[i].read(message, BALBOA_MESSAGE_SIZE);
         if (length > 0)
         {
-          print_msg("bridge/in", message, length);
-          if (message[2] == 0x0A && message[4] == 0x04)
+          Log.verbose(F("[Bridge]: bridge/in %s" CR), msgToString(message, length).c_str());
+          if (message[2] == id && message[4] == 0x04)
           {
             Q_out.clear();
-            WiFi_Module_Configuration_Response
-                bridgeSend(Q_out);
+            WiFi_Module_Configuration_Response(Q_out);
+            bridgeSend(Q_out);
             Q_out.clear();
           }
           else
           {
             //  P_in.clear();
             publishBridge((String(length) + " Msg Received").c_str());
-            rs485Send(message, length, false);
+            cacheRead(message, length);
           }
         }
         else
@@ -162,7 +147,29 @@ void bridgeSend(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   }
   if (sent)
   {
-    print_msg("bridge/out", data);
+    Log.verbose(F("[Bridge]: bridge/out %s" CR), msgToString(data).c_str());
+  }
+  else
+  {
+    publishBridge("Client not connected");
+  }
+};
+
+void bridgeSend(uint8_t *message, int length)
+{
+  bool sent = false;
+  for (int i = 0; i < MAX_BRIDGE_CLIENTS; i++)
+  {
+    if (clients[i] && clients[i].connected())
+    {
+      sent = true;
+      clients[i].write(message, length);
+      clients[i].flush();
+    }
+  }
+  if (sent)
+  {
+    Log.verbose(F("[Bridge]: bridge/out %s" CR), msgToString(message, length).c_str());
   }
   else
   {
