@@ -11,6 +11,7 @@ const rts = Buffer.from([0x7E, 0x00, 0x0f, 0xFA, 0x06, 0x0f, 0x7E]);
 // const config = Buffer.from([0x7E, 0x1e, 0x0f, 0x0a, 0x2e, 0x0a, 0x00, 0x02, 0x00, 0x00, 0x15, 0x27, 0x10, 0xab, 0xd2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x15, 0x27, 0xff, 0xff, 0x10, 0xab, 0xd2, 0x7E]);
 const config = Buffer.from([0x7e, 0xb, 0x0f, 0xbf, 0x2e, 0xa, 0x00, 0x01, 0x10, 0x00, 0x00, 0x37, 0x7e]);
 
+const clearToSend = Buffer.from([0x7e, 0x05, 0x0a, 0xbf, 0x06, 0x79, 0x7e]);
 
 // const status = Buffer.from([0x7E, 0x1d, 0xff, 0xaf, 0x13, 0xF0, 0xF1, 0x60, 0x12, 0x23, 0xF2, 0x00, 0x00, 0x00, 0xF3, 0xF4, 0x03, 0x00, 0xF5, 0x03, 0xF6, 0x00, 0x00, 0x00, 0x00, 0x0, 0x00, 0x00, 0x00, 0x0f, 0x7E]);
 //                           7e 20 ff af 13 00 00 4a 13 08 00 00 01 00 05 0c 01 00 00 00 00 00 00 00 00 4a 00 00 02 78 00 00 a2 7e
@@ -41,7 +42,7 @@ setInterval(() => {
     if (err) {
       return console.log('Error on write: ', err.message)
     }
-    // console.log('ID Transmitted', id.toString('hex'))
+    console.log('ID Transmitted', id.toString('hex'))
   })
 }, 5000);
 
@@ -65,11 +66,11 @@ port.on('data', function (data) {
 })
 
 setInterval(() => {
-  port.write(rts, function (err) {
+  port.write(clearToSend, function (err) {
     if (err) {
       return console.log('Error on write: ', err.message)
     }
-    // console.log('RTS Transmitted', rts)
+    console.log('clearToSend Transmitted', clearToSend)
   })
 }, 1000);
 
@@ -119,3 +120,35 @@ function concat(a, b) {
   c.set(b, a.length);
   return c;
 }
+
+
+
+00:00:12.877 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:12.911 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:12.939 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:12.964 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:12.983 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.017 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.048 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.067 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.092 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.126 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.160 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.185 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.214 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.247 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.282 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.315 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.340 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.363 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.392 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.431 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.461 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.486 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.524 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.556 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.583 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.603 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.640 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.670 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.697 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
