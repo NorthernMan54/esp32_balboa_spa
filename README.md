@@ -1,3 +1,13 @@
+
+## Compiler Definitions
+
+  * LOCAL_CLIENT - Connects to SPA via local rs485 connection
+  * REMOTE_CLIENT - Connects to SPA via TCP / WiFi Module interface 
+  * LOCAL_CONNECT - Enable discovery of WiFi Module interface
+<BR>
+  * TELNET_LOG - Enables serial logging via a telnet interface
+
+
 This is port of the package to run on an ESP32 Device, and modernization of the package
 
 Based on the great work over at \
