@@ -40,4 +40,10 @@ struct SpaWriteQueueMessage
   int length;
 };
 
+#ifdef LOCAL_CLIENT
+#ifdef REMOTE_CLIENT
+#error "Cannot define both LOCAL_CLIENT and REMOTE_CLIENT"
+#endif
+#endif
+
 #endif
