@@ -9,8 +9,16 @@ const id = Buffer.from([0x7E, 0x00, 0xFE, 0xFA, 0x02, 0x0f, 0x7E]);
 const rts = Buffer.from([0x7E, 0x00, 0x0f, 0xFA, 0x06, 0x0f, 0x7E]);
 
 // const config = Buffer.from([0x7E, 0x1e, 0x0f, 0x0a, 0x2e, 0x0a, 0x00, 0x02, 0x00, 0x00, 0x15, 0x27, 0x10, 0xab, 0xd2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x15, 0x27, 0xff, 0xff, 0x10, 0xab, 0xd2, 0x7E]);
-const config = Buffer.from([0x7e, 0xb, 0x0f, 0xbf, 0x2e, 0xa, 0x00, 0x01, 0x10, 0x00, 0x00, 0x37, 0x7e]);
+const config = Buffer.from([0x7e, 0xb, 0x0a, 0xbf, 0x2e, 0x0a, 0x00, 0x01, 0x10, 0x00, 0x00, 0x79, 0x7e]);
+// 7E 0B 0A BF 2E 0A 00 01 10 00 00 39 7E
+const clearToSend = Buffer.from([0x7e, 0x05, 0x0a, 0xbf, 0x06, 0x79, 0x7e]);
 
+// 7E 0F 0A BF 25 11 03 32 50 50 68 89 03 41 02 93 7E
+const settings = Buffer.from([0x7E, 0x0F, 0x0A, 0xBF, 0x25, 0x11, 0x03, 0x32, 0x50, 0x50, 0x68, 0x89, 0x03, 0x41, 0x02, 0x93, 0x7E]);
+// 7E 0D 0A BF 23 13 00 04 00 87 00 04 00 FA 7E
+const filter = Buffer.from([0x7E, 0x0D, 0x0A, 0xBF, 0x23, 0x13, 0x00, 0x04, 0x00, 0x87, 0x00, 0x04, 0x00, 0xFA, 0x7E]);
+// 7E 1A 0A BF 24 64 C9 2C 00 53 52 42 50 35 30 31 58 03 09 57 FA 83 01 06 02 00 1F 7E
+const information = Buffer.from([0x7E, 0x1A, 0x0A, 0xBF, 0x24, 0x64, 0xC9, 0x2C, 0x00, 0x53, 0x52, 0x42, 0x50, 0x35, 0x30, 0x31, 0x58, 0x03, 0x09, 0x57, 0xFA, 0x83, 0x01, 0x06, 0x02, 0x00, 0x1F, 0x7E]);
 
 // const status = Buffer.from([0x7E, 0x1d, 0xff, 0xaf, 0x13, 0xF0, 0xF1, 0x60, 0x12, 0x23, 0xF2, 0x00, 0x00, 0x00, 0xF3, 0xF4, 0x03, 0x00, 0xF5, 0x03, 0xF6, 0x00, 0x00, 0x00, 0x00, 0x0, 0x00, 0x00, 0x00, 0x0f, 0x7E]);
 //                           7e 20 ff af 13 00 00 4a 13 08 00 00 01 00 05 0c 01 00 00 00 00 00 00 00 00 4a 00 00 02 78 00 00 a2 7e
@@ -41,7 +49,7 @@ setInterval(() => {
     if (err) {
       return console.log('Error on write: ', err.message)
     }
-    // console.log('ID Transmitted', id.toString('hex'))
+    console.log('ID Transmitted', id.toString('hex'))
   })
 }, 5000);
 
@@ -50,26 +58,39 @@ port.on('error', function (err) {
   console.log('Error: ', err.message)
 })
 
-port.on('data', function (data) {
+// fragment 8 a bf 22 0 0 1 58
+// fragment 8 a bf 22 4 0 0 f4
+// fragment 8 a bf 22 1 0 0 34
+// fragment 8 a bf 22 2 0 0 89
 
-  if (data[3] === 0xBF && data[5] === 0x00 && data[6] === 0x00) {
-    console.log('Get Config', data)
-    sendConfig()
-  } else if (data[3] === 0xBF && data[5] === 0x20 && data[6] === 0xff) {
-    console.log('Get Fault log', data)
-  } else if (data[3] === 0xBF && data[4] === 0x07) {
-    // console.log('CTS', data)
-  } else {
-    console.log('Data:', data)
-  }
+port.on('data', function (data) {
+  parseMessage(message).forEach((fragment, index) => {
+    console.log(`Fragment ${index}: ${fragment.map(byte => byte.toString(16)).join(' ')}`);
+    if (fragment[3] === 0x22 && fragment[4] === 0x00) {
+      console.log('Get Config', data)
+      sendData(config)
+    } else if (fragment[3] === 0x22 && fragment[4] === 0x04) {
+      console.log('Settings 0x04 Response', data);
+      sendData(settings)
+    } else if (fragment[3] === 0x22 && fragment[4] === 0x01) {
+      console.log('Filter', data)
+      sendData(filter)
+    } else if (fragment[3] === 0x22 && fragment[4] === 0x02) {
+      console.log('Information', data)
+      sendData(information)
+    } else {
+      console.log('Data:', data)
+    }
+
+  })
 })
 
 setInterval(() => {
-  port.write(rts, function (err) {
+  port.write(clearToSend, function (err) {
     if (err) {
       return console.log('Error on write: ', err.message)
     }
-    // console.log('RTS Transmitted', rts)
+    console.log('clearToSend Transmitted', clearToSend)
   })
 }, 1000);
 
@@ -80,8 +101,8 @@ setInterval(() => {
   let second = d.getSeconds();
 
 
-    status[8] = minute;
-    status[9] = second;
+  status[8] = minute;
+  status[9] = second;
 
   // 0xbe
 
@@ -97,13 +118,13 @@ setInterval(() => {
   })
 }, 300);
 
-function sendConfig() {
 
-  port.write(config, function (err) {
+function sendData(data) {
+  port.write(data, function (err) {
     if (err) {
       return console.log('Error on write: ', err.message)
     }
-    console.log('Config Transmitted', config)
+    console.log('Transmitted', data)
   })
 }
 
@@ -119,3 +140,88 @@ function concat(a, b) {
   c.set(b, a.length);
   return c;
 }
+
+function parseMessage(message) {
+  // Split the message by '7e'
+  const delimiter = 0x7e;
+  const fragments = [];
+  let currentFragment = [];
+
+  // Convert message to array of bytes
+  const bytes = message.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
+
+  // Iterate over the bytes
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] === delimiter) {
+      // If currentFragment has data, push it to the fragments array
+      if (currentFragment.length > 0) {
+        fragments.push(currentFragment);
+        currentFragment = [];
+      }
+    } else {
+      currentFragment.push(bytes[i]);
+    }
+  }
+
+  // Check if there's one last fragment
+  if (currentFragment.length > 0) {
+    fragments.push(currentFragment);
+  }
+
+  // Process each fragment based on its second byte (length byte)
+  return fragments.map(fragment => {
+    if (fragment.length < 2) {
+      return null; // Invalid fragment
+    }
+
+    const length = fragment[1]; // Second byte is the length
+    const actualFragment = fragment.slice(0, length + 1); // Get the fragment based on length byte
+    return actualFragment;
+  }).filter(frag => frag !== null); // Filter out invalid fragments
+}
+
+// Example usage:
+// const message = "7e080abf22000001587e7e080abf22040000f47e7e080abf22010000347e7e080abf22020000897e";
+// const result = parseMessage(message);
+// console.log(result);
+
+
+/*
+00:00:12.877 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:12.911 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:12.939 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:12.964 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:12.983 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.017 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.048 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.067 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.092 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.126 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.160 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.185 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.214 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.247 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.282 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.315 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.340 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.363 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.392 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.431 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.461 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.486 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.524 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.556 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.583 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:13.603 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
+00:00:13.640 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
+00:00:13.670 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
+00:00:13.697 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+*/
+
+
+const message = "7e080abf22000001587e7e080abf22040000f47e7e080abf22010000347e7e080abf22020000897e";
+const result = parseMessage(message);
+
+parseMessage(message).forEach((fragment, index) => {
+  console.log(`Fragment ${index}: ${fragment.map(byte => byte.toString(16)).join(' ')}`);
+})
