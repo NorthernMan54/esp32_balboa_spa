@@ -23,7 +23,6 @@
  */
 
 #include "Analytics.h"
-#include <TimeLib.h>
 #include <utilities.h>
 
 // Store data in ESP32 RTC memory, it will survive restarts but not power cycles
@@ -42,7 +41,7 @@ Analytics::Analytics(AnalyticsData *data)
     // Continue from previous session
   }
 
-  analyticsInstance->lastCheckedTime = now();
+  analyticsInstance->lastCheckedTime = getTime();
 }
 
 Analytics::~Analytics() {}
@@ -82,22 +81,13 @@ unsigned long Analytics::yesterday()
   return analyticsInstance->onTimeYesterday / 1000;
 }
 
-int Analytics::getHour()
-{
-  time_t now;
-  struct tm *now_tm;
-  now = time(NULL);         // Get the current time
-  now_tm = localtime(&now); // Convert to local time
-  return now_tm->tm_hour;   // Return the hour part
-}
-
 void Analytics::reset()
 {
   analyticsInstance->onTimeToday = 0;
   analyticsInstance->onTimeYesterday = 0;
   analyticsInstance->previousReading = millis();
   analyticsInstance->magicNumber = ANALYTICS_MAGIC_NUMBER;
-  analyticsInstance->lastCheckedTime = now();
+  analyticsInstance->lastCheckedTime = getTime();
 }
 
 void Analytics::rollover()

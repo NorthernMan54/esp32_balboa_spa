@@ -76,7 +76,6 @@ private:
   AnalyticsData *analyticsInstance;
   void rollover();
   void reset();
-  int getHour();
 };
 
 #endif

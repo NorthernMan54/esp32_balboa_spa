@@ -8,6 +8,7 @@
 #include <base64.hpp>
 #include "FS.h"
 #include <LittleFS.h>
+
 #define FORMAT_LITTLEFS_IF_FAILED true
 
 // Internal libraries
@@ -173,6 +174,8 @@ void handleConfig(AsyncWebServerRequest *request)
   Log.verbose("[Web]: handleConfig %p %s %s" CR, request->client()->remoteIP(), request->methodToString(), request->url().c_str());
 }
 
+time_t testLastCheckedTime = getTime();
+
 void handleState(AsyncWebServerRequest *request)
 {
   // Log.verbose(F("[Web]: handleStatus()" CR));
@@ -186,8 +189,13 @@ void handleState(AsyncWebServerRequest *request)
   String release = String(__DATE__) + " - " + String(__TIME__);
   html += "<li><b>Release: </b>" + release + "</li>";
 
+  html += "<br><li><b>getTime(): </b>" + formatNumberWithCommas(getTime()) + "</li>";
+  html += "<li><b>getHour(testLastCheckedTime): </b>" + formatNumberWithCommas(getHour(testLastCheckedTime)) + "</li>";
+  html += "<li><b>getHour(getTime()): </b>" + formatNumberWithCommas(getHour(getTime())) + "</li>";
+  html += "<li><b>hasDayChanged(testLastCheckedTime): </b>" + String(hasDayChanged(testLastCheckedTime)) + "</li>";
+
 #ifdef LOCAL_CLIENT
-  html += "<li><b>rs485 messagesToday: </b>" + formatNumberWithCommas(rs485Stats.messagesToday) + "</li>";
+  html += "<br><li><b>rs485 messagesToday: </b>" + formatNumberWithCommas(rs485Stats.messagesToday) + "</li>";
   html += "<li><b>rs485 crcToday: </b>" + formatNumberWithCommas(rs485Stats.crcToday) + "</li>";
   html += "<li><b>rs485 messagesYesterday: </b>" + formatNumberWithCommas(rs485Stats.messagesYesterday) + "</li>";
   html += "<li><b>rs485 crcYesterday: </b>" + formatNumberWithCommas(rs485Stats.crcYesterday) + "</li>";
