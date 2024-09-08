@@ -16,6 +16,7 @@
 #include <spaMessage.h>
 #include <utilities.h>
 #include <restartReason.h>
+#include <rs485.h>
 
 // Local functions
 
@@ -124,6 +125,12 @@ void handleStatus(AsyncWebServerRequest *request)
   html += "<li><b>M8 Cycle Time: </b>" + String(spaStatusData.m8CycleTime) + "</li>";
   html += "<li><b>Notification: </b>" + String(spaStatusData.notification) + "</li>";
   html += "<li><b>Flags 19: </b>" + String(spaStatusData.flags19) + "</li>";
+
+  html += "<li><b>Heater On Time Today: </b>" + formatNumberWithCommas(spaStatusData.heaterOnTimeToday) + "</li>";
+  html += "<li><b>Heater On Time Yesterday: </b>" + formatNumberWithCommas(spaStatusData.heaterOnTimeYesterday) + "</li>";
+  html += "<li><b>Filter On Time Today: </b>" + formatNumberWithCommas(spaStatusData.filterOnTimeToday) + "</li>";
+  html += "<li><b>Filter On Time Yesterday: </b>" + formatNumberWithCommas(spaStatusData.filterOnTimeYesterday) + "</li>";
+
   html += "</ul></body></html>";
   // Add more fields as needed
   request->send(200, "text/html", html);
@@ -178,6 +185,13 @@ void handleState(AsyncWebServerRequest *request)
   html += "<li><b>Restart Reason: </b>" + getLastRestartReason() + "</li>";
   String release = String(__DATE__) + " - " + String(__TIME__);
   html += "<li><b>Release: </b>" + release + "</li>";
+
+#ifdef LOCAL_CLIENT
+  html += "<li><b>rs485 messagesToday: </b>" + formatNumberWithCommas(rs485Stats.messagesToday) + "</li>";
+  html += "<li><b>rs485 crcToday: </b>" + formatNumberWithCommas(rs485Stats.crcToday) + "</li>";
+  html += "<li><b>rs485 messagesYesterday: </b>" + formatNumberWithCommas(rs485Stats.messagesYesterday) + "</li>";
+  html += "<li><b>rs485 crcYesterday: </b>" + formatNumberWithCommas(rs485Stats.crcYesterday) + "</li>";
+#endif
 
   html += "</ul><h1>Spa Status</h1><ul>";
   html += "<li><b>lastUpdate: </b>" + formatNumberWithCommas(spaStatusData.lastUpdate) + "</li>";
@@ -307,7 +321,7 @@ String parseBody(String body)
   }
   else if (body.indexOf("SetupParameters.txt") > 0)
   {
-    response = encodeResponse(spaPreferencesData.rawData, spaPreferencesData.rawDataLength);
+    response = encodeResponse(spaSettings0x04Data.rawData, spaSettings0x04Data.rawDataLength);
   }
   else if (body.indexOf("SystemInformation.txt") > 0)
   {

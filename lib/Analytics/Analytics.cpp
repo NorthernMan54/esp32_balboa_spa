@@ -23,42 +23,33 @@
  */
 
 #include "Analytics.h"
+#include <TimeLib.h>
+#include <utilities.h>
 
 // Store data in ESP32 RTC memory, it will survive restarts but not power cycles
 // RTC_NOINIT_ATTR AnalyticsData data;
 
 Analytics::Analytics(AnalyticsData *data)
 {
-  // Serial.printf("\nAnalytics constructor ");
-  // Serial.printf("%p\n", data);
   analyticsInstance = data;
 
-  if (analyticsInstance->initialized != ANALYTICS_MAGIC_NUMBER)
+  if (analyticsInstance->magicNumber != ANALYTICS_MAGIC_NUMBER)
   {
-    // Serial.println("\nAnalytics initialized");
     reset();
   }
   else
   {
-    // Serial.println("Analytics On Start");
-    // Serial.printf("analyticsInstance %p\n", analyticsInstance);
-    // Serial.print("initialized ");
-    // Serial.println(analyticsInstance->initialized);
-    // Serial.print("onTimeToday ");
-    // Serial.println(analyticsInstance->onTimeToday);
-    // Serial.print("onTimeYesterday ");
-    // Serial.println(analyticsInstance->onTimeYesterday);
-    // Serial.print("previousReading ");
-    // Serial.println(analyticsInstance->previousReading);
+    // Continue from previous session
   }
-  analyticsInstance->previousHour = getHour();
+
+  analyticsInstance->lastCheckedTime = now();
 }
 
 Analytics::~Analytics() {}
 
 void Analytics::add(uint8_t state)
 {
-  if(state)
+  if (state)
   {
     on();
   }
@@ -70,31 +61,19 @@ void Analytics::add(uint8_t state)
 
 void Analytics::on()
 {
-  // Serial.println("\nAnalytics on");
-  rollover();
+  rollover(); // Check for day change before updating time
   analyticsInstance->onTimeToday += (millis() > analyticsInstance->previousReading ? millis() - analyticsInstance->previousReading : millis());
   analyticsInstance->previousReading = millis();
 }
 
 void Analytics::off()
 {
-  // Serial.println("\nAnalytics off");
-  rollover();
+  rollover(); // Check for day change before updating the reading time
   analyticsInstance->previousReading = millis();
 }
 
 unsigned long Analytics::today()
 {
-  // Serial.println("\nAnalytics today");
-  // Serial.printf("analyticsInstance %p\n", analyticsInstance);
-  // Serial.print("initialized ");
-  // Serial.println(analyticsInstance->initialized);
-  // Serial.print("onTimeToday ");
-  // Serial.println(analyticsInstance->onTimeToday);
-  // Serial.print("onTimeYesterday ");
-  // Serial.println(analyticsInstance->onTimeYesterday);
-  // Serial.print("previousReading ");
-  // Serial.println(analyticsInstance->previousReading);
   return analyticsInstance->onTimeToday / 1000;
 }
 
@@ -107,15 +86,9 @@ int Analytics::getHour()
 {
   time_t now;
   struct tm *now_tm;
-  int hour;
-
-  now = time(NULL);
-  now_tm = localtime(&now);
-  hour = now_tm->tm_hour;
-
-  // hour = now_tm->tm_min % 5;
-
-  return hour;
+  now = time(NULL);         // Get the current time
+  now_tm = localtime(&now); // Convert to local time
+  return now_tm->tm_hour;   // Return the hour part
 }
 
 void Analytics::reset()
@@ -123,27 +96,14 @@ void Analytics::reset()
   analyticsInstance->onTimeToday = 0;
   analyticsInstance->onTimeYesterday = 0;
   analyticsInstance->previousReading = millis();
-  analyticsInstance->initialized = ANALYTICS_MAGIC_NUMBER;
-  analyticsInstance->previousHour = getHour();
-
-  // Serial.println("\nAnalytics reset");
-  // Serial.printf("analyticsInstance %p\n", analyticsInstance);
-  // Serial.print("initialized ");
-  // Serial.println(analyticsInstance->initialized);
-  // Serial.print("onTimeToday ");
-  // Serial.println(analyticsInstance->onTimeToday);
-  // Serial.print("onTimeYesterday ");
-  // Serial.println(analyticsInstance->onTimeYesterday);
-  // Serial.print("previousReading ");
-  // Serial.println(analyticsInstance->previousReading);
+  analyticsInstance->magicNumber = ANALYTICS_MAGIC_NUMBER;
+  analyticsInstance->lastCheckedTime = now();
 }
 
 void Analytics::rollover()
 {
-  if (getHour() < analyticsInstance->previousHour)
+  if (hasDayChanged(analyticsInstance->lastCheckedTime))
   {
-    // Serial.println("\nAnalytics rollover");
-    analyticsInstance->previousHour = getHour();
     analyticsInstance->onTimeYesterday = analyticsInstance->onTimeToday;
     analyticsInstance->onTimeToday = 0;
   }

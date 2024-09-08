@@ -10,6 +10,7 @@
 #include <utilities.h>
 #include <restartReason.h>
 #include "mqttModule.h"
+#include <rs485.h>
 
 // Local Functions
 void reconnect();
@@ -91,6 +92,12 @@ void nodeStatusReport()
     publishNodeStatus("speed", String(ESP.getCpuFreqMHz()).c_str());
     publishNodeStatus("heap", String(ESP.getFreeHeap()).c_str());
     publishNodeStatus("stack", String(uxTaskGetStackHighWaterMark(NULL)).c_str());
+#ifdef LOCAL_CLIENT
+    publishNodeStatus("rs485 messagesToday", String(rs485Stats.messagesToday).c_str());
+    publishNodeStatus("rs485 crcToday", String(rs485Stats.crcToday).c_str());
+    publishNodeStatus("rs485 messagesYesterday", String(rs485Stats.messagesYesterday).c_str());
+    publishNodeStatus("rs485 crcYesterday", String(rs485Stats.crcYesterday).c_str());
+#endif
 
     String release = String(__DATE__) + " - " + String(__TIME__);
     publishNodeStatus("release", release.c_str());

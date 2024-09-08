@@ -28,15 +28,15 @@
 #include "Arduino.h"
 
 #define ANALYTICS_VERSION "0.1.0"
-#define ANALYTICS_MAGIC_NUMBER 0x123456789  // Magic number to check if data is initialized
+#define ANALYTICS_MAGIC_NUMBER 0x13245678  // Magic number to check if data is initialized
 
 typedef struct
 {
-  unsigned long long int initialized;
-  int previousHour;
+  u_int32_t magicNumber;
   unsigned long previousReading;
   unsigned long onTimeToday;
   unsigned long onTimeYesterday;
+  time_t lastCheckedTime;
 } AnalyticsData;
 
 class Analytics

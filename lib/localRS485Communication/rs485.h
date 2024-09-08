@@ -11,10 +11,23 @@ void rs485Setup();
 void rs485Loop();
 void rs485ClearToSend();
 
-void rs485Send(uint8_t *data, int length, boolean addCrc, boolean force = false);
-void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCrc, boolean force = false);
+// void rs485Send(uint8_t *data, int length, boolean addCrc, boolean force = false);
+// void rs485Send(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data, boolean addCrc, boolean force = false);
 
 extern uint8_t id; // spa id
+
+// Analytics
+
+struct Rs485Stats
+{
+  uint32_t messagesToday;
+  uint32_t messagesYesterday;
+  uint32_t crcToday;
+  uint32_t crcYesterday;
+  uint32_t magicNumber;
+};
+
+extern Rs485Stats rs485Stats;
 
 struct rs485WriteQueueMessage
 {

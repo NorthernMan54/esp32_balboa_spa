@@ -18,4 +18,13 @@ String formatNumberWithCommas(unsigned long num);
 String formatNumberWithCommas(uint32_t num);
 void printPrefix(Print *_logOutput, int logLevel);
 
+#define hasDayChanged(lastCheckedTime) ( \
+  { \
+    time_t currentTime = now(); \
+    bool dayChanged = (hour(currentTime) == 0 && hour(lastCheckedTime) != 0); \
+    lastCheckedTime = currentTime; \
+    dayChanged; \
+  } \
+)
+
 #endif

@@ -83,6 +83,7 @@ void bridgeLoop()
         if (length > 0)
         {
           Log.verbose(F("[Bridge]: bridge/in %s" CR), msgToString(message, length).c_str());
+          mqtt.publish((mqttTopic + "bridge/in").c_str(), msgToString(message, length).c_str());
           if (message[2] == id && message[4] == 0x04)
           {
             Q_out.clear();
@@ -148,11 +149,13 @@ void bridgeSend(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   if (sent)
   {
     Log.verbose(F("[Bridge]: bridge/out %s" CR), msgToString(data).c_str());
+    mqtt.publish((mqttTopic + "bridge/out").c_str(), msgToString(data).c_str());
   }
   else
   {
     publishBridge("Client not connected");
   }
+  data.clear();
 };
 
 void bridgeSend(uint8_t *message, int length)
@@ -170,6 +173,7 @@ void bridgeSend(uint8_t *message, int length)
   if (sent)
   {
     Log.verbose(F("[Bridge]: bridge/out %s" CR), msgToString(message, length).c_str());
+    mqtt.publish((mqttTopic + "bridge/out").c_str(), msgToString(message, length).c_str());
   }
   else
   {
