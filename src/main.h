@@ -14,7 +14,7 @@
 #define BUILD (String(__DATE__) + " - " + String(__TIME__)).c_str()
 
 #define INITIAL_WDT_TIMEOUT 300 // Reset ESP32 if wifi is not connected within 5 minutes
-#define RUNNING_WDT_TIMEOUT 60  // Reset ESP32 if no SPA messages are received for 60 seconds
+#define RUNNING_WDT_TIMEOUT 120  // Reset ESP32 if no SPA messages are received for 60 seconds
 
 #define logSection(section)                                                  \
   Log.setShowLevel(false);                                                   \

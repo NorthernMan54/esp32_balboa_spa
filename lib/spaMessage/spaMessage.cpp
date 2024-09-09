@@ -149,6 +149,7 @@ void spaMessageLoop()
     SpaReadQueueMessage *message;
     if (xQueueReceive(spaReadQueue, &message, 0) == pdTRUE)
     {
+      esp_task_wdt_reset();
       // Log.verbose(F("[Mess]: Queue Message Received: [%d]%s" CR), message->length, msgToString(message->message, message->length).c_str());
 #ifdef LOCAL_CONNECT
       if (message->message[2] == id || message->message[2] == 0xff)
@@ -194,7 +195,6 @@ void spaMessageLoop()
       }
     }
     delete message;
-    esp_task_wdt_reset();
   }
   else
   {

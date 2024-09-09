@@ -26,16 +26,40 @@ void setup()
   Log.begin(LOG_LEVEL, &Serial);
   esp_task_wdt_init(INITIAL_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);                       // add current thread to WDT watch
-  logSection("WELCOME TO esp32_balboa_panel");
+  logSection("WELCOME TO esp32_balboa_spa");
   Log.notice(F("Version: %s" CR), VERSION);
   Log.notice(F("Build: %s" CR), BUILD);
-//  Log.notice(F("Last restart reason: %s" CR), getLastRestartReason().c_str());
+
+  logSection("Build Definitions");
+  #ifdef LOCAL_CONNECT
+  Log.notice(F("LOCAL_CONNECT Enabled" CR));
+  #else
+  Log.notice(F("LOCAL_CONNECT Disabled" CR));
+  #endif
+  #ifdef LOCAL_CLIENT
+  Log.notice(F("LOCAL_CLIENT Enabled" CR));
+  #else
+  Log.notice(F("LOCAL_CLIENT Disabled" CR));
+  #endif
+  #ifdef REMOTE_CLIENT
+  Log.notice(F("REMOTE_CLIENT Enabled" CR));
+  #else
+  Log.notice(F("REMOTE_CLIENT Disabled" CR));
+  #endif
+  #ifdef TELNET_LOG
+  Log.notice(F("TELNET_LOG Enabled" CR));
+  #else
+  Log.notice(F("TELNET_LOG Disabled" CR));
+  #endif
+
+  logSection("ESP Information");
+  Log.notice(F("Last restart reason: %s" CR), getLastRestartReason().c_str());
   Log.verbose(F("Free heap: %d bytes" CR), ESP.getFreeHeap());
   Log.verbose(F("Free sketch space: %d bytes" CR), ESP.getFreeSketchSpace());
   Log.verbose(F("Chip ID: %x" CR), ESP.getEfuseMac());
 
   Log.verbose(F("Flash chip size: %d bytes" CR), ESP.getFlashChipSize());
-  Log.verbose(F("Flash chip speed: %d Hz" CR), ESP.getFlashChipSpeed());
+//  Log.verbose(F("Flash chip speed: %d Hz" CR), ESP.getFlashChipSpeed());
   Log.verbose(F("CPU frequency: %d Hz" CR), ESP.getCpuFreqMHz());
   Log.verbose(F("SDK version: %s" CR), ESP.getSdkVersion());
 

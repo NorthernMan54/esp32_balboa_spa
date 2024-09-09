@@ -5,11 +5,12 @@
 #include <ArduinoLog.h>
 #include <mqttModule.h>
 
+#define BUFFER_SIZE BALBOA_MESSAGE_SIZE * 3 + 1
 // Macro to simplify publishing data
 #define PUBLISH_STATUS_ELEMENT(element, format)                      \
   do                                                                 \
   {                                                                  \
-    char buffer[32];                                                 \
+    char buffer[BUFFER_SIZE];                                                 \
     snprintf(buffer, sizeof(buffer), format, spaStatusData.element); \
     publishElement(#element, "status", buffer);                      \
   } while (0)
@@ -18,7 +19,7 @@
   do                                                                      \
   {                                                                       \
     std::map<uint8_t, const char *> map = suppliedMap;                    \
-    char buffer[32];                                                      \
+    char buffer[BUFFER_SIZE];                                                      \
     snprintf(buffer, sizeof(buffer), format, map[spaStatusData.element]); \
     publishElement(#element, "status", buffer);                           \
   } while (0)
@@ -31,22 +32,28 @@ void publishElement(const char *element, const char *group, const char *value)
   mqtt.publish(topic, value);
 }
 
+#define convertRawDataToHex(structure, outputBuffer)                             \
+  do                                                                             \
+  {                                                                              \
+    char *ptr = outputBuffer;                                                    \
+    for (int i = 0; i < structure.rawDataLength && i < BALBOA_MESSAGE_SIZE; i++) \
+    {                                                                            \
+      ptr += sprintf(ptr, "%02X ", structure.rawData[i]);                        \
+    }                                                                            \
+    *(ptr - 1) = '\0';                                                           \
+  } while (0)
+
 void publishSpaStatusData()
 {
   PUBLISH_STATUS_ELEMENT(crc, "%u");
   PUBLISH_STATUS_ELEMENT(lastUpdate, "%lu");
   PUBLISH_STATUS_ELEMENT(magicNumber, "%u");
-  // Convert rawData to a space-separated hexadecimal string
-  char rawDataHex[3 * BALBOA_MESSAGE_SIZE]; // 2 characters per byte + space + null terminator
-  char *ptr = rawDataHex;
-  for (int i = 0; i < spaStatusData.rawDataLength; i++)
-  {
-    ptr += sprintf(ptr, "%02X ", spaStatusData.rawData[i]);
-  }
-  *(ptr - 1) = '\0'; // Remove the last space and null-terminate the string
-
-  publishElement("rawData", "status", rawDataHex);
   PUBLISH_STATUS_ELEMENT(rawDataLength, "%u");
+  // Convert rawData to a space-separated hexadecimal string
+  char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
+  convertRawDataToHex(spaStatusData, rawDataHex);
+  publishElement("rawData", "status", rawDataHex);
+
   // PUBLISH_STATUS_ELEMENT(spaState, "%u");
   PUBLISH_STATUS_MAP(spaState, SPA_STATE_MAP, "%s");
   PUBLISH_STATUS_MAP(initMode, SPA_MODE_MAP, "%s");
@@ -96,7 +103,7 @@ void publishSpaStatusData()
 #define PUBLISH_CONFIG_ELEMENT(element, format)                             \
   do                                                                        \
   {                                                                         \
-    char buffer[32];                                                        \
+    char buffer[BUFFER_SIZE];                                                        \
     snprintf(buffer, sizeof(buffer), format, spaConfigurationData.element); \
     publishElement(#element, "config", buffer);                             \
   } while (0)
@@ -107,19 +114,13 @@ void publishSpaConfigurationData()
   PUBLISH_CONFIG_ELEMENT(lastUpdate, "%lu");
   PUBLISH_CONFIG_ELEMENT(lastRequest, "%lu");
   PUBLISH_CONFIG_ELEMENT(magicNumber, "%u");
+  PUBLISH_CONFIG_ELEMENT(rawDataLength, "%u");
 
   // Convert rawData to a space-separated hexadecimal string
-  char rawDataHex[3 * BALBOA_MESSAGE_SIZE]; // 2 characters per byte + space + null terminator
-  char *ptr = rawDataHex;
-  for (int i = 0; i < spaConfigurationData.rawDataLength; i++)
-  {
-    ptr += sprintf(ptr, "%02X ", spaConfigurationData.rawData[i]);
-  }
-  *(ptr - 1) = '\0'; // Remove the last space and null-terminate the string
-
+  char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
+  convertRawDataToHex(spaConfigurationData, rawDataHex);
   publishElement("rawData", "config", rawDataHex);
 
-  PUBLISH_CONFIG_ELEMENT(rawDataLength, "%u");
   PUBLISH_CONFIG_ELEMENT(pump1, "%u");
   PUBLISH_CONFIG_ELEMENT(pump2, "%u");
   PUBLISH_CONFIG_ELEMENT(pump3, "%u");
@@ -139,7 +140,7 @@ void publishSpaConfigurationData()
 #define PUBLISH_FILTER_SETTINGS_ELEMENT(element, format)                     \
   do                                                                         \
   {                                                                          \
-    char buffer[32];                                                         \
+    char buffer[BUFFER_SIZE];                                                         \
     snprintf(buffer, sizeof(buffer), format, spaFilterSettingsData.element); \
     publishElement(#element, "filterSettings", buffer);                      \
   } while (0)
@@ -150,18 +151,13 @@ void publishSpaFilterSettingsData()
   PUBLISH_FILTER_SETTINGS_ELEMENT(lastUpdate, "%lu");
   PUBLISH_FILTER_SETTINGS_ELEMENT(lastRequest, "%lu");
   PUBLISH_FILTER_SETTINGS_ELEMENT(magicNumber, "%u");
+  PUBLISH_FILTER_SETTINGS_ELEMENT(rawDataLength, "%u");
 
   // Convert rawData to a space-separated hexadecimal string
-  char rawDataHex[3 * BALBOA_MESSAGE_SIZE]; // 2 characters per byte + space + null terminator
-  char *ptr = rawDataHex;
-  for (int i = 0; i < spaFilterSettingsData.rawDataLength; i++)
-  {
-    ptr += sprintf(ptr, "%02X ", spaFilterSettingsData.rawData[i]);
-  }
-  *(ptr - 1) = '\0'; // Remove the last space and null-terminate the string
-
+  char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
+  convertRawDataToHex(spaFilterSettingsData, rawDataHex);
   publishElement("rawData", "filterSettings", rawDataHex);
-  PUBLISH_FILTER_SETTINGS_ELEMENT(rawDataLength, "%u");
+
   PUBLISH_FILTER_SETTINGS_ELEMENT(filt1Hour, "%u");
   PUBLISH_FILTER_SETTINGS_ELEMENT(filt1Minute, "%u");
   PUBLISH_FILTER_SETTINGS_ELEMENT(filt1DurationHour, "%u");
@@ -188,17 +184,12 @@ void publishSpaFaultLogData()
   PUBLISH_FAULT_LOG_ELEMENT(lastRequest, "%lu");
   PUBLISH_FAULT_LOG_ELEMENT(magicNumber, "%u");
 
-  // Convert rawData to a space-separated hexadecimal string
-  char rawDataHex[3 * BALBOA_MESSAGE_SIZE]; // 2 characters per byte + space + null terminator
-  char *ptr = rawDataHex;
-  for (int i = 0; i < spaFaultLogData.rawDataLength; i++)
-  {
-    ptr += sprintf(ptr, "%02X ", spaFaultLogData.rawData[i]);
-  }
-  *(ptr - 1) = '\0'; // Remove the last space and null-terminate the string
-
-  publishElement("rawData", "faultLog", rawDataHex);
   PUBLISH_FAULT_LOG_ELEMENT(rawDataLength, "%u");
+  // Convert rawData to a space-separated hexadecimal string
+  char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
+  convertRawDataToHex(spaFaultLogData, rawDataHex);
+  publishElement("rawData", "faultLog", rawDataHex);
+
   PUBLISH_FAULT_LOG_ELEMENT(totEntry, "%u");
   PUBLISH_FAULT_LOG_ELEMENT(currEntry, "%u");
   PUBLISH_FAULT_LOG_ELEMENT(faultCode, "%u");
@@ -214,7 +205,7 @@ void publishSpaFaultLogData()
 #define PUBLISH_PREFERENCES_ELEMENT(element, format)                      \
   do                                                                      \
   {                                                                       \
-    char buffer[32];                                                      \
+    char buffer[BUFFER_SIZE];                                                      \
     snprintf(buffer, sizeof(buffer), format, spaPreferencesData.element); \
     publishElement(#element, "preferences", buffer);                      \
   } while (0)
@@ -226,17 +217,12 @@ void publishSpaPreferencesData()
   PUBLISH_PREFERENCES_ELEMENT(lastRequest, "%lu");
   PUBLISH_PREFERENCES_ELEMENT(magicNumber, "%u");
 
-  // Convert rawData to a space-separated hexadecimal string
-  char rawDataHex[3 * BALBOA_MESSAGE_SIZE]; // 2 characters per byte + space + null terminator
-  char *ptr = rawDataHex;
-  for (int i = 0; i < spaPreferencesData.rawDataLength; i++)
-  {
-    ptr += sprintf(ptr, "%02X ", spaPreferencesData.rawData[i]);
-  }
-  *(ptr - 1) = '\0'; // Remove the last space and null-terminate the string
-
-  publishElement("rawData", "preferences", rawDataHex);
   PUBLISH_PREFERENCES_ELEMENT(rawDataLength, "%u");
+  // Convert rawData to a space-separated hexadecimal string
+  char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
+  convertRawDataToHex(spaPreferencesData, rawDataHex);
+  publishElement("rawData", "preferences", rawDataHex);
+
   PUBLISH_PREFERENCES_ELEMENT(reminders, "%u");
   PUBLISH_PREFERENCES_ELEMENT(tempScale, "%u");
   PUBLISH_PREFERENCES_ELEMENT(clockMode, "%u");
@@ -248,7 +234,7 @@ void publishSpaPreferencesData()
 #define PUBLISH_INFORMATION_ELEMENT(element, format)                      \
   do                                                                      \
   {                                                                       \
-    char buffer[32];                                                      \
+    char buffer[BUFFER_SIZE];                                                      \
     snprintf(buffer, sizeof(buffer), format, spaInformationData.element); \
     publishElement(#element, "information", buffer);                      \
   } while (0)
@@ -260,17 +246,11 @@ void publishSpaInformationData()
   PUBLISH_INFORMATION_ELEMENT(lastRequest, "%lu");
   PUBLISH_INFORMATION_ELEMENT(magicNumber, "%u");
 
-  // Convert rawData to a space-separated hexadecimal string
-  char rawDataHex[3 * BALBOA_MESSAGE_SIZE]; // 2 characters per byte + space + null terminator
-  char *ptr = rawDataHex;
-  for (int i = 0; i < spaInformationData.rawDataLength; i++)
-  {
-    ptr += sprintf(ptr, "%02X ", spaInformationData.rawData[i]);
-  }
-  *(ptr - 1) = '\0'; // Remove the last space and null-terminate the string
-
-  publishElement("rawData", "information", rawDataHex);
   PUBLISH_INFORMATION_ELEMENT(rawDataLength, "%u");
+  // Convert rawData to a space-separated hexadecimal string
+  char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
+  convertRawDataToHex(spaInformationData, rawDataHex);
+  publishElement("rawData", "information", rawDataHex);
 
   // Handle publishing of char arrays
   publishElement("softwareID", "information", spaInformationData.softwareID);
@@ -284,7 +264,7 @@ void publishSpaInformationData()
 #define PUBLISH_SETTINGS_0x04_ELEMENT(element, format)                     \
   do                                                                       \
   {                                                                        \
-    char buffer[32];                                                       \
+    char buffer[BUFFER_SIZE];                                                       \
     snprintf(buffer, sizeof(buffer), format, spaSettings0x04Data.element); \
     publishElement(#element, "settings0x04", buffer);                      \
   } while (0)
@@ -296,23 +276,18 @@ void publishSpaSettings0x04Data()
   PUBLISH_SETTINGS_0x04_ELEMENT(lastRequest, "%lu");
   PUBLISH_SETTINGS_0x04_ELEMENT(magicNumber, "%u");
 
-  // Convert rawData to a space-separated hexadecimal string
-  char rawDataHex[3 * BALBOA_MESSAGE_SIZE]; // 2 characters per byte + space + null terminator
-  char *ptr = rawDataHex;
-  for (int i = 0; i < spaSettings0x04Data.rawDataLength; i++)
-  {
-    ptr += sprintf(ptr, "%02X ", spaSettings0x04Data.rawData[i]);
-  }
-  *(ptr - 1) = '\0'; // Remove the last space and null-terminate the string
-
-  publishElement("rawData", "settings0x04", rawDataHex);
   PUBLISH_SETTINGS_0x04_ELEMENT(rawDataLength, "%u");
+  // Convert rawData to a space-separated hexadecimal string
+  char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
+  convertRawDataToHex(spaSettings0x04Data, rawDataHex);
+  publishElement("rawData", "settings0x04", rawDataHex);
+
 }
 
 #define PUBLISH_WIFI_MODULE_CONFIG_ELEMENT(element, format)                        \
   do                                                                               \
   {                                                                                \
-    char buffer[32];                                                               \
+    char buffer[BUFFER_SIZE];                                                               \
     snprintf(buffer, sizeof(buffer), format, wiFiModuleConfigurationData.element); \
     publishElement(#element, "wifiModuleConfig", buffer);                          \
   } while (0)

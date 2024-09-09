@@ -26,11 +26,13 @@ def before_buildfs(source, target, env):
         os.system('npm install')
         print('Building balboa-spa')
         os.system('npm run build')
+        os.system('cp .env dist/.env')
         os.chdir('../')
     else:
         print('Building balboa-spa')
         os.chdir('balboa-spa')
         os.system('npm run build')
+        os.system('cp .env dist/.env')
         os.chdir('../')
 
 env.AddPreAction('$BUILD_DIR/littlefs.bin', before_buildfs)

@@ -48,6 +48,21 @@ void spaWebServerSetup()
     Log.notice("[Web]: LittleFS Mounted" CR);
     listDir(LittleFS, "/", 3);
   }
+  File envFile = LittleFS.open("/.env", "r");
+  if(envFile)
+  {
+    // Log.notice("[Web]: .env file found" CR);
+    while(envFile.available())
+    {
+      String line = envFile.readStringUntil('\n');
+      Log.notice("[Web]: /.env - %s" CR, line.c_str());
+    }
+    envFile.close();
+  }
+  else
+  {
+    Log.error("[Web]: .env file not found" CR);
+  }
   // put your setup code here, to run once:
   Log.verbose(F("[Web]: spaWebServerSetup()" CR));
 }

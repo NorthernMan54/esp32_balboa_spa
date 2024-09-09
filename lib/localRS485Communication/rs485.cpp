@@ -2,7 +2,6 @@
 #include <CircularBuffer.hpp>
 #include <ArduinoLog.h>
 #include <esp_task_wdt.h>
-#include <TimeLib.h>
 
 #include <utilities.h>
 #include <spaMessage.h>
@@ -49,7 +48,7 @@ void rs485Setup()
   Serial2.begin(115200, SERIAL_8N1, TX485_Rx, TX485_Tx);
   Log.verbose(F("[rs485]: RS485 setup, RX GPIO %d, TX GPIO %d" CR), TX485_Rx, TX485_Tx);
 
-  lastCheckedTime = now();
+  lastCheckedTime = getTime();
   if (rs485Stats.magicNumber != RS_485_MAGIC_NUMBER)
   {
     Log.verbose(F("[Mess]: rs485Stats.magicNumber: %x" CR), rs485Stats.magicNumber);
