@@ -22,6 +22,8 @@ struct Rs485Stats
 {
   uint32_t messagesToday;
   uint32_t messagesYesterday;
+  uint32_t badFormatToday;
+  uint32_t badFormatYesterday;
   uint32_t crcToday;
   uint32_t crcYesterday;
   uint32_t magicNumber;

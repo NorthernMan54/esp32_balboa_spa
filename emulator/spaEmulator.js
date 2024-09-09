@@ -1,15 +1,15 @@
 import { SerialPort } from 'serialport';
 import crc from 'crc';
 
+
 // const port = new SerialPort({ path: '/dev/null', baudRate: 115200 })
 const port = new SerialPort({ path: '/dev/cu.usbserial-3', baudRate: 115200 })
-
 const id = Buffer.from([0x7E, 0x00, 0xFE, 0xFA, 0x02, 0x0f, 0x7E]);
 
 const rts = Buffer.from([0x7E, 0x00, 0x0f, 0xFA, 0x06, 0x0f, 0x7E]);
 
 // const config = Buffer.from([0x7E, 0x1e, 0x0f, 0x0a, 0x2e, 0x0a, 0x00, 0x02, 0x00, 0x00, 0x15, 0x27, 0x10, 0xab, 0xd2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x15, 0x27, 0xff, 0xff, 0x10, 0xab, 0xd2, 0x7E]);
-const config = Buffer.from([0x7e, 0xb, 0x0a, 0xbf, 0x2e, 0x0a, 0x00, 0x01, 0x10, 0x00, 0x00, 0x79, 0x7e]);
+const config = Buffer.from([0x7e, 0xb, 0x0a, 0xbf, 0x2e, 0x0a, 0x00, 0x01, 0x10, 0x00, 0x00, 0x39, 0x7e]);
 // 7E 0B 0A BF 2E 0A 00 01 10 00 00 39 7E
 const clearToSend = Buffer.from([0x7e, 0x05, 0x0a, 0xbf, 0x06, 0x79, 0x7e]);
 
@@ -23,35 +23,13 @@ const information = Buffer.from([0x7E, 0x1A, 0x0A, 0xBF, 0x24, 0x64, 0xC9, 0x2C,
 // const status = Buffer.from([0x7E, 0x1d, 0xff, 0xaf, 0x13, 0xF0, 0xF1, 0x60, 0x12, 0x23, 0xF2, 0x00, 0x00, 0x00, 0xF3, 0xF4, 0x03, 0x00, 0xF5, 0x03, 0xF6, 0x00, 0x00, 0x00, 0x00, 0x0, 0x00, 0x00, 0x00, 0x0f, 0x7E]);
 //                           7e 20 ff af 13 00 00 4a 13 08 00 00 01 00 05 0c 01 00 00 00 00 00 00 00 00 4a 00 00 02 78 00 00 a2 7e
 const status = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x13, 0x08, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xa2, 0x7e]);
-// const status = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x49, 0x11, 0x1b, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x35, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xbe, 0x7e]);
-// const status = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x60, 0xd, 0x35, 0x01, 0x00, 0x60, 0x00, 0x08, 0xc, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xf2, 0x7e]);
 
-// Bad
-// {"id":"ff","command":"13","crc":"7e","dir":"out","payload":"7e 20 ff af 13 00 00 4a 07 08 00 00 c1 50 df af 52 07 07 04 00 00 00 00 35 00 00 02 78 00 00 36 7e 7e ","diff":21471}
+const tooLong = Buffer.from([0x7e, 0x7f, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x13, 0x08, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xa2, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x13, 0x08, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xa2, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x13, 0x08, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xa2, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x13, 0x08, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xa2, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x13, 0x08, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xa2, 0x7e]);
 
-const status1b = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x07, 0x08, 0x00, 0x00, 0xc1, 0x50, 0xdf, 0xaf, 0x52, 0x07, 0x07, 0x04, 0x00, 0x00, 0x00, 0x00, 0x35, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0x36, 0x7e, 0x7e]);
-// Good 
-// {"id":"ff","command":"13","crc":"8f","dir":"out","payload":"7e 20 ff af 13 00 00 4a 07 09 00 00 01 00 89 08 01 00 00 00 00 00 00 00 00 35 00 00 02 78 00 00 8f 7e ","diff":33055}
-const status1g = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x07, 0x09, 0x00, 0x00, 0x01, 0x00, 0x89, 0x08, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x35, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0x8f, 0x7e]);
+const shorter = Buffer.from([0x7e, 0x32, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x13, 0x08, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x05, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x02, 0x78, 0x00, 0x00, 0xa2, 0x7e]);
 
-// Bad
+console.log(shorter.length);
 
-// {"id":"ff","command":"13","crc":"7e","dir":"out","payload":"7e 20 ff af 13 00 00 4a 16 04 00 30 55 fb 99 7c a2 22 00 00 00 00 00 08 4a 00 00 02 1e 00 00 6e 7e 7e ","diff":1400}
-const status2b = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x16, 0x04, 0x00, 0x30, 0x55, 0xfb, 0x99, 0x7c, 0xa2, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x4a, 0x00, 0x00, 0x02, 0x1e, 0x00, 0x00, 0x6e, 0x7e, 0x7e]);
-
-// Good
-// {"id":"ff","command":"13","crc":"6e","dir":"out","payload":"7e 20 ff af 13 00 00 4a 16 04 00 00 01 00 85 0c 01 00 00 00 00 00 00 00 08 4a 00 00 02 1e 00 00 6e 7e ","diff":3958}
-const status2g = Buffer.from([0x7e, 0x20, 0xff, 0xaf, 0x13, 0x00, 0x00, 0x4a, 0x16, 0x04, 0x00, 0x00, 0x01, 0x00, 0x85, 0x0c, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x4a, 0x00, 0x00, 0x02, 0x1e, 0x00, 0x00, 0x6e, 0x7e]);
-
-
-setInterval(() => {
-  port.write(id, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    console.log('ID Transmitted', id.toString('hex'))
-  })
-}, 5000);
 
 // Open errors will be emitted as an error event
 port.on('error', function (err) {
@@ -63,21 +41,21 @@ port.on('error', function (err) {
 // fragment 8 a bf 22 1 0 0 34
 // fragment 8 a bf 22 2 0 0 89
 
-port.on('data', function (data) {
-  parseMessage(message).forEach((fragment, index) => {
+port.on('data', async function (data) {
+  parseMessageFromBinaryArray(data).forEach(async (fragment, index) => {
     console.log(`Fragment ${index}: ${fragment.map(byte => byte.toString(16)).join(' ')}`);
     if (fragment[3] === 0x22 && fragment[4] === 0x00) {
-      console.log('Get Config', data)
-      sendData(config)
+      console.log('Get Config', fragment.map(byte => byte.toString(16)).join(' '))
+      await sendData(config)
     } else if (fragment[3] === 0x22 && fragment[4] === 0x04) {
-      console.log('Settings 0x04 Response', data);
-      sendData(settings)
+      console.log('Get Settings 0x04', fragment.map(byte => byte.toString(16)).join(' '));
+      await sendData(settings)
     } else if (fragment[3] === 0x22 && fragment[4] === 0x01) {
-      console.log('Filter', data)
-      sendData(filter)
+      console.log('Get Filter', fragment.map(byte => byte.toString(16)).join(' '))
+      await sendData(filter)
     } else if (fragment[3] === 0x22 && fragment[4] === 0x02) {
-      console.log('Information', data)
-      sendData(information)
+      console.log('Get Information', fragment.map(byte => byte.toString(16)).join(' '))
+      await sendData(information)
     } else {
       console.log('Data:', data)
     }
@@ -85,16 +63,20 @@ port.on('data', function (data) {
   })
 })
 
-setInterval(() => {
-  port.write(clearToSend, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    console.log('clearToSend Transmitted', clearToSend)
-  })
+
+setInterval(async () => {
+  await sendData(tooLong);
+}, 20000);
+
+setInterval(async () => {
+  await sendData(shorter);
+}, 19000);
+
+setInterval(async () => {
+  await sendData(clearToSend);
 }, 1000);
 
-setInterval(() => {
+setInterval(async () => {
   const d = new Date();
   let hour = d.getHours();
   let minute = d.getMinutes();
@@ -110,22 +92,23 @@ setInterval(() => {
   status[status.length - 2] = checksum;
   // console.log('status to Transmit', status)
 
-  port.write(status, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    console.log('status Transmitted', status)
-  })
+  await sendData(status);
 }, 300);
 
 
-function sendData(data) {
-  port.write(data, function (err) {
-    if (err) {
-      return console.log('Error on write: ', err.message)
-    }
-    console.log('Transmitted', data)
-  })
+async function sendData(data) {
+  return new Promise((resolve, reject) => {
+    port.write(data, async function (err) {
+      await sleep(50);
+      if (err) {
+        console.log('Error on write:', err.message);
+        reject(err);
+      } else {
+        console.log('Transmitted', data);
+        resolve();
+      }
+    });
+  });
 }
 
 function compute_checksum(bytes) {
@@ -141,25 +124,22 @@ function concat(a, b) {
   return c;
 }
 
-function parseMessage(message) {
+function parseMessageFromBinaryArray(binaryArray) {
   // Split the message by '7e'
   const delimiter = 0x7e;
   const fragments = [];
   let currentFragment = [];
 
-  // Convert message to array of bytes
-  const bytes = message.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
-
-  // Iterate over the bytes
-  for (let i = 0; i < bytes.length; i++) {
-    if (bytes[i] === delimiter) {
+  // Iterate over the binary array
+  for (let i = 0; i < binaryArray.length; i++) {
+    if (binaryArray[i] === delimiter) {
       // If currentFragment has data, push it to the fragments array
       if (currentFragment.length > 0) {
         fragments.push(currentFragment);
         currentFragment = [];
       }
     } else {
-      currentFragment.push(bytes[i]);
+      currentFragment.push(binaryArray[i]);
     }
   }
 
@@ -180,48 +160,49 @@ function parseMessage(message) {
   }).filter(frag => frag !== null); // Filter out invalid fragments
 }
 
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Example usage:
-// const message = "7e080abf22000001587e7e080abf22040000f47e7e080abf22010000347e7e080abf22020000897e";
-// const result = parseMessage(message);
+// const binaryArray = [0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x00, 0x00, 0x01, 0x58, 0x7e, 0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x04, 0x00, 0x00, 0xf4, 0x7e, 0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x01, 0x00, 0x00, 0x34, 0x7e, 0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x02, 0x00, 0x00, 0x89, 0x7e];
+
+// const result = parseMessageFromBinaryArray(binaryArray);
 // console.log(result);
 
 
+
 /*
-00:00:12.877 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
-00:00:12.911 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:12.939 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
-00:00:12.964 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
-00:00:12.983 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
-00:00:13.017 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:13.048 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
-00:00:13.067 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
-00:00:13.092 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
-00:00:13.126 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:13.160 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
-00:00:13.185 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
-00:00:13.214 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
-00:00:13.247 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:13.282 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:13.315 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
-00:00:13.340 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
-00:00:13.363 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
-00:00:13.392 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:13.431 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
-00:00:13.461 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
-00:00:13.486 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
-00:00:13.524 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:13.556 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
-00:00:13.583 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
-00:00:13.603 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e 
-00:00:13.640 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e 
-00:00:13.670 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e 
-00:00:13.697 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e 
+00:00:12.877 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e
+00:00:12.911 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:12.939 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e
+00:00:12.964 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e
+00:00:12.983 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e
+00:00:13.017 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:13.048 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e
+00:00:13.067 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e
+00:00:13.092 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e
+00:00:13.126 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:13.160 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e
+00:00:13.185 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e
+00:00:13.214 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e
+00:00:13.247 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:13.282 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:13.315 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e
+00:00:13.340 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e
+00:00:13.363 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e
+00:00:13.392 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:13.431 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e
+00:00:13.461 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e
+00:00:13.486 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e
+00:00:13.524 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:13.556 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e
+00:00:13.583 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e
+00:00:13.603 V: [rs485]: Received: 10 - 7e 05 10 bf 06 5c 7e
+00:00:13.640 V: [rs485]: Received: 10 - 7e 07 10 bf 11 00 00 3e 7e
+00:00:13.670 V: [rs485]: Received: 10 - 7e 05 0a bf 06 79 7e
+00:00:13.697 V: [rs485]: Sent: 7e 05 0a bf 07 7e 7e
 */
 
 
-const message = "7e080abf22000001587e7e080abf22040000f47e7e080abf22010000347e7e080abf22020000897e";
-const result = parseMessage(message);
-
-parseMessage(message).forEach((fragment, index) => {
-  console.log(`Fragment ${index}: ${fragment.map(byte => byte.toString(16)).join(' ')}`);
-})
+// 00:04:54.525 V: [rs485]: spaMessage 7e 00 fe fa 02 0f 7e 7e 05 0a bf 06 79 7e 7e 20 ff af 13 00 00 4a 20 04 00 00 01 00 05 0c 01 00 00 00 00 00 00 00 00 4a 00 00 02 78 00 00 43 7e 7e 05 

@@ -97,6 +97,8 @@ void nodeStatusReport()
     publishNodeStatus("rs485 crcToday", String(rs485Stats.crcToday).c_str());
     publishNodeStatus("rs485 messagesYesterday", String(rs485Stats.messagesYesterday).c_str());
     publishNodeStatus("rs485 crcYesterday", String(rs485Stats.crcYesterday).c_str());
+    publishNodeStatus("rs485 badFormatToday", String(rs485Stats.badFormatToday).c_str());
+    publishNodeStatus("rs485 badFormatYesterday", String(rs485Stats.badFormatYesterday).c_str());
 #endif
 
     String release = String(__DATE__) + " - " + String(__TIME__);

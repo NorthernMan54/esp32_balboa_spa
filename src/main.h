@@ -46,4 +46,10 @@ struct SpaWriteQueueMessage
 #endif
 #endif
 
+#ifndef LOCAL_CLIENT
+#ifndef REMOTE_CLIENT
+#error "Define either LOCAL_CLIENT or REMOTE_CLIENT"
+#endif
+#endif
+
 #endif

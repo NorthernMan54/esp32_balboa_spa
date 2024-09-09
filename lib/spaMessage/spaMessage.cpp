@@ -151,7 +151,7 @@ void spaMessageLoop()
     {
       esp_task_wdt_reset();
       // Log.verbose(F("[Mess]: Queue Message Received: [%d]%s" CR), message->length, msgToString(message->message, message->length).c_str());
-#ifdef LOCAL_CONNECT
+#if defined(LOCAL_CONNECT) || defined(BRIDGE)
       if (message->message[2] == id || message->message[2] == 0xff)
       {
         bridgeSend(message->message, message->length);
@@ -343,7 +343,7 @@ void parseWiFiModuleConfigurationResponse(u_int8_t *message, int length)
 
   sprintf(wiFiModuleConfigurationData.macAddress, "%02x:%02x:%02x:%02x:%02x:%02x", hexArray[3], hexArray[4], hexArray[5], hexArray[6], hexArray[7], hexArray[8]);
 
-  Log.verbose(F("[Mess]: WiFi Module Configuration Response: %s" CR), msgToString(hexArray, length - 7).c_str());
+  // Log.verbose(F("[Mess]: WiFi Module Configuration Response: %s" CR), msgToString(hexArray, length - 7).c_str());
   publishWiFiModuleConfigurationData();
 }
 
@@ -402,7 +402,7 @@ void parseConfigurationResponse(u_int8_t *message, int length)
   spaConfigurationData.aux2 = bitRead(hexArray[4], 1);
   spaConfigurationData.mister = TwoBit(hexArray[4], 4);
 
-  Log.verbose(F("[Mess]: Configuration Response: %s" CR), msgToString(hexArray, length - 7).c_str());
+  // Log.verbose(F("[Mess]: Configuration Response: %s" CR), msgToString(hexArray, length - 7).c_str());
   publishSpaConfigurationData();
 }
 
@@ -449,7 +449,7 @@ void parseInformationResponse(u_int8_t *message, int length)
   spaInformationData.heaterType = hexArray[18];
   sprintf(spaInformationData.dipSwitch, "%x%x", hexArray[20], hexArray[19]);
 
-  Log.verbose(F("[Mess]: Information Response: %s" CR), msgToString(hexArray, length - 7).c_str());
+  // Log.verbose(F("[Mess]: Information Response: %s" CR), msgToString(hexArray, length - 7).c_str());
   publishSpaInformationData();
 }
 
@@ -602,7 +602,7 @@ void parseFilterResponse(u_int8_t *message, int length)
   spaFilterSettingsData.filt2DurationHour = hexArray[6];
   spaFilterSettingsData.filt2DurationMinute = hexArray[7];
 
-  Log.verbose(F("[Mess]: Filter Response: %s" CR), msgToString(hexArray, length - 7).c_str());
+  // Log.verbose(F("[Mess]: Filter Response: %s" CR), msgToString(hexArray, length - 7).c_str());
   publishSpaFilterSettingsData();
 }
 
@@ -618,7 +618,7 @@ void parseSettings0x04Response(u_int8_t *message, int length)
 
   u_int8_t *hexArray = message + 5;
 
-  Log.verbose(F("[Mess]: Settings 0x04 Response: %s" CR), msgToString(hexArray, length - 7).c_str());
+  // Log.verbose(F("[Mess]: Settings 0x04 Response: %s" CR), msgToString(hexArray, length - 7).c_str());
   publishSpaSettings0x04Data();
 }
 

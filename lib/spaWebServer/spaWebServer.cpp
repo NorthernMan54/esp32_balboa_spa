@@ -49,10 +49,10 @@ void spaWebServerSetup()
     listDir(LittleFS, "/", 3);
   }
   File envFile = LittleFS.open("/.env", "r");
-  if(envFile)
+  if (envFile)
   {
     // Log.notice("[Web]: .env file found" CR);
-    while(envFile.available())
+    while (envFile.available())
     {
       String line = envFile.readStringUntil('\n');
       Log.notice("[Web]: /.env - %s" CR, line.c_str());
@@ -75,6 +75,14 @@ void spaWebServerLoop()
     server.on("/state", HTTP_GET, handleState);
     server.on("/config", HTTP_GET, handleConfig);
     server.on("/status", HTTP_GET, handleStatus);
+    server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request)
+              {
+      Log.notice(F("[Web]: Restart requested by %p" CR), request->client()->remoteIP());
+      AsyncWebServerResponse *response = request->beginResponse(302);
+      response->addHeader("Location", "/");
+      request->send(response);
+      delay(1000);
+      ESP.restart(); });
 
     // Balboa cloud emulation
 
@@ -214,6 +222,8 @@ void handleState(AsyncWebServerRequest *request)
   html += "<li><b>rs485 crcToday: </b>" + formatNumberWithCommas(rs485Stats.crcToday) + "</li>";
   html += "<li><b>rs485 messagesYesterday: </b>" + formatNumberWithCommas(rs485Stats.messagesYesterday) + "</li>";
   html += "<li><b>rs485 crcYesterday: </b>" + formatNumberWithCommas(rs485Stats.crcYesterday) + "</li>";
+  html += "<li><b>rs485 badFormatToday: </b>" + formatNumberWithCommas(rs485Stats.badFormatToday) + "</li>";
+  html += "<li><b>rs485 badFormatYesterday: </b>" + formatNumberWithCommas(rs485Stats.badFormatYesterday) + "</li>";
 #endif
 
   html += "</ul><h1>Spa Status</h1><ul>";

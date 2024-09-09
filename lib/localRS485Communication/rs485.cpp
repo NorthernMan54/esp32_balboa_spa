@@ -73,78 +73,114 @@ void rs485Loop()
     // Drop until SOF is seen
     if (spaMessage.first() != 0x7E)
       spaMessage.clear();
+    if (spaMessage.size() > BALBOA_MESSAGE_SIZE - 1)
+    {
+      rs485Stats.badFormatToday++;
+      Log.warning(F("[rs485]: Invalid message, too long: %s" CR), msgToString(spaMessage).c_str());
+      spaMessage.clear();
+    }
   }
 
   // Double SOF-marker, drop last one
   if (spaMessage[1] == 0x7E && spaMessage.size() > 1)
     spaMessage.pop();
 
-  if (x == 0x7E && spaMessage.size() > 4 && spaMessage.size() == spaMessage[1] + 2 && isMessageValid(spaMessage))
+  if (x == 0x7E && spaMessage.size() > 2)
   {
-    // Log.verbose(F("[rs485]: Received: %d - %s" CR), id, msgToString(spaMessage).c_str());
-    rs485Stats.messagesToday++;
-    if (id == 0)
+    // Log.verbose(F("[rs485]: spaMessage %s, size %d, supplied size %d, %d" CR), msgToString(spaMessage).c_str(), spaMessage.size(), spaMessage[1] + 2, isMessageValid(spaMessage));
+  }
+
+  if (spaMessage.size() == 4 && (spaMessage[1] > BALBOA_MESSAGE_SIZE | !(spaMessage[3] == 0xBF || spaMessage[3] == 0xAF)))
+  {
+    rs485Stats.badFormatToday++;
+    Log.warning(F("[rs485]: Invalid message, corrupted length/broadcast flag: %s" CR), msgToString(spaMessage).c_str());
+    spaMessage.clear();
+  }
+
+  if (spaMessage.size() - 2 > spaMessage[1])
+  {
+    rs485Stats.badFormatToday++;
+    Log.warning(F("[rs485]: Invalid message, corrupted length: %s" CR), msgToString(spaMessage).c_str());
+    spaMessage.clear();
+  }
+
+  if (x == 0x7E && spaMessage.size() > 4 && spaMessage.size() == spaMessage[1] + 2)
+  {
+
+    if (isMessageValid(spaMessage))
     {
-      if (Status_Update(spaMessage)) // This is hacky, but it appears to work
+      // Log.verbose(F("[rs485]: Received: %d - %s" CR), id, msgToString(spaMessage).c_str());
+      rs485Stats.messagesToday++;
+      if (id == 0)
       {
-        id = WIFI_MODULE_ID;
-        Log.verbose(F("[rs485]: Set SPA id 0x0A" CR));
-        sendExistingClientResponse(id);
-        esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
-        spaMessage.clear();
+        if (Status_Update(spaMessage)) // This is hacky, but it appears to work
+        {
+          id = WIFI_MODULE_ID;
+          Log.verbose(F("[rs485]: Set SPA id 0x0A" CR));
+          sendExistingClientResponse(id);
+          esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
+          spaMessage.clear();
+        }
+
+        // This method is used to assign a unique ID to the spa
+        /*
+            if (Channel_Assignment_Response(spaMessage))
+            {
+              id = spaMessage[5];
+              if (id > 0x2F)
+                id = 0x2F;
+
+              ID_ack();
+              mqtt.publish((mqttTopic + "node/id").c_str(), String(id, 16).c_str());
+              publishDebug("Received SPA id");
+              esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
+            }
+
+            // FE BF 00:Any new clients?
+            if (New_Client_Clear_to_Send(spaMessage))
+            {
+              ID_request();
+            }
+            */
       }
+      else if (Clear_to_Send(spaMessage))
+      {
+        rs485ClearToSend();
+      }
+      else if (For_Us_Message(spaMessage))
+      {
+        SpaReadQueueMessage *messageToSend = new SpaReadQueueMessage;
+        messageToSend->length = (spaMessage.size() < BALBOA_MESSAGE_SIZE ? spaMessage.size() : BALBOA_MESSAGE_SIZE);
+        for (int i = 0; i < messageToSend->length; i++)
+        {
+          messageToSend->message[i] = spaMessage[i];
+        }
 
-      // This method is used to assign a unique ID to the spa
-      /*
-          if (Channel_Assignment_Response(spaMessage))
-          {
-            id = spaMessage[5];
-            if (id > 0x2F)
-              id = 0x2F;
-
-            ID_ack();
-            mqtt.publish((mqttTopic + "node/id").c_str(), String(id, 16).c_str());
-            publishDebug("Received SPA id");
-            esp_task_wdt_init(RUNNING_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
-          }
-
-          // FE BF 00:Any new clients?
-          if (New_Client_Clear_to_Send(spaMessage))
-          {
-            ID_request();
-          }
-          */
+        if (xQueueSend(spaReadQueue, &messageToSend, 0) != pdTRUE)
+        {
+          Log.error(F("[rs485]: SPA Read Queue full, dropped %s" CR), msgToString(messageToSend->message, messageToSend->length).c_str());
+        }
+        else
+        {
+          // Log.verbose(F("[rs485]: Data added to Read Queue [%d]%s" CR), messageToSend->length, msgToString(messageToSend->message, messageToSend->length).c_str());
+        }
+      }
     }
-    else if (Clear_to_Send(spaMessage))
+    else
     {
-      rs485ClearToSend();
-    }
-    else if (For_Us_Message(spaMessage))
-    {
-      SpaReadQueueMessage *messageToSend = new SpaReadQueueMessage;
-      messageToSend->length = (spaMessage.size() < BALBOA_MESSAGE_SIZE ? spaMessage.size() : BALBOA_MESSAGE_SIZE);
-      for (int i = 0; i < messageToSend->length; i++)
-      {
-        messageToSend->message[i] = spaMessage[i];
-      }
-
-      if (xQueueSend(spaReadQueue, &messageToSend, 0) != pdTRUE)
-      {
-        Log.error(F("[rs485]: SPA Read Queue full, dropped %s" CR), msgToString(messageToSend->message, messageToSend->length).c_str());
-      }
-      else
-      {
-        // Log.verbose(F("[rs485]: Data added to Read Queue [%d]%s" CR),messageToSend->length, msgToString(messageToSend->message, messageToSend->length).c_str());
-      }
+      Log.warning(F("[rs485]: Invalid message, crc failed: %s" CR), msgToString(spaMessage).c_str());
     }
     spaMessage.clear();
   }
 
-  if(hasDayChanged(lastCheckedTime)) {
+  if (hasDayChanged(lastCheckedTime))
+  {
     rs485Stats.messagesYesterday = rs485Stats.messagesToday;
     rs485Stats.crcYesterday = rs485Stats.crcToday;
     rs485Stats.messagesToday = 0;
     rs485Stats.crcToday = 0;
+    rs485Stats.badFormatYesterday = rs485Stats.badFormatToday;
+    rs485Stats.badFormatToday = 0;
   }
 };
 
@@ -266,7 +302,10 @@ void rs485Write(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
     digitalWrite(TX485_Tx, LOW);
   }
 
-  // Log.verbose(F("[rs485]: Sent: %s" CR), msgToString(data).c_str());
+  if (data[4] != Nothing_to_Send_Type)
+  {
+    Log.verbose(F("[rs485]: Sent: %s" CR), msgToString(data).c_str());
+  }
   data.clear();
 }
 
@@ -293,9 +332,9 @@ bool isMessageValid(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   {
     message[i - 1] = data[i];
   }
-  // Log.verbose(F("[rs485]: Data: %d - %s" CR), data.size(), msgToString(data).c_str());
-  // Log.verbose(F("[rs485]: message: %s" CR), msgToString(message, data.size() - 3).c_str());
-  // Log.verbose(F("[rs485]: CRC: %x, %x" CR), crc8(message, data.size() - 3), data[data[1]]);
+  //  Log.verbose(F("[rs485]: Data: %d - %s" CR), data.size(), msgToString(data).c_str());
+  //  Log.verbose(F("[rs485]: message: %s" CR), msgToString(message, data.size() - 3).c_str());
+  //  Log.verbose(F("[rs485]: CRC: %x, %x" CR), crc8(message, data.size() - 3), data[data[1]]);
   if (crc8(message, data.size() - 3) != data[data[1]])
   {
     rs485Stats.crcToday++;

@@ -31,26 +31,31 @@ void setup()
   Log.notice(F("Build: %s" CR), BUILD);
 
   logSection("Build Definitions");
-  #ifdef LOCAL_CONNECT
+#ifdef LOCAL_CONNECT
   Log.notice(F("LOCAL_CONNECT Enabled" CR));
-  #else
+#else
   Log.notice(F("LOCAL_CONNECT Disabled" CR));
-  #endif
-  #ifdef LOCAL_CLIENT
+#endif
+#ifdef LOCAL_CLIENT
   Log.notice(F("LOCAL_CLIENT Enabled" CR));
-  #else
+#else
   Log.notice(F("LOCAL_CLIENT Disabled" CR));
-  #endif
-  #ifdef REMOTE_CLIENT
+#endif
+#ifdef REMOTE_CLIENT
   Log.notice(F("REMOTE_CLIENT Enabled" CR));
-  #else
+#else
   Log.notice(F("REMOTE_CLIENT Disabled" CR));
-  #endif
-  #ifdef TELNET_LOG
+#endif
+#ifdef TELNET_LOG
   Log.notice(F("TELNET_LOG Enabled" CR));
-  #else
+#else
   Log.notice(F("TELNET_LOG Disabled" CR));
-  #endif
+#endif
+#ifdef BRIDGE
+  Log.notice(F("BRIDGE Enabled" CR));
+#else
+  Log.notice(F("BRIDGE Disabled" CR));
+#endif
 
   logSection("ESP Information");
   Log.notice(F("Last restart reason: %s" CR), getLastRestartReason().c_str());
@@ -59,7 +64,7 @@ void setup()
   Log.verbose(F("Chip ID: %x" CR), ESP.getEfuseMac());
 
   Log.verbose(F("Flash chip size: %d bytes" CR), ESP.getFlashChipSize());
-//  Log.verbose(F("Flash chip speed: %d Hz" CR), ESP.getFlashChipSpeed());
+  //  Log.verbose(F("Flash chip speed: %d Hz" CR), ESP.getFlashChipSpeed());
   Log.verbose(F("CPU frequency: %d Hz" CR), ESP.getCpuFreqMHz());
   Log.verbose(F("SDK version: %s" CR), ESP.getSdkVersion());
 
@@ -81,7 +86,7 @@ void setup()
   spaMessageSetup();
   logSection("Web Server Setup");
   spaWebServerSetup();
-#ifdef LOCAL_CONNECT
+#if defined(LOCAL_CONNECT) || defined(BRIDGE)
   logSection("Bridge Setup");
   bridgeSetup();
 #endif
@@ -110,7 +115,7 @@ void loop()
 #endif
     spaMessageLoop();
     spaWebServerLoop();
-#ifdef LOCAL_CONNECT
+#if defined(LOCAL_CONNECT) || defined(BRIDGE)
     bridgeLoop();
 #endif
   }

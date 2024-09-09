@@ -25,7 +25,7 @@ time_t getTime()
 {
   time_t now;
   struct tm timeinfo;
-  if (!getLocalTime(&timeinfo))
+  if (!getLocalTime(&timeinfo,5))
   {
     // Serial.println("Failed to obtain time");
     return (0);
