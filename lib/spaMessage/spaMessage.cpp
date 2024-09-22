@@ -1,6 +1,8 @@
 #include "spaMessage.h"
 #include <ArduinoLog.h>
-#include <utilities.h>
+#include <TickTwo.h>
+
+#include <spaUtilities.h>
 #include <Analytics.h>
 #include <esp_task_wdt.h>
 
@@ -34,9 +36,6 @@ RTC_NOINIT_ATTR SpaFaultLogData spaFaultLogData;
 RTC_NOINIT_ATTR AnalyticsData heatOnData;
 RTC_NOINIT_ATTR AnalyticsData filterOnData;
 
-Analytics *heatOn;
-Analytics *filterOn;
-
 // private functions
 bool parseStatusMessage(u_int8_t *, int);
 void parseInformationResponse(u_int8_t *, int);
@@ -47,6 +46,9 @@ void parseFaultResponse(u_int8_t *, int);
 void parseFilterResponse(u_int8_t *, int);
 void parseSettings0x04Response(u_int8_t *, int);
 void configurationRequest();
+void updateTemperatureHistory();
+
+TickTwo temperatureHistory(updateTemperatureHistory, .75 * 60 * 1000); // Initial interval is 1 minute, then hourly on first execution
 
 void spaMessageSetup()
 {
@@ -137,8 +139,9 @@ void spaMessageSetup()
     Log.verbose(F("[Mess]: Stale Preferences" CR));
   }
 
-  heatOn = new Analytics(&heatOnData);
-  filterOn = new Analytics(&filterOnData);
+  spaStatusData.heatOn = new Analytics(&heatOnData, "HeatOn");
+  spaStatusData.filterOn = new Analytics(&filterOnData, "FilterOn");
+  temperatureHistory.start();
 }
 
 void spaMessageLoop()
@@ -207,6 +210,7 @@ void spaMessageLoop()
     }
     //  Log.verbose(F("[Mess]: No messages in Read Queue" CR));
   }
+  temperatureHistory.update();
 }
 
 void configurationRequest()
@@ -513,13 +517,13 @@ bool parseStatusMessage(u_int8_t *message, int length)
     spaStatusData.tempScale = hexArray[9] & 0x01;
     spaStatusData.clockMode = hexArray[9] & 0x02;
     spaStatusData.filterMode = TwoBit(hexArray[9], 2);
-    filterOn->add(spaStatusData.filterMode);
+    spaStatusData.filterOn->add(spaStatusData.filterMode);
 
     spaStatusData.panelLocked = hexArray[9] & 0x20;
     spaStatusData.tempRange = bitRead(hexArray[10], 2);
     spaStatusData.needsHeat = bitRead(hexArray[10], 3);
     spaStatusData.heatingState = TwoBit(hexArray[10], 4);
-    heatOn->add(spaStatusData.heatingState);
+    spaStatusData.heatOn->add(spaStatusData.heatingState);
 
     spaStatusData.pump1 = TwoBit(hexArray[11], 0);
     spaStatusData.pump2 = TwoBit(hexArray[11], 2);
@@ -550,12 +554,13 @@ bool parseStatusMessage(u_int8_t *message, int length)
     }
 
     spaStatusData.settingsLock = bitRead(hexArray[21], 3);
+    
     spaStatusData.m8CycleTime = hexArray[24];
 
-    spaStatusData.filterOnTimeToday = filterOn->today();
-    spaStatusData.filterOnTimeYesterday = filterOn->yesterday();
-    spaStatusData.heaterOnTimeToday = heatOn->today();
-    spaStatusData.heaterOnTimeYesterday = heatOn->yesterday();
+    spaStatusData.filterOnTimeToday = spaStatusData.filterOn->today();
+    spaStatusData.filterOnTimeYesterday = spaStatusData.filterOn->yesterday();
+    spaStatusData.heaterOnTimeToday = spaStatusData.heatOn->today();
+    spaStatusData.heaterOnTimeYesterday = spaStatusData.heatOn->yesterday();
 
     Log.verbose(F("[Mess]: Status Response: %s" CR), msgToString(hexArray, length - 7).c_str());
 
@@ -653,4 +658,24 @@ void sendMessageToSpa(CircularBuffer<uint8_t, BALBOA_MESSAGE_SIZE> &data)
   {
     Log.verbose(F("[Mess]: Queuing message to spa %s" CR), msgToString(messageToSend->message, messageToSend->length).c_str());
   }
+}
+
+String getMapDescription(uint8_t element, const std::map<uint8_t, const char *> &suppliedMap)
+{
+  auto it = suppliedMap.find(element);
+  if (it != suppliedMap.end())
+  {
+    return String(it->second);
+  }
+  return String("Unknown - " + String(element));
+}
+
+void updateTemperatureHistory()
+{
+  temperatureHistory.interval(60 * 60 * 1000); // Hourly
+  for (int x = GRAPH_MAX_READINGS; x > 1; x--)
+  {
+    spaStatusData.temperatureHistory[x - 1] = spaStatusData.temperatureHistory[x - 2];
+  }
+  spaStatusData.temperatureHistory[0] = spaStatusData.currentTemp;
 }

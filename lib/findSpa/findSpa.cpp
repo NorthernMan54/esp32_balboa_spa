@@ -2,7 +2,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <ArduinoLog.h>
-#include <utilities.h>
+#include <spaUtilities.h>
 
 #define BALBOA_UDP_DISCOVERY_PORT 30303
 #define BROADCAST_TIMEOUT 20  // 20 seconds

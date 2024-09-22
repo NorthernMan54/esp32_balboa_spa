@@ -6,7 +6,7 @@
 #include <AsyncTCP.h>
 #include <esp_task_wdt.h>
 
-#include <utilities.h>
+#include  <spaUtilities.h>
 #include "../../src/main.h"
 
 #define BALBOA_PORT 4257

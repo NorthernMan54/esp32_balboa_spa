@@ -3,7 +3,7 @@
 #include <ArduinoLog.h>
 #include <esp_task_wdt.h>
 
-#include <utilities.h>
+#include  <spaUtilities.h>
 #include <spaMessage.h>
 
 #include "rs485.h"

@@ -8,6 +8,9 @@
 #include <base64.hpp>
 #include "FS.h"
 #include <LittleFS.h>
+#ifdef spaEpaper
+#include <epd47.h>
+#endif
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
@@ -15,7 +18,7 @@
 
 #include <tinyxml2.h>
 #include <spaMessage.h>
-#include <utilities.h>
+#include <spaUtilities.h>
 #include <restartReason.h>
 #include <rs485.h>
 
@@ -31,8 +34,10 @@ void handleData(AsyncWebServerRequest *request);
 void handleLoginData(AsyncWebServerRequest *request);
 void handleOptionsData(AsyncWebServerRequest *request);
 void handleOptionsLoginData(AsyncWebServerRequest *request);
+void handleepdpanel(AsyncWebServerRequest *request);
 String parseBody(String body);
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
+String listDirToString(fs::FS &fs, const char *dirname, uint8_t levels);
 
 AsyncWebServer server(80);
 bool serverSetup = false;
@@ -48,6 +53,7 @@ void spaWebServerSetup()
     Log.notice("[Web]: LittleFS Mounted" CR);
     listDir(LittleFS, "/", 3);
   }
+  Log.notice("[Web]: Web App config" CR);
   File envFile = LittleFS.open("/.env", "r");
   if (envFile)
   {
@@ -75,6 +81,9 @@ void spaWebServerLoop()
     server.on("/state", HTTP_GET, handleState);
     server.on("/config", HTTP_GET, handleConfig);
     server.on("/status", HTTP_GET, handleStatus);
+#ifdef spaEpaper
+    server.on("/panel.jpg", HTTP_GET, handleepdpanel);
+#endif
     server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request)
               {
       Log.notice(F("[Web]: Restart requested by %p" CR), request->client()->remoteIP());
@@ -104,9 +113,29 @@ void spaWebServerLoop()
   }
 }
 
+#ifdef spaEpaper
+void handleepdpanel(AsyncWebServerRequest *request)
+{
+  Log.verbose("[Web]: Request %s received from %p - size %d" CR, request->url().c_str(), request->client()->remoteIP(), jpegSize);
+  if (captureToJPEG() > 0)
+  {
+    // Send the BMP image as a response
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "image/jpeg", jpegBuffer, jpegSize);
+    response->addHeader("Content-Disposition", "inline; filename=\"framebuffer.jpeg\"");
+    request->send(response);
+  }
+  else
+  {
+    request->send(404, "text/plain", "Image not available");
+  }
+}
+#endif
+
 #define style String("<style>body{font-family:Arial,Helvetica,sans-serif;}h1{color:blue;}ul{list-style-type:none;}li{padding:5px;}button{  border: none;  color: white; padding: 15px 32px;  text-align: center;  text-decoration: none;  display: inline-block;  font-size: 16px;  margin: 4px 2px;  cursor: pointer;background-color: #04AA6D;} .active, .btn:hover { background-color: #666;  color: white;}</style>")
 
-#define head String("<head><title>Spa Web Server State</title>") + style + String("</head>")
+#define icon String("<link rel='icon' href='/assets/style/hottubbing.webp' type='image/x-icon' />")
+
+#define head String("<head><title>Spa Web Server State</title>") + icon + style + String("</head>")
 
 #define webMenuStatus String("<form><button class='active' formaction='/status'>SPA Status</button><button formaction='/config'>SPA Config</button><button formaction='/state'>ESP State</button><button formaction='/index.html'>SPA Website</button></form>")
 
@@ -114,46 +143,62 @@ void spaWebServerLoop()
 
 #define webMenuState String("<form><button formaction='/status'>SPA Status</button><button formaction='/config'>SPA Config</button><button class='active' formaction='/state'>ESP State</button><button formaction='/index.html'>SPA Website</button></form>")
 
+#ifdef spaEpaper
+#define ePaper String("<img src='panel.jpg' alt='Spa Panel' width=600>")
+#else
+#define ePaper String("")
+#endif
+
 void handleStatus(AsyncWebServerRequest *request)
 {
   Log.verbose("[Web]: Request %s received from %p" CR, request->url().c_str(), request->client()->remoteIP());
-  String html = "<html>" + head + "<body>" + webMenuStatus + "<h1>Spa Status</h1><ul>";
+  String html = "<html>" + head + "<body>" + webMenuStatus + ePaper + "<h1>Spa Status</h1><ul>";
   html += "<li><b>lastUpdate:</b> " + formatNumberWithCommas(spaStatusData.lastUpdate) + "</li>";
   html += "<li><b>magicNumber: </b>" + String(spaStatusData.magicNumber) + "</li>";
   html += "<br><li><b>Free Heap: </b>" + formatNumberWithCommas(ESP.getFreeHeap()) + "</li>";
+  html += "<li><b>Free PSRAM: </b>" + formatNumberWithCommas(ESP.getFreePsram()) + "</li>";
   html += "<li><b>Free Stack: </b>" + formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)) + "</li>";
 
   html += "<br><li><b>Current Temp: </b>" + String(spaStatusData.currentTemp) + "°C</li>";
   html += "<li><b>Set Temp: </b>" + String(spaStatusData.setTemp) + "°C</li>";
-  html += "<li><b>Heating Mode: </b>" + String(spaStatusData.heatingMode) + "</li>";
+  html += "<li><b>High Set Temp: </b>" + String(spaStatusData.highSetTemp) + "°C</li>";
+  html += "<li><b>Low Set Temp: </b>" + String(spaStatusData.lowSetTemp) + "°C</li>";
+  html += "<li><b>Temp Range: </b>" + getMapDescription(spaStatusData.tempRange, tempRangeMap) + "</li>";
+  html += "<li><b>Temp Scale: </b>" + String(spaStatusData.tempScale) + "</li>";
+
+  html += "<li><b>Spa State: </b>" + getMapDescription(spaStatusData.spaState, spaStateMap) + "</li>";
+  html += "<li><b>Init Mode: </b>" + getMapDescription(spaStatusData.initMode, initModeMap) + "</li>";
+  html += "<li><b>Heating Mode: </b>" + getMapDescription(spaStatusData.heatingMode, heatingModeMap) + "</li>";
   html += "<li><b>Heating State: </b>" + String(spaStatusData.heatingState) + "</li>";
   html += "<li><b>Needs Heat: </b>" + String(spaStatusData.needsHeat) + "</li>";
-  html += "<li><b>Temp Range: </b>" + String(spaStatusData.tempRange) + "</li>";
-  html += "<li><b>Temp Scale: </b>" + String(spaStatusData.tempScale) + "</li>";
+
   html += "<li><b>Time: </b>" + String(spaStatusData.time) + "</li>";
   html += "<li><b>Clock Mode: </b>" + String(spaStatusData.clockMode) + "</li>";
-  html += "<li><b>Filter Mode: </b>" + String(spaStatusData.filterMode) + "</li>";
-  html += "<li><b>Pump 1: </b>" + String(spaStatusData.pump1) + "</li>";
-  html += "<li><b>Pump 2: </b>" + String(spaStatusData.pump2) + "</li>";
-  html += "<li><b>Pump 3: </b>" + String(spaStatusData.pump3) + "</li>";
-  html += "<li><b>Pump 4: </b>" + String(spaStatusData.pump4) + "</li>";
-  html += "<li><b>Pump 5: </b>" + String(spaStatusData.pump5) + "</li>";
-  html += "<li><b>Pump 6: </b>" + String(spaStatusData.pump6) + "</li>";
-  html += "<li><b>Circulation Pump: </b>" + String(spaStatusData.circ) + "</li>";
-  html += "<li><b>Blower: </b>" + String(spaStatusData.blower) + "</li>";
-  html += "<li><b>Light 1: </b>" + String(spaStatusData.light1) + "</li>";
-  html += "<li><b>Light 2: </b>" + String(spaStatusData.light2) + "</li>";
-  html += "<li><b>Mister: </b>" + String(spaStatusData.mister) + "</li>";
-  html += "<li><b>Panel Locked: </b>" + String(spaStatusData.panelLocked) + "</li>";
-  html += "<li><b>Settings Lock: </b>" + String(spaStatusData.settingsLock) + "</li>";
+  html += "<li><b>Filter Mode: </b>" + getMapDescription(spaStatusData.filterMode, filterModeMap) + "</li>";
+  html += "<li><b>Pump 1: </b>" + getMapDescription(spaStatusData.pump1, pumpMap) + "</li>";
+  html += "<li><b>Pump 2: </b>" + getMapDescription(spaStatusData.pump2, pumpMap) + "</li>";
+  html += "<li><b>Pump 3: </b>" + getMapDescription(spaStatusData.pump3, pumpMap) + "</li>";
+  html += "<li><b>Pump 4: </b>" + getMapDescription(spaStatusData.pump4, pumpMap) + "</li>";
+  html += "<li><b>Pump 5: </b>" + getMapDescription(spaStatusData.pump5, pumpMap) + "</li>";
+  html += "<li><b>Pump 6: </b>" + getMapDescription(spaStatusData.pump6, pumpMap) + "</li>";
+  html += "<li><b>Circulation Pump: </b>" + getMapDescription(spaStatusData.circ, onOffMap) + "</li>";
+  html += "<li><b>Blower: </b>" + getMapDescription(spaStatusData.blower, onOffMap) + "</li>";
+  html += "<li><b>Light 1: </b>" + getMapDescription(spaStatusData.light1, onOffMap) + "</li>";
+  html += "<li><b>Light 2: </b>" + getMapDescription(spaStatusData.light2, onOffMap) + "</li>";
+  html += "<li><b>Mister: </b>" + getMapDescription(spaStatusData.mister, onOffMap) + "</li>";
+  html += "<li><b>Panel Locked: </b>" + getMapDescription(spaStatusData.panelLocked, lockedMap) + "</li>";
+  html += "<li><b>Settings Lock: </b>" + getMapDescription(spaStatusData.settingsLock, lockedMap) + "</li>";
   html += "<li><b>M8 Cycle Time: </b>" + String(spaStatusData.m8CycleTime) + "</li>";
   html += "<li><b>Notification: </b>" + String(spaStatusData.notification) + "</li>";
   html += "<li><b>Flags 19: </b>" + String(spaStatusData.flags19) + "</li>";
 
-  html += "<li><b>Heater On Time Today: </b>" + formatNumberWithCommas(spaStatusData.heaterOnTimeToday) + "</li>";
-  html += "<li><b>Heater On Time Yesterday: </b>" + formatNumberWithCommas(spaStatusData.heaterOnTimeYesterday) + "</li>";
-  html += "<li><b>Filter On Time Today: </b>" + formatNumberWithCommas(spaStatusData.filterOnTimeToday) + "</li>";
-  html += "<li><b>Filter On Time Yesterday: </b>" + formatNumberWithCommas(spaStatusData.filterOnTimeYesterday) + "</li>";
+  html += "<br><li><b>Heater On Time Today: </b>" + formatNumberWithCommas(spaStatusData.heaterOnTimeToday) + "(sec)</li>";
+  html += "<li><b>Heater On Time Yesterday: </b>" + formatNumberWithCommas(spaStatusData.heaterOnTimeYesterday) + "(sec)</li>";
+  html += "<li><b>Filter On Time Today: </b>" + formatNumberWithCommas(spaStatusData.filterOnTimeToday) + "(sec)</li>";
+  html += "<li><b>Filter On Time Yesterday: </b>" + formatNumberWithCommas(spaStatusData.filterOnTimeYesterday) + "(sec)</li>";
+  html += "<br><li><b>Temperature History: </b>" + historyToString(spaStatusData.temperatureHistory) + "</li>";
+  html += "<li><b>Heat History: </b>" + historyToString(spaStatusData.heatOn->history()) + "</li>";
+  html += "<li><b>Filter History: </b>" + historyToString(spaStatusData.filterOn->history()) + "</li>";
 
   html += "</ul></body></html>";
   // Add more fields as needed
@@ -165,7 +210,7 @@ void handleConfig(AsyncWebServerRequest *request)
 {
   // Log.verbose("[Web]: Request %s received from %p" CR, request->url().c_str(), request->client()->remoteIP());
 
-  String html = "<html>" + head + "<body>" + webMenuConfig + "<h1>Spa Configuration</h1><ul>";
+  String html = "<html>" + head + "<body>" + webMenuConfig + ePaper + "<h1>Spa Configuration</h1><ul>";
   if (spaConfigurationData.lastUpdate == 0)
   {
     html += "<li><b>Spa Configuration not available</b></li>";
@@ -188,7 +233,21 @@ void handleConfig(AsyncWebServerRequest *request)
     html += "<li><b>Aux 2: </b>" + String(spaConfigurationData.aux2) + "</li>";
     html += "<li><b>Mister: </b>" + String(spaConfigurationData.mister) + "</li>";
     html += "<li><b>temp_scale: </b>" + String(spaConfigurationData.temp_scale) + "</li>";
+    html += "</ul><h1>Filter Configuration</h1><ul>";
+    html += "<li><b>Filter 1 Time: </b>" + formatAsHourMinute(spaFilterSettingsData.filt1Hour, spaFilterSettingsData.filt1Minute) + "</li>";
+    html += "<li><b>Filter 1 Duration: </b>" + formatAsHourMinute(spaFilterSettingsData.filt1DurationHour, spaFilterSettingsData.filt1DurationMinute) + "</li>";
+    html += "<li><b>Filter 2 Time: </b>" + formatAsHourMinute(spaFilterSettingsData.filt2Hour, spaFilterSettingsData.filt2Minute) + "</li>";
+    html += "<li><b>Filter 2 Duration: </b>" + formatAsHourMinute(spaFilterSettingsData.filt2DurationHour, spaFilterSettingsData.filt2DurationMinute) + "</li>";
+    html += "</ul><h1>LittleFS Configuration</h1><ul>";
 
+    if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED))
+    {
+      html += "<li><b>Error LittleFS Mount Failed </b></li>";
+    }
+    else
+    {
+      html += "<li>" + listDirToString(LittleFS, "/", 3) + "</li>";
+    }
     // Add more fields as needed
     html += "</ul></body></html>";
   }
@@ -202,8 +261,9 @@ time_t testLastCheckedTime = getTime();
 void handleState(AsyncWebServerRequest *request)
 {
   // Log.verbose(F("[Web]: handleStatus()" CR));
-  String html = "<html>" + head + "<body>" + webMenuState + "<h1>ESP State</h1><ul>";
+  String html = "<html>" + head + "<body>" + webMenuState + ePaper + "<h1>ESP State</h1><ul>";
   html += "<li><b>Free Heap: </b>" + formatNumberWithCommas(ESP.getFreeHeap()) + "</li>";
+  html += "<li><b>Free PSRAM: </b>" + formatNumberWithCommas(ESP.getFreePsram()) + "</li>";
   html += "<li><b>Free Stack: </b>" + formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)) + "</li>";
   html += "<li><b>Uptime: </b>" + formatNumberWithCommas(millis() / 1000) + "</li>";
   html += "<li><b>Time: </b>" + formatNumberWithCommas(getTime()) + "</li>";
@@ -211,6 +271,7 @@ void handleState(AsyncWebServerRequest *request)
   html += "<li><b>Restart Reason: </b>" + getLastRestartReason() + "</li>";
   String release = String(__DATE__) + " - " + String(__TIME__);
   html += "<li><b>Release: </b>" + release + "</li>";
+  html += "<li><b>Build Definition: </b>" + buildDefinitionString + "</li>";
 
   html += "<br><li><b>getTime(): </b>" + formatNumberWithCommas(getTime()) + "</li>";
   html += "<li><b>getHour(testLastCheckedTime): </b>" + formatNumberWithCommas(getHour(testLastCheckedTime)) + "</li>";
@@ -543,4 +604,43 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels)
     }
     file = root.openNextFile();
   }
+}
+
+String listDirToString(fs::FS &fs, const char *dirname, uint8_t levels)
+{
+  String response = "";
+  File root = fs.open(dirname);
+  if (!root)
+  {
+    // Serial.println("- failed to open directory");
+    return String("");
+  }
+  if (!root.isDirectory())
+  {
+    // Serial.println(" - not a directory");
+    return String("");
+  }
+
+  File file = root.openNextFile();
+  while (file)
+  {
+    if (file.isDirectory())
+    {
+      if (levels)
+      {
+        response += listDirToString(fs, file.path(), levels - 1);
+      }
+    }
+    else
+    {
+      response += "  FILE: " + String(dirname);
+      if (strcmp(dirname, "/") != 0)
+      {
+        response += "/";
+      }
+      response += String(file.name()) + "\tSIZE: " + String(file.size()) + "<BR>";
+    }
+    file = root.openNextFile();
+  }
+  return response;
 }

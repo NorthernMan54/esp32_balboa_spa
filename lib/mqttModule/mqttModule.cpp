@@ -7,7 +7,7 @@
 // Local Libraries
 
 #include <wifiModule.h>
-#include <utilities.h>
+#include <spaUtilities.h>
 #include <restartReason.h>
 #include "mqttModule.h"
 #include <rs485.h>
@@ -15,13 +15,13 @@
 // Local Functions
 void reconnect();
 void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length);
-void nodeStatusReport();
+void nodeStateReport();
 
 WiFiClient wifiClient;
 PubSubClient mqtt(wifiClient);
 String mqttTopic = "Spa/"; // root topic, gets appeanded with node mac address
 
-TickTwo sendStatus(nodeStatusReport, 1.5 * 60 * 1000); // 5 minutes
+TickTwo sendStatus(nodeStateReport, 1.5 * 60 * 1000); // 5 minutes
 
 void mqttModuleSetup()
 {
@@ -65,7 +65,7 @@ void reconnect()
     {
       publishError("MQTT Timeout - Reconnect Successfully Run");
       mqtt.subscribe((mqttTopic + "command").c_str());
-      nodeStatusReport();
+      nodeStateReport();
     }
   }
   mqtt.setBufferSize(512); // increase pubsubclient buffer size
@@ -76,7 +76,7 @@ void mqttMessage(char *p_topic, byte *p_payload, unsigned int p_length)
   mqtt.publish(p_topic, p_payload, p_length);
 }
 
-void nodeStatusReport()
+void nodeStateReport()
 {
   if (mqtt.connected())
   {
@@ -86,11 +86,12 @@ void nodeStatusReport()
     publishNodeStatus("restartReason", getLastRestartReason().c_str());
     publishNodeStatus("uptime", String(millis() / 1000).c_str());
     publishNodeStatus("getTime", String(getTime()).c_str());
-    publishNodeStatus("state", "ON");
+    publishNodeStatus("state", "ON", true);
     publishNodeStatus("flashsize", String(ESP.getFlashChipSize()).c_str());
     publishNodeStatus("chipid", String(ESP.getChipModel()).c_str());
     publishNodeStatus("speed", String(ESP.getCpuFreqMHz()).c_str());
     publishNodeStatus("heap", String(ESP.getFreeHeap()).c_str());
+    publishNodeStatus("psram", String(ESP.getFreePsram()).c_str());
     publishNodeStatus("stack", String(uxTaskGetStackHighWaterMark(NULL)).c_str());
 #ifdef LOCAL_CLIENT
     publishNodeStatus("rs485 messagesToday", String(rs485Stats.messagesToday).c_str());
@@ -103,5 +104,6 @@ void nodeStatusReport()
 
     String release = String(__DATE__) + " - " + String(__TIME__);
     publishNodeStatus("release", release.c_str());
+    publishNodeStatus("buildDefinition", buildDefinitionString.c_str());
   }
 }

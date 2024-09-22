@@ -6,7 +6,7 @@
 
 #define BALBOA_PORT 4257
 #define BALBOA_UDP_DISCOVERY_PORT 30303
-#define MAX_BRIDGE_CLIENTS 5
+#define MAX_BRIDGE_CLIENTS 10
 
 void bridgeSetup();
 void bridgeLoop();

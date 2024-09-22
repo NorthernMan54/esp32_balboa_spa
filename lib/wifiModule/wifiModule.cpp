@@ -4,11 +4,11 @@
 #include <ArduinoOTA.h>
 #include <ArduinoLog.h>
 #include <esp_task_wdt.h>
-#include <spaCommunication.h>
 #include <TelnetStream.h>
-
 #include <time.h>
-#include "../restartReason/restartReason.h"
+
+#include <spaCommunication.h>
+#include <restartReason.h>
 
 WiFiManager wifiManager;
 char gatewayName[20];

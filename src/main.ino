@@ -11,51 +11,69 @@
 #include <spaCommunication.h>
 #include <spaMessage.h>
 #include <spaWebServer.h>
-#include <utilities.h>
+#include <spaUtilities.h>
 #include <mqttModule.h>
 #include <rs485.h>
 #include <bridge.h>
+#include <spaEpaper.h>
 
 #include "main.h"
+
+String buildDefinitionString = "";
+#define addBuildDefinition(name) buildDefinitionString += #name " ";
 
 void setup()
 {
   // Launch serial for debugging purposes
   Serial.begin(SERIAL_BAUD);
-  Log.setPrefix(printPrefix);
+  Log.setPrefix(logPrintPrefix);
   Log.begin(LOG_LEVEL, &Serial);
   esp_task_wdt_init(INITIAL_WDT_TIMEOUT, true); // enable panic so ESP32 restarts
   esp_task_wdt_add(NULL);                       // add current thread to WDT watch
   logSection("WELCOME TO esp32_balboa_spa");
+#ifdef spaEpaper
+  logSection("EPaper Setup");
+  spaEpaperSetup();
+#endif
+  logSection("Build Definitions");
   Log.notice(F("Version: %s" CR), VERSION);
   Log.notice(F("Build: %s" CR), BUILD);
 
-  logSection("Build Definitions");
+#ifdef ESP32S3
+  Log.notice(F("Build for ESP32S3" CR));
+#else
+  Log.notice(F("Build for ESP32" CR));
+#endif
+
+#ifdef ARDUINO_ESP32S3_DEV
+  Log.notice(F("Build for ARDUINO_ESP32S3_DEV" CR));
+#endif
+
 #ifdef LOCAL_CONNECT
-  Log.notice(F("LOCAL_CONNECT Enabled" CR));
-#else
-  Log.notice(F("LOCAL_CONNECT Disabled" CR));
+  addBuildDefinition("LOCAL_CONNECT");
 #endif
+
 #ifdef LOCAL_CLIENT
-  Log.notice(F("LOCAL_CLIENT Enabled" CR));
-#else
-  Log.notice(F("LOCAL_CLIENT Disabled" CR));
+  addBuildDefinition("LOCAL_CLIENT");
 #endif
+
 #ifdef REMOTE_CLIENT
-  Log.notice(F("REMOTE_CLIENT Enabled" CR));
-#else
-  Log.notice(F("REMOTE_CLIENT Disabled" CR));
+  addBuildDefinition("REMOTE_CLIENT");
 #endif
+
 #ifdef TELNET_LOG
-  Log.notice(F("TELNET_LOG Enabled" CR));
-#else
-  Log.notice(F("TELNET_LOG Disabled" CR));
+  addBuildDefinition("TELNET_LOG");
 #endif
+
 #ifdef BRIDGE
-  Log.notice(F("BRIDGE Enabled" CR));
-#else
-  Log.notice(F("BRIDGE Disabled" CR));
+  addBuildDefinition("BRIDGE");
 #endif
+
+#ifdef spaEpaper
+  addBuildDefinition("spaEpaper");
+#endif
+
+  Log.notice(F("Build Definitions: %s" CR), buildDefinitionString.c_str());
 
   logSection("ESP Information");
   Log.notice(F("Last restart reason: %s" CR), getLastRestartReason().c_str());
@@ -82,10 +100,11 @@ void setup()
   logSection("Spa Remote Communications Setup");
   spaCommunicationSetup();
 #endif
-  logSection("Spa Message Setup");
-  spaMessageSetup();
   logSection("Web Server Setup");
   spaWebServerSetup();
+  logSection("Spa Message Setup");
+  spaMessageSetup();
+
 #if defined(LOCAL_CONNECT) || defined(BRIDGE)
   logSection("Bridge Setup");
   bridgeSetup();
@@ -97,6 +116,9 @@ void loop()
 {
 #ifdef LOCAL_CLIENT
   rs485Loop();
+#endif
+#ifdef spaEpaper
+  spaEpaperLoop();
 #endif
   wifiModuleLoop();
 

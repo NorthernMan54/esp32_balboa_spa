@@ -1,7 +1,6 @@
-#include "utilities.h"
+#include "spaUtilities.h"
 #include <Arduino.h>
 #include <CircularBuffer.hpp>
-#include "../../src/main.h"
 
 /**
  * Calculate uptime and take into account the millis() rollover
@@ -84,16 +83,31 @@ String formatNumberWithCommas(time_t num)
   return formatNumberWithCommas((unsigned long)num);
 }
 
+/*
+  Format a number with commas
+  num: number to format
+  returns: formatted number as a string
+*/
 String formatNumberWithCommas(int num)
 {
   return formatNumberWithCommas((unsigned long)num);
 }
 
+/*
+  Format a number with commas
+  num: number to format
+  returns: formatted number as a string
+*/
 String formatNumberWithCommas(uint32_t num)
 {
   return formatNumberWithCommas((unsigned long)num);
 }
 
+/*
+  Format a number with commas
+  num: number to format
+  returns: formatted number as a string
+*/
 String formatNumberWithCommas(unsigned long num)
 {
   String numStr = String(num);
@@ -163,8 +177,37 @@ void _printLogLevel(Print *_logOutput, int logLevel)
   }
 }
 
-void printPrefix(Print *_logOutput, int logLevel)
+void logPrintPrefix(Print *_logOutput, int logLevel)
 {
   _printTimestamp(_logOutput);
   //   printLogLevel (_logOutput, logLevel);
+}
+
+String weekday_D[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+String month_M[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+/*
+history - array of floats to convert to string, length is GRAPH_MAX_READINGS
+*/
+String historyToString(float *history)
+{
+  String tempHistory = "";
+  for (int i = 0; i < GRAPH_MAX_READINGS; i++)
+  {
+    tempHistory += String(history[i]) + ", ";
+  }
+  return tempHistory;
+}
+
+/*
+  Format a time as HH:MM
+  hour: hour to format
+  minute: minute to format
+  returns: formatted time as a string
+*/
+String formatAsHourMinute(uint8_t hour, uint8_t minute)
+{
+  char timeStr[6];
+  sprintf(timeStr, "%02d:%02d", hour, minute);
+  return String(timeStr);
 }

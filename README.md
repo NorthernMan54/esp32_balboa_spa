@@ -1,12 +1,75 @@
+# esp32_balboa_spa
+
+WiFI Enable your Balboa SPA using a ESP32 module connected to your spa controller using rs485 interface to Balboa SPA Controller.
+
+Multimode code base, with multiple user interfaces available.  Interfaces include MQTT, Web and ePaper display.
+
+Code base can also operate in client mode to a remote implementation of the code base in the Hot Tub.  This allows for creating a ePaper display in a central location.
+
+In my setup I have the code base deployed twice, one connected to the Balboa spa controller via rs485.  And a second deployment on a [LilyGo T5 ePaper Display](https://www.lilygo.cc/en-ca/products/t5-4-7-inch-e-paper-v2-3?srsltid=AfmBOopva5B_jxFAsa86Fn75lR66ZpcsqNLJEqPG4Axu8zeuCEEeqI0D) that is mounted to the kitchen so you can see the temperature etc.
+
+## Advanced Features
+
+* Caching of hot tub configuration, to reduce number of calls to SPA Controller and improve responsiveness of client applications
+* Hourly tracking of hot tub temperature for 24 hours
+* Daily tracking of heater on time in seconds. Keeps 24 days of history
+* Daily Tracking of filter on time in seconds.  Keeps 24 days of history
+
+## This is the ePaper display
+
+![alt text](docs/ePaper-Sept2024.jpeg)
+
+Display is based on the [LilyGo T5 ePaper Display](https://www.lilygo.cc/en-ca/products/t5-4-7-inch-e-paper-v2-3?srsltid=AfmBOopva5B_jxFAsa86Fn75lR66ZpcsqNLJEqPG4Axu8zeuCEEeqI0D)
+
+## This is the web site
+Credit for the code goes to https://github.com/jozefnad/balboa-spa
+
+![alt text](docs/balboa-spa-web.png)
+
+Currently the WebSite buttons are not working.  I never got around to wiring them up.
+
+## Integration with Homebridge
+
+I have used this with the homebridge plugin [homebridge-plugin-bwaspa](https://github.com/vincedarley/homebridge-plugin-bwaspa) to control and automate my Hot Tub.
+
+## MQTT Interface
+
+MQTT Commands are not working yet.  I never got around to wiring them up.
+
+# Code Base Build
+
+For the build I use platformio.
 
 ## Compiler Definitions
 
-  * LOCAL_CLIENT - Connects to SPA via local rs485 connection
-  * REMOTE_CLIENT - Connects to SPA via TCP / WiFi Module interface 
-  * LOCAL_CONNECT - Enable discovery of WiFi Module interface
-<BR>
+  * LOCAL_CLIENT - Connects to a local SPA via rs485 connection
+  * REMOTE_CLIENT - Connects to a remote SPA via TCP / WiFi Module interface 
+  * LOCAL_CONNECT - Enable discovery of ESP32 module via the Balboa discovery protocol
+  * BRIDGE - Enable local TCP Server - Can be leveraged by https://github.com/vincedarley/homebridge-plugin-bwaspa
   * TELNET_LOG - Enables serial logging via a telnet interface
+  * spaEpaper - Enables ePaper display
 
+### In spa configuration
+
+For the unit deployed in the spa, and connected to the Balboa spa controller via rs485 I use these compiler definitions.
+
+```
+  '-DLOCAL_CONNECT'
+  '-DLOCAL_CLIENT'
+  '-DBRIDGE'
+  '-DTELNET_LOG'
+```
+
+### Remote module configuration
+
+This is for the [LilyGo T5 ePaper Display](https://www.lilygo.cc/en-ca/products/t5-4-7-inch-e-paper-v2-3?srsltid=AfmBOopva5B_jxFAsa86Fn75lR66ZpcsqNLJEqPG4Axu8zeuCEEeqI0D)
+
+```
+  '-DREMOTE_CLIENT'
+  '-DspaEpaper'
+```
+
+## Background / History
 
 This is port of the package to run on an ESP32 Device, and modernization of the package
 
@@ -15,6 +78,8 @@ https://github.com/cribskip/esp8266_spa
 https://github.com/ccutrer/balboa_worldwide_app/wiki
 https://github.com/ccutrer/balboa_worldwide_app/blob/master/doc/protocol.md
 
+
+# Original README by cribskip
 
 # esp8266_spa
 Control for a Balboa spa controller using the esp8266 (tested on BP2100 and BP601 series)

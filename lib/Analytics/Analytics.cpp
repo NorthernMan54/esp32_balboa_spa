@@ -1,44 +1,32 @@
-/* Analytics library code is placed under the MIT license
- * Copyright (c) 2018 Stefan Staub
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
- * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+#include <LittleFS.h>
+#include <Analytics.h>
+#include <spaUtilities.h>
+#include <ArduinoLog.h>  // Ensure ArduinoLog is included
+#include "../../src/main.h"
+#include <cstring>  // For string handling functions like strcpy and strcat
 
-#include "Analytics.h"
-#include <utilities.h>
-
-// Store data in ESP32 RTC memory, it will survive restarts but not power cycles
-// RTC_NOINIT_ATTR AnalyticsData data;
-
-Analytics::Analytics(AnalyticsData *data)
+Analytics::Analytics(AnalyticsData *data, const char *dataName)
 {
   analyticsInstance = data;
 
+  // Construct the filename using C-style strings
+  strncpy(dataFileName, "/", sizeof(dataFileName) - 1);  // Start with "/"
+  strncat(dataFileName, dataName, sizeof(dataFileName) - strlen(dataFileName) - 1);  // Append the dataName
+  strncat(dataFileName, ".bin", sizeof(dataFileName) - strlen(dataFileName) - 1);  // Append ".bin"
+
+  // Load data if the magic number is not set, meaning it's the first run
   if (analyticsInstance->magicNumber != ANALYTICS_MAGIC_NUMBER)
   {
-    reset();
+    if (!loadData())  // Try to load saved data, reset if file doesn't exist
+    {
+      reset();  // If no saved data is found, reset the data
+      saveData();  // Save the new reset state
+    }
   }
   else
   {
     // Continue from previous session
+    Log.notice(F("[Analytics]: Loaded existing %s data from RTC" CR), dataName);
   }
 
   analyticsInstance->lastCheckedTime = getTime();
@@ -81,6 +69,11 @@ unsigned long Analytics::yesterday()
   return analyticsInstance->onTimeYesterday / 1000;
 }
 
+float *Analytics::history()
+{
+  return analyticsInstance->history;
+}
+
 void Analytics::reset()
 {
   analyticsInstance->onTimeToday = 0;
@@ -88,6 +81,14 @@ void Analytics::reset()
   analyticsInstance->previousReading = millis();
   analyticsInstance->magicNumber = ANALYTICS_MAGIC_NUMBER;
   analyticsInstance->lastCheckedTime = getTime();
+
+  for (int i = 0; i < GRAPH_MAX_READINGS; i++)
+  {
+    analyticsInstance->history[i] = 0.0;
+  }
+
+  saveData();  // Save the reset state
+  Log.notice(F("[Analytics]: Analytics data has been reset and saved." CR));
 }
 
 void Analytics::rollover()
@@ -96,5 +97,57 @@ void Analytics::rollover()
   {
     analyticsInstance->onTimeYesterday = analyticsInstance->onTimeToday;
     analyticsInstance->onTimeToday = 0;
+
+    // Shift history data for graph readings
+    for (int x = GRAPH_MAX_READINGS; x > 1; x--)
+    {
+      analyticsInstance->history[x - 1] = analyticsInstance->history[x - 2];
+    }
+
+    // Store yesterday's onTime into history
+    analyticsInstance->history[0] = analyticsInstance->onTimeYesterday / 1000;
+
+    // Save updated data to persistent storage after rollover
+    saveData();
+    Log.notice(F("[Analytics]: Day rollover detected. Data updated and saved." CR));
   }
+}
+
+void Analytics::saveData()
+{
+  File file = LittleFS.open(dataFileName, "w");
+  if (!file)
+  {
+    Log.error(F("[Analytics]: Failed to open file for writing: %s" CR), dataFileName);
+    return;
+  }
+
+  // Write the entire analytics data structure to LittleFS
+  if(!file.write((uint8_t*)analyticsInstance, sizeof(AnalyticsData))) {
+    Log.error(F("[Analytics]: Failed to write data to file: %s" CR), dataFileName);
+  } else {
+    Log.notice(F("[Analytics]: Analytics data saved to %s" CR), dataFileName);
+  }
+  file.close();
+}
+
+bool Analytics::loadData()
+{
+  File file = LittleFS.open(dataFileName, "r");
+  if (!file)
+  {
+    Log.warning(F("[Analytics]: No saved data found for %s. Resetting..." CR), dataFileName);
+    return false;  // File not found, return false to trigger reset
+  }
+
+  // Read the saved data into the analyticsInstance structure
+  if(!file.readBytes((char*)analyticsInstance, sizeof(AnalyticsData))) {
+    Log.error(F("[Analytics]: Failed to read data from file: %s" CR), dataFileName);
+    file.close();
+    return false;
+  }
+  file.close();
+
+  Log.notice(F("[Analytics]: Analytics data loaded from %s" CR), dataFileName);
+  return true;  // Successfully loaded data
 }

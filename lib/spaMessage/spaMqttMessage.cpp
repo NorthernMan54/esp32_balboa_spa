@@ -4,25 +4,20 @@
 #include <Arduino.h>
 #include <ArduinoLog.h>
 #include <mqttModule.h>
+#include <spaUtilities.h>
 
 #define BUFFER_SIZE BALBOA_MESSAGE_SIZE * 3 + 1
 // Macro to simplify publishing data
 #define PUBLISH_STATUS_ELEMENT(element, format)                      \
   do                                                                 \
   {                                                                  \
-    char buffer[BUFFER_SIZE];                                                 \
+    char buffer[BUFFER_SIZE];                                        \
     snprintf(buffer, sizeof(buffer), format, spaStatusData.element); \
     publishElement(#element, "status", buffer);                      \
   } while (0)
 
-#define PUBLISH_STATUS_MAP(element, suppliedMap, format)                  \
-  do                                                                      \
-  {                                                                       \
-    std::map<uint8_t, const char *> map = suppliedMap;                    \
-    char buffer[BUFFER_SIZE];                                                      \
-    snprintf(buffer, sizeof(buffer), format, map[spaStatusData.element]); \
-    publishElement(#element, "status", buffer);                           \
-  } while (0)
+#define PUBLISH_STATE_MAP(element, map) \
+  publishElement(#element, "status", getMapDescription(spaStatusData.element, map).c_str());
 
 void publishElement(const char *element, const char *group, const char *value)
 {
@@ -54,35 +49,37 @@ void publishSpaStatusData()
   convertRawDataToHex(spaStatusData, rawDataHex);
   publishElement("rawData", "status", rawDataHex);
 
-  // PUBLISH_STATUS_ELEMENT(spaState, "%u");
-  PUBLISH_STATUS_MAP(spaState, SPA_STATE_MAP, "%s");
-  PUBLISH_STATUS_MAP(initMode, SPA_MODE_MAP, "%s");
-  // PUBLISH_STATUS_ELEMENT(initMode, "%u");
+  PUBLISH_STATE_MAP(spaState, spaStateMap);
+  PUBLISH_STATE_MAP(initMode, initModeMap);
+  PUBLISH_STATUS_ELEMENT(currentTemp, "%.2f");
+
   PUBLISH_STATUS_ELEMENT(currentTemp, "%.2f");
   PUBLISH_STATUS_ELEMENT(time, "%s");
-  PUBLISH_STATUS_ELEMENT(heatingMode, "%u");
+  PUBLISH_STATE_MAP(heatingMode, heatingModeMap);
+  PUBLISH_STATUS_ELEMENT(heatingState, "%u");
 
   PUBLISH_STATUS_ELEMENT(reminderType, "%u");
   PUBLISH_STATUS_ELEMENT(sensorA, "%u");
   PUBLISH_STATUS_ELEMENT(sensorB, "%u");
   PUBLISH_STATUS_ELEMENT(tempScale, "%u");
   PUBLISH_STATUS_ELEMENT(clockMode, "%u");
-  PUBLISH_STATUS_MAP(filterMode, FILTER_MODE_MAP, "%s");
-  PUBLISH_STATUS_MAP(panelLocked, LOCKED_MAP, "%s");
-  PUBLISH_STATUS_MAP(tempRange, TEMP_RANGE_MAP, "%s");
+  PUBLISH_STATE_MAP(filterMode, filterModeMap);
+
+  PUBLISH_STATE_MAP(panelLocked, lockedMap);
+  PUBLISH_STATE_MAP(tempRange, tempRangeMap);
   PUBLISH_STATUS_ELEMENT(needsHeat, "%u");
-  PUBLISH_STATUS_ELEMENT(heatingState, "%u");
-  PUBLISH_STATUS_MAP(pump1, PUMP_STATE_MAP, "%s");
-  PUBLISH_STATUS_MAP(pump2, PUMP_STATE_MAP, "%s");
-  PUBLISH_STATUS_MAP(pump3, PUMP_STATE_MAP, "%s");
-  PUBLISH_STATUS_MAP(pump4, PUMP_STATE_MAP, "%s");
-  PUBLISH_STATUS_MAP(pump5, PUMP_STATE_MAP, "%s");
-  PUBLISH_STATUS_MAP(pump6, PUMP_STATE_MAP, "%s");
-  PUBLISH_STATUS_MAP(light1, ON_OFF_MAP, "%s");
-  PUBLISH_STATUS_MAP(blower, ON_OFF_MAP, "%s");
-  PUBLISH_STATUS_MAP(light1, ON_OFF_MAP, "%s");
-  PUBLISH_STATUS_MAP(light2, ON_OFF_MAP, "%s");
-  PUBLISH_STATUS_MAP(mister, ON_OFF_MAP, "%s");
+
+  PUBLISH_STATE_MAP(pump1, pumpMap);
+  PUBLISH_STATE_MAP(pump2, pumpMap);
+  PUBLISH_STATE_MAP(pump3, pumpMap);
+  PUBLISH_STATE_MAP(pump4, pumpMap);
+  PUBLISH_STATE_MAP(pump5, pumpMap);
+  PUBLISH_STATE_MAP(pump6, pumpMap);
+  PUBLISH_STATE_MAP(circ, onOffMap);
+  PUBLISH_STATE_MAP(blower, onOffMap);
+  PUBLISH_STATE_MAP(light1, onOffMap);
+  PUBLISH_STATE_MAP(light2, onOffMap);
+  PUBLISH_STATE_MAP(mister, onOffMap);
 
   PUBLISH_STATUS_ELEMENT(mister, "%u");
   PUBLISH_STATUS_ELEMENT(setTemp, "%.2f");
@@ -91,19 +88,25 @@ void publishSpaStatusData()
   PUBLISH_STATUS_ELEMENT(notification, "%u");
   PUBLISH_STATUS_ELEMENT(flags19, "%u");
   PUBLISH_STATUS_ELEMENT(settingsLock, "%u");
-  PUBLISH_STATUS_MAP(settingsLock, LOCKED_MAP, "%s");
+  PUBLISH_STATE_MAP(settingsLock, lockedMap);
   PUBLISH_STATUS_ELEMENT(m8CycleTime, "%u");
 
   PUBLISH_STATUS_ELEMENT(heaterOnTimeToday, "%u");
   PUBLISH_STATUS_ELEMENT(heaterOnTimeYesterday, "%u");
   PUBLISH_STATUS_ELEMENT(filterOnTimeToday, "%u");
   PUBLISH_STATUS_ELEMENT(filterOnTimeYesterday, "%u");
+
+  PUBLISH_STATUS_ELEMENT(filterOnTimeYesterday, "%u");
+
+  publishElement("temperatureHistory", "status", historyToString(spaStatusData.temperatureHistory).c_str());
+  publishElement("heaterHistory", "status", historyToString(spaStatusData.heatOn->history()).c_str());
+  publishElement("filterHistory", "status", historyToString(spaStatusData.filterOn->history()).c_str());
 }
 
 #define PUBLISH_CONFIG_ELEMENT(element, format)                             \
   do                                                                        \
   {                                                                         \
-    char buffer[BUFFER_SIZE];                                                        \
+    char buffer[BUFFER_SIZE];                                               \
     snprintf(buffer, sizeof(buffer), format, spaConfigurationData.element); \
     publishElement(#element, "config", buffer);                             \
   } while (0)
@@ -140,7 +143,7 @@ void publishSpaConfigurationData()
 #define PUBLISH_FILTER_SETTINGS_ELEMENT(element, format)                     \
   do                                                                         \
   {                                                                          \
-    char buffer[BUFFER_SIZE];                                                         \
+    char buffer[BUFFER_SIZE];                                                \
     snprintf(buffer, sizeof(buffer), format, spaFilterSettingsData.element); \
     publishElement(#element, "filterSettings", buffer);                      \
   } while (0)
@@ -205,7 +208,7 @@ void publishSpaFaultLogData()
 #define PUBLISH_PREFERENCES_ELEMENT(element, format)                      \
   do                                                                      \
   {                                                                       \
-    char buffer[BUFFER_SIZE];                                                      \
+    char buffer[BUFFER_SIZE];                                             \
     snprintf(buffer, sizeof(buffer), format, spaPreferencesData.element); \
     publishElement(#element, "preferences", buffer);                      \
   } while (0)
@@ -234,7 +237,7 @@ void publishSpaPreferencesData()
 #define PUBLISH_INFORMATION_ELEMENT(element, format)                      \
   do                                                                      \
   {                                                                       \
-    char buffer[BUFFER_SIZE];                                                      \
+    char buffer[BUFFER_SIZE];                                             \
     snprintf(buffer, sizeof(buffer), format, spaInformationData.element); \
     publishElement(#element, "information", buffer);                      \
   } while (0)
@@ -264,7 +267,7 @@ void publishSpaInformationData()
 #define PUBLISH_SETTINGS_0x04_ELEMENT(element, format)                     \
   do                                                                       \
   {                                                                        \
-    char buffer[BUFFER_SIZE];                                                       \
+    char buffer[BUFFER_SIZE];                                              \
     snprintf(buffer, sizeof(buffer), format, spaSettings0x04Data.element); \
     publishElement(#element, "settings0x04", buffer);                      \
   } while (0)
@@ -281,13 +284,12 @@ void publishSpaSettings0x04Data()
   char rawDataHex[3 * BALBOA_MESSAGE_SIZE + 1]; // 2 characters per byte + space + null terminator
   convertRawDataToHex(spaSettings0x04Data, rawDataHex);
   publishElement("rawData", "settings0x04", rawDataHex);
-
 }
 
 #define PUBLISH_WIFI_MODULE_CONFIG_ELEMENT(element, format)                        \
   do                                                                               \
   {                                                                                \
-    char buffer[BUFFER_SIZE];                                                               \
+    char buffer[BUFFER_SIZE];                                                      \
     snprintf(buffer, sizeof(buffer), format, wiFiModuleConfigurationData.element); \
     publishElement(#element, "wifiModuleConfig", buffer);                          \
   } while (0)

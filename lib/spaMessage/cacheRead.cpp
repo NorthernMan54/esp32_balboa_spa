@@ -3,7 +3,7 @@
 #include <CircularBuffer.hpp>
 #include <ArduinoLog.h>
 
-#include <utilities.h>
+#include  <spaUtilities.h>
 #include <bridge.h>
 
 #include "balboa.h"

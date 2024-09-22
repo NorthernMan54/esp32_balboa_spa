@@ -14,7 +14,12 @@
 #define BUILD (String(__DATE__) + " - " + String(__TIME__)).c_str()
 
 #define INITIAL_WDT_TIMEOUT 300 // Reset ESP32 if wifi is not connected within 5 minutes
-#define RUNNING_WDT_TIMEOUT 120  // Reset ESP32 if no SPA messages are received for 60 seconds
+#if defined(ESP32S3)
+#warning "Need to look into S3 watchdog timer"
+#define RUNNING_WDT_TIMEOUT 1200  // Reset ESP32 if no SPA messages are received for 60 seconds
+#else
+#define RUNNING_WDT_TIMEOUT 60  // Reset ESP32 if no SPA messages are received for 60 seconds
+#endif
 
 #define logSection(section)                                                  \
   Log.setShowLevel(false);                                                   \
@@ -40,6 +45,8 @@ struct SpaWriteQueueMessage
   int length;
 };
 
+extern String buildDefinitionString;
+
 #ifdef LOCAL_CLIENT
 #ifdef REMOTE_CLIENT
 #error "Cannot define both LOCAL_CLIENT and REMOTE_CLIENT"
@@ -51,5 +58,7 @@ struct SpaWriteQueueMessage
 #error "Define either LOCAL_CLIENT or REMOTE_CLIENT"
 #endif
 #endif
+
+#define GRAPH_MAX_READINGS 24 // Limited to 3-days here, but could go to 5-days = 40 as the data is issued  
 
 #endif

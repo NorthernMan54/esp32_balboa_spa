@@ -25,10 +25,11 @@
 #ifndef ANALYTICS_H
 #define ANALYTICS_H
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include "../../src/main.h"
 
 #define ANALYTICS_VERSION "0.1.0"
-#define ANALYTICS_MAGIC_NUMBER 0x13245678  // Magic number to check if data is initialized
+#define ANALYTICS_MAGIC_NUMBER 0x13245678 // Magic number to check if data is initialized
 
 typedef struct
 {
@@ -36,6 +37,7 @@ typedef struct
   unsigned long previousReading;
   unsigned long onTimeToday;
   unsigned long onTimeYesterday;
+  float history[GRAPH_MAX_READINGS];
   time_t lastCheckedTime;
 } AnalyticsData;
 
@@ -47,14 +49,14 @@ public:
    *
    *
    */
-  Analytics(AnalyticsData *data);
+  Analytics(AnalyticsData *data, const char *dataName);
 
   /** destructor for the Analytics object
    *
    */
   ~Analytics();
 
-void add(uint8_t);
+  void add(uint8_t);
   /** start the Analytics
    *
    */
@@ -65,17 +67,20 @@ void add(uint8_t);
    */
   void off();
 
-  /*
-
-  */
   unsigned long today();
 
   unsigned long yesterday();
 
+  float *history();
+
 private:
   AnalyticsData *analyticsInstance;
+  char dataFileName[32];
   void rollover();
   void reset();
+  void saveData();
+  bool loadData();
+
 };
 
 #endif

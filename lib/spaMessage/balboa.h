@@ -1,8 +1,12 @@
 #ifndef BALBOA_H
 #define BALBOA_H
 #include <Arduino.h>
+#include <ArduinoLog.h>
+#include <../Analytics/Analytics.h>
 #include "../../src/main.h"
 #include <map>
+
+// Rest of the code...
 
 // Message Types
 
@@ -36,10 +40,10 @@
 #define WiFi_Module_Configuration_Type 0x94
 
 // Configuration, Settings 0x04, Filter Cycles, and Information Messages
-#define CONFIGURATION_REQUEST   {0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x00, 0x00, 0x01, 0x58, 0x7e}
-#define SETTINGS_0X04_REQUEST   {0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x04, 0x00, 0x00, 0xf4, 0x7e}
+#define CONFIGURATION_REQUEST {0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x00, 0x00, 0x01, 0x58, 0x7e}
+#define SETTINGS_0X04_REQUEST {0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x04, 0x00, 0x00, 0xf4, 0x7e}
 #define FILTER_SETTINGS_REQUEST {0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x01, 0x00, 0x00, 0x34, 0x7e}
-#define INFORMATION_REQUEST     {0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x02, 0x00, 0x00, 0x89, 0x7e}
+#define INFORMATION_REQUEST {0x7e, 0x08, 0x0a, 0xbf, 0x22, 0x02, 0x00, 0x00, 0x89, 0x7e}
 
 /*
 Settings Code	Name	Subsequent Arguments	Response
@@ -78,39 +82,39 @@ Settings Code	Name	Subsequent Arguments	Response
 #define Existing_WiFi_Client_Request(Q_in) (Q_in[2] == 0x0a && Q_in[4] == Existing_Client_Request_Type) // 7e 05 0a bf 04 77 7e
 #define Clear_to_Send(Q_in) (Q_in[2] == id && Q_in[4] == Clear_to_Send_Type)
 
-#define For_Us_Message(Q_in) (Q_in[2] == id || Q_in[2] == 0xFF)  
+#define For_Us_Message(Q_in) (Q_in[2] == id || Q_in[2] == 0xFF)
 
 #define WiFi_Module_Configuration_Response(Q_out) \
-  Q_out.push(0x7E);                        \
-  Q_out.push(0x1D);                        \
-  Q_out.push(0x0A);                        \
-  Q_out.push(0xBF);                        \
-  Q_out.push(0x94);                        \
-  Q_out.push(0x02);                        \
-  Q_out.push(0x14);                        \
-  Q_out.push(0x80);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x15);                        \
-  Q_out.push(0x27);                        \
-  Q_out.push(0x3F);                        \
-  Q_out.push(0x9B);                        \
-  Q_out.push(0x95);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x00);                        \
-  Q_out.push(0x15);                        \
-  Q_out.push(0x27);                        \
-  Q_out.push(0xFF);                        \
-  Q_out.push(0xFF);                        \
-  Q_out.push(0x3F);                        \
-  Q_out.push(0x9B);                        \
-  Q_out.push(0x95);                        \
-  Q_out.push(0x27);                        \
+  Q_out.push(0x7E);                               \
+  Q_out.push(0x1D);                               \
+  Q_out.push(0x0A);                               \
+  Q_out.push(0xBF);                               \
+  Q_out.push(0x94);                               \
+  Q_out.push(0x02);                               \
+  Q_out.push(0x14);                               \
+  Q_out.push(0x80);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x15);                               \
+  Q_out.push(0x27);                               \
+  Q_out.push(0x3F);                               \
+  Q_out.push(0x9B);                               \
+  Q_out.push(0x95);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x00);                               \
+  Q_out.push(0x15);                               \
+  Q_out.push(0x27);                               \
+  Q_out.push(0xFF);                               \
+  Q_out.push(0xFF);                               \
+  Q_out.push(0x3F);                               \
+  Q_out.push(0x9B);                               \
+  Q_out.push(0x95);                               \
+  Q_out.push(0x27);                               \
   Q_out.push(0x7E);
 
 struct SpaStatusData
@@ -149,24 +153,35 @@ struct SpaStatusData
 
   bool light1;
   bool light2;
-
+  uint8_t flag16;
+  uint8_t flag17;
   bool mister;
 
   float setTemp;
   float lowSetTemp;
   float highSetTemp;
   uint8_t notification;
-  uint8_t flags19;
-  bool settingsLock;
-  uint8_t m8CycleTime;
 
-// Analytics
+  uint8_t flags19;
+  uint8_t flags21_0;
+  uint8_t atimeouts;
+  bool settingsLock;
+  uint8_t flags21_4_7;
+  uint8_t flags22;
+  uint8_t flags23;
+  uint8_t m8CycleTime;
+  uint8_t flag25;
+  uint8_t flag26;
+
+  // Analytics
 
   unsigned long heaterOnTimeToday;
   unsigned long heaterOnTimeYesterday;
   unsigned long filterOnTimeToday;
   unsigned long filterOnTimeYesterday;
-
+  float temperatureHistory[GRAPH_MAX_READINGS];
+  Analytics *heatOn;
+  Analytics *filterOn;
 };
 
 struct SpaConfigurationData
@@ -286,50 +301,48 @@ struct SpaPreferencesData
   uint8_t m8AI;
 };
 
-#define SPA_STATE_MAP { \
-  {0, "Running"}, \
-  {1, "Initializing"}, \
-  {5, "Hold Mode"}, \
-  {0x14, "A/B Temps ON"}, \
-  {0x17, "Test Mode"} \
-}
+const std::map<uint8_t, const char *> spaStateMap = {
+    {0, "Running"},
+    {1, "Initializing"},
+    {5, "Hold Mode"},
+    {0x14, "A/B Temps ON"},
+    {0x17, "Test Mode"}};
 
-#define SPA_MODE_MAP {                         \
-  {0, "Idle"},                                 \
-  {1, "Priming Mode"},                         \
-  {2, "Fault"},                                \
-  {3, "Reminder"},                             \
-  {4, "Stage 1"},                              \
-  {5, "Stage 3"},                              \
-  {0x42, "Stage 2"}                            \
-}
+const std::map<uint8_t, const char *> initModeMap = {
+    {0, "Idle"},
+    {1, "Priming Mode"},
+    {2, "Fault"},
+    {3, "Reminder"},
+    {4, "Stage 1"},
+    {5, "Stage 3"},
+    {0x42, "Stage 2"}};
 
-#define FILTER_MODE_MAP {                                 \
-  {0, "Off"},                                            \
-  {1, "Cycle 1"},                                         \
-  {2, "Cycle 2"},                                         \
-  {3, "Cycle 1 & 2"}                                      \
-}
+const std::map<uint8_t, const char *> filterModeMap = {
+    {0, "Off"},
+    {1, "Cycle 1"},
+    {2, "Cycle 2"},
+    {3, "Cycle 1 & 2"}};
 
-#define TEMP_RANGE_MAP {                          \
-  {0, "Low Range"},                               \
-  {1, "High Range"}                               \
-}
+const std::map<uint8_t, const char *> heatingModeMap = {
+    {0, "Ready"},
+    {1, "Rest"},
+    {3, "Ready in Rest"}};
 
-#define PUMP_STATE_MAP {                            \
-  {0, "Off"},                                      \
-  {1, "Low"},                                       \
-  {2, "High"}                                       \
-}
+const std::map<uint8_t, const char *> pumpMap = {
+    {0, "Off"},
+    {1, "Low"},
+    {2, "High"}};
 
-#define LOCKED_MAP {                          \
-  {0, "Unlocked"},                            \
-  {1, "Locked"}                               \
-}
+const std::map<uint8_t, const char *> tempRangeMap = {
+    {0, "Low Range"},
+    {1, "High Range"}};
 
-#define ON_OFF_MAP {                          \
-  {0, "Off"},                                 \
-  {1, "On"}                                   \
-}
+const std::map<uint8_t, const char *> lockedMap = {
+    {0, "Unlocked"},
+    {1, "Locked"}};
+
+const std::map<uint8_t, const char *> onOffMap = {
+    {0, "Off"},
+    {1, "On"}};
 
 #endif

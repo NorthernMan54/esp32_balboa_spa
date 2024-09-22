@@ -4,7 +4,7 @@
 #include <AsyncTCP.h>
 #include <ArduinoLog.h>
 
-#include <utilities.h>
+#include  <spaUtilities.h>
 #include <mqttModule.h>
 #include <rs485.h>
 #include <cacheRead.h>
