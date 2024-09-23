@@ -16,7 +16,9 @@
 #include <rs485.h>
 #include <bridge.h>
 #include <spaEpaper.h>
+#ifdef TEMP_PROBE
 #include <tempProbe.h>
+#endif
 
 #include "main.h"
 
@@ -150,4 +152,7 @@ void loop()
     bridgeLoop();
 #endif
   }
+#ifdef TEMP_PROBE
+  tempProbeLoop();
+#endif
 }

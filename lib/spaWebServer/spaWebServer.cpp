@@ -44,6 +44,8 @@ bool serverSetup = false;
 
 void spaWebServerSetup()
 {
+  Log.notice("[Web]: Web App Setup" CR);
+  /*
   if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED))
   {
     Log.error("[Web]: Error LittleFS Mount Failed");
@@ -53,6 +55,7 @@ void spaWebServerSetup()
     Log.notice("[Web]: LittleFS Mounted" CR);
     listDir(LittleFS, "/", 3);
   }
+  */
   Log.notice("[Web]: Web App config" CR);
   File envFile = LittleFS.open("/.env", "r");
   if (envFile)
