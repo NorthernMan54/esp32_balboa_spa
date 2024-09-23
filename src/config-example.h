@@ -18,3 +18,5 @@
 
 #define TX485_Rx 16
 #define TX485_Tx 17
+
+#define TEMP_SENSOR_GPIO 4

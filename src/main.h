@@ -10,7 +10,7 @@
 #define LOG_LEVEL LOG_LEVEL_VERBOSE
 #endif
 
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 #define BUILD (String(__DATE__) + " - " + String(__TIME__)).c_str()
 
 #define INITIAL_WDT_TIMEOUT 300 // Reset ESP32 if wifi is not connected within 5 minutes

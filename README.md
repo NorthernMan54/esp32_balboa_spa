@@ -48,6 +48,7 @@ For the build I use platformio.
   * BRIDGE - Enable local TCP Server - Can be leveraged by https://github.com/vincedarley/homebridge-plugin-bwaspa
   * TELNET_LOG - Enables serial logging via a telnet interface
   * spaEpaper - Enables ePaper display
+  * TEMP_SENSOR_GPIO - Enable locally connected DS18B20 Temperature Sensor
 
 ### In spa configuration
 

@@ -16,6 +16,7 @@
 #include <rs485.h>
 #include <bridge.h>
 #include <spaEpaper.h>
+#include <tempProbe.h>
 
 #include "main.h"
 
@@ -73,6 +74,10 @@ void setup()
   addBuildDefinition("spaEpaper");
 #endif
 
+#ifdef TEMP_PROBE
+  addBuildDefinition("TEMP_PROBE");
+#endif
+
   Log.notice(F("Build Definitions: %s" CR), buildDefinitionString.c_str());
 
   logSection("ESP Information");
@@ -108,6 +113,10 @@ void setup()
 #if defined(LOCAL_CONNECT) || defined(BRIDGE)
   logSection("Bridge Setup");
   bridgeSetup();
+#endif
+#ifdef TEMP_PROBE
+  logSection("Temperature Probe Setup");
+  tempProbeSetup();
 #endif
   logSection("Setup Complete");
 }
