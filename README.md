@@ -36,6 +36,12 @@ I have used this with the homebridge plugin [homebridge-plugin-bwaspa](https://g
 
 MQTT Commands are not working yet.  I never got around to wiring them up.
 
+##  LVGL development 320 * 480
+
+(ESP32S3 LVGL 320 * 480)[https://www.aliexpress.com/item/1005007566332450.html?spm=a2g0o.order_list.order_list_main.4.2c511802JA4XpT]
+
+
+
 # Code Base Build
 
 For the build I use platformio.
