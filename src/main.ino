@@ -16,6 +16,7 @@
 #include <rs485.h>
 #include <bridge.h>
 #include <spaEpaper.h>
+#include <lvglDisplay.h>
 
 #include "main.h"
 
@@ -34,6 +35,9 @@ void setup()
 #ifdef spaEpaper
   logSection("EPaper Setup");
   spaEpaperSetup();
+#endif
+#ifdef LVGL_DISPLAY
+
 #endif
   logSection("Build Definitions");
   Log.notice(F("Version: %s" CR), VERSION);
@@ -72,7 +76,9 @@ void setup()
 #ifdef spaEpaper
   addBuildDefinition("spaEpaper");
 #endif
-
+#ifdef LVGL_DISPLAY
+  addBuildDefinition("LVGL_DISPLAY");
+#endif
   Log.notice(F("Build Definitions: %s" CR), buildDefinitionString.c_str());
 
   logSection("ESP Information");
@@ -119,6 +125,9 @@ void loop()
 #endif
 #ifdef spaEpaper
   spaEpaperLoop();
+#endif
+#ifdef LVGL_DISPLAY
+  lvglDisplayLoop();
 #endif
   wifiModuleLoop();
 
