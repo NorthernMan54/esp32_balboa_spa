@@ -16,6 +16,7 @@
 #include <rs485.h>
 #include <bridge.h>
 #include <spaEpaper.h>
+#include <spaLvgl.h>
 
 #include "main.h"
 
@@ -24,6 +25,9 @@ String buildDefinitionString = "";
 
 void setup()
 {
+#ifdef ARDUINO_USB_CDC_ON_BOOT
+  delay(5000);
+#endif
   // Launch serial for debugging purposes
   Serial.begin(SERIAL_BAUD);
   Log.setPrefix(logPrintPrefix);
@@ -34,6 +38,10 @@ void setup()
 #ifdef spaEpaper
   logSection("EPaper Setup");
   spaEpaperSetup();
+#endif
+#ifdef LVGL
+  logSection("SPA LVGL Setup");
+  spaLvglSetup();
 #endif
   logSection("Build Definitions");
   Log.notice(F("Version: %s" CR), VERSION);
@@ -71,6 +79,10 @@ void setup()
 
 #ifdef spaEpaper
   addBuildDefinition("spaEpaper");
+#endif
+
+#ifdef LVGL
+  addBuildDefinition("LVGL");
 #endif
 
   Log.notice(F("Build Definitions: %s" CR), buildDefinitionString.c_str());
@@ -119,6 +131,9 @@ void loop()
 #endif
 #ifdef spaEpaper
   spaEpaperLoop();
+#endif
+#ifdef LVGL
+  spaLvglLoop();
 #endif
   wifiModuleLoop();
 
