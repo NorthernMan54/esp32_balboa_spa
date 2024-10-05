@@ -82,7 +82,7 @@ void setup()
 #endif
 
 #ifdef SPALVGL
-  addBuildDefinition("LVGL");
+  addBuildDefinition("SPALVGL");
 #endif
 
   Log.notice(F("Build Definitions: %s" CR), buildDefinitionString.c_str());

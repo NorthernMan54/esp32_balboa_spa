@@ -144,7 +144,7 @@
     "use_1200bps_touch": true,
     "wait_for_upload_port": true,
     "require_upload_port": true,
-    "speed": 460800
+    "speed": 921600
   },
   "url": "https://www.aliexpress.com/item/1005006302276974.html",
   "vendor": "Sunton"
