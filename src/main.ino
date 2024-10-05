@@ -39,7 +39,7 @@ void setup()
   logSection("EPaper Setup");
   spaEpaperSetup();
 #endif
-#ifdef LVGL
+#ifdef SPALVGL
   logSection("SPA LVGL Setup");
   spaLvglSetup();
 #endif
@@ -81,7 +81,7 @@ void setup()
   addBuildDefinition("spaEpaper");
 #endif
 
-#ifdef LVGL
+#ifdef SPALVGL
   addBuildDefinition("LVGL");
 #endif
 
@@ -132,7 +132,7 @@ void loop()
 #ifdef spaEpaper
   spaEpaperLoop();
 #endif
-#ifdef LVGL
+#ifdef SPALVGL
   spaLvglLoop();
 #endif
   wifiModuleLoop();

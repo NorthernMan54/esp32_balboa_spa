@@ -1,8 +1,12 @@
-#ifdef LVGL
+#ifdef SPALVGL
 
 #include <Arduino.h>
 #include <esp32_smartdisplay.h>
+#ifdef SQUARELINE
 #include <ui/ui.h>
+#else
+#include <spaUI/ui.h>
+#endif
 
 void OnAddOneClicked(lv_event_t *e)
 {
