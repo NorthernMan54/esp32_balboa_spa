@@ -5,8 +5,25 @@
 // #include "display.h"
 #include "ui.h"
 
+// #include "pumpOff.h"
+// #include "pumpLow.h"
+// #include "pumpHigh.h"
+
+#include "ui_img_pumpoff_png.c"
+#include "ui_img_pumplow_png.c"
+#include "ui_temporary_image.c"
+
+#include "LightOff.c"
+#include "LightOn.c"
+
 #define SCALE_WIDTH 150
 #define SCALE_HEIGHT 150
+
+#define THERMO_WIDTH 200
+#define THERMO_HEIGHT 150
+
+#define BUTTON_WIDTH 100
+#define BUTTON_HEIGHT 100
 
 #define CHART_WIDTH 200
 #define CHART_HEIGHT 150
@@ -18,7 +35,7 @@ static const char *TAG = "GRID";
 /**
  * Demonstrate grid's "free unit"
  */
-void ui_init(void)
+void ui_init_old(void)
 {
   /*Column 1: fix width 60 px
    *Column 2: 1 unit from the remaining free space
@@ -49,12 +66,12 @@ void ui_init(void)
       if (col == 0)
       {
         log_i("scale_2 i=%lu, col=%d, row=%d, ", i, col, row);
-        obj = scale_4(cont);
+        obj = scale_2(cont);
       }
       else
       {
         log_i("scale_4 i=%lu, col=%d, row=%d, ", i, col, row);
-        obj = scale_2(cont);
+        obj = scale_4(cont);
       }
     }
     else if (row == 1)
@@ -67,15 +84,109 @@ void ui_init(void)
       log_i("scale-needle i=%lu, col=%d, row=%d, ", i, col, row);
       //    obj = scale_3(cont);
     }
+    log_i("cell i=%lu, x=%d, x2=%d, y=%d, y2=%d", i, lv_obj_get_x(obj), lv_obj_get_x2(obj), lv_obj_get_y(obj), lv_obj_get_y2(obj));
     /*Stretch the cell horizontally and vertically too
      *Set span to 1 to make the cell 1 column/row sized*/
-    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, col, 1,
-                         LV_GRID_ALIGN_STRETCH, row, 1);
+
+    lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+    lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+    lv_obj_set_style_pad_left(obj, 8, 0);
+    lv_obj_set_style_radius(obj, 8, 0);
+    lv_obj_set_style_pad_ver(obj, 8, 0);
+
+    lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_SPACE_AROUND, col, 1,
+                         LV_GRID_ALIGN_SPACE_AROUND, row, 1);
 
     label = lv_label_create(obj);
     lv_label_set_text_fmt(label, "%d,%d", col, row);
     lv_obj_align(label, LV_ALIGN_BOTTOM_MID, 0, 0);
   }
+}
+
+void ui_init(void)
+{
+  static lv_style_t style;
+  lv_style_init(&style);
+  lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
+  lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_EVENLY);
+  lv_style_set_layout(&style, LV_LAYOUT_FLEX);
+
+  lv_obj_t *cont = lv_obj_create(lv_screen_active());
+  lv_obj_set_size(cont, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+  lv_obj_center(cont);
+  lv_obj_add_style(cont, &style, 0);
+
+  uint32_t i;
+
+  lv_obj_t *obj = scale_2(cont);
+  lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+  lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+  lv_obj_set_style_pad_left(obj, 8, 0);
+  lv_obj_set_style_radius(obj, 8, 0);
+  lv_obj_set_style_pad_ver(obj, 8, 0);
+
+  obj = scale_4(cont);
+  lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+  lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+  lv_obj_set_style_pad_left(obj, 8, 0);
+  lv_obj_set_style_radius(obj, 8, 0);
+  lv_obj_set_style_pad_ver(obj, 8, 0);
+
+  obj = scale_5(cont);
+  lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+  lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+  lv_obj_set_style_pad_left(obj, 8, 0);
+  lv_obj_set_style_radius(obj, 8, 0);
+  lv_obj_set_style_pad_ver(obj, 8, 0);
+
+  obj = chart_obj(cont);
+  lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+  lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+  lv_obj_set_style_pad_left(obj, 8, 0);
+  lv_obj_set_style_radius(obj, 8, 0);
+  lv_obj_set_style_pad_ver(obj, 8, 0);
+
+  /*
+    obj = pump_button_1(cont);
+    lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+    lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+    lv_obj_set_style_pad_left(obj, 8, 0);
+    lv_obj_set_style_radius(obj, 8, 0);
+    lv_obj_set_style_pad_ver(obj, 8, 0);
+  */
+
+  obj = pump_button_2(cont);
+  // lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+  // lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+  lv_obj_set_style_pad_left(obj, 8, 0);
+  lv_obj_set_style_radius(obj, 8, 0);
+  lv_obj_set_style_pad_ver(obj, 8, 0);
+
+  obj = pump_button_2(cont);
+  // lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+  // lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+  lv_obj_set_style_pad_left(obj, 8, 0);
+  lv_obj_set_style_radius(obj, 8, 0);
+  lv_obj_set_style_pad_ver(obj, 8, 0);
+
+  obj = lamp_button_1(cont);
+  lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+  lv_obj_set_style_bg_opa(obj, LV_OPA_50, 0);
+  lv_obj_set_style_pad_left(obj, 8, 0);
+  lv_obj_set_style_radius(obj, 8, 0);
+  lv_obj_set_style_pad_ver(obj, 8, 0);
+
+  /*
+  for(i = 0; i < 8; i++) {
+      lv_obj_t * obj = lv_obj_create(cont);
+      lv_obj_set_size(obj, 70, LV_SIZE_CONTENT);
+      lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE);
+
+      lv_obj_t * label = lv_label_create(obj);
+      lv_label_set_text_fmt(label, "%"LV_PRIu32, i);
+      lv_obj_center(label);
+  }
+  */
 }
 
 /**
@@ -84,7 +195,7 @@ void ui_init(void)
 lv_obj_t *scale_2(lv_obj_t *parent)
 {
   lv_obj_t *scale = lv_scale_create(parent);
-  lv_obj_set_size(scale, 60, 200);
+  lv_obj_set_size(scale, 60, SCALE_HEIGHT);
   lv_scale_set_label_show(scale, true);
   lv_scale_set_mode(scale, LV_SCALE_MODE_VERTICAL_RIGHT);
   lv_obj_center(scale);
@@ -156,11 +267,13 @@ lv_obj_t *scale_2(lv_obj_t *parent)
   lv_scale_section_set_style(section, LV_PART_ITEMS, &section_minor_tick_style);
   lv_scale_section_set_style(section, LV_PART_MAIN, &section_main_line_style);
 
-  lv_obj_set_style_bg_color(scale, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
-  lv_obj_set_style_bg_opa(scale, LV_OPA_50, 0);
-  lv_obj_set_style_pad_left(scale, 8, 0);
-  lv_obj_set_style_radius(scale, 8, 0);
-  lv_obj_set_style_pad_ver(scale, 20, 0);
+  /*
+    lv_obj_set_style_bg_color(scale, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+    lv_obj_set_style_bg_opa(scale, LV_OPA_50, 0);
+    lv_obj_set_style_pad_left(scale, 8, 0);
+    lv_obj_set_style_radius(scale, 8, 0);
+    lv_obj_set_style_pad_ver(scale, 20, 0);
+    */
 
   return scale;
 }
@@ -171,11 +284,20 @@ lv_obj_t *scale_2(lv_obj_t *parent)
  */
 lv_obj_t *scale_4(lv_obj_t *parent)
 {
-  lv_obj_t *scale = lv_scale_create(parent);
-//  lv_obj_set_size(scale, 100, 100);
+  lv_obj_t *container = lv_obj_create(parent);
+
+  lv_obj_set_size(container, THERMO_WIDTH, 110);
+  lv_obj_set_align(container, LV_ALIGN_CENTER);
+
+  lv_obj_remove_flag(container, LV_OBJ_FLAG_SCROLLABLE);
+
+  lv_obj_t *scale = lv_scale_create(container);
+
   lv_scale_set_label_show(scale, true);
+  lv_obj_set_size(scale, THERMO_WIDTH * .7, THERMO_HEIGHT * .7);
   lv_scale_set_mode(scale, LV_SCALE_MODE_ROUND_OUTER);
-  lv_obj_center(scale);
+
+  lv_obj_align(scale, LV_ALIGN_CENTER, 22, 40);
 
   lv_scale_set_total_tick_count(scale, 21);
   lv_scale_set_major_tick_every(scale, 5);
@@ -193,31 +315,28 @@ lv_obj_t *scale_4(lv_obj_t *parent)
   static lv_style_t indicator_style;
   lv_style_init(&indicator_style);
 
-  /* Label style properties */
   lv_style_set_text_font(&indicator_style, LV_FONT_DEFAULT);
   lv_style_set_text_color(&indicator_style, lv_palette_darken(LV_PALETTE_BLUE, 3));
 
-  /* Major tick properties */
   lv_style_set_line_color(&indicator_style, lv_palette_darken(LV_PALETTE_BLUE, 3));
-  lv_style_set_width(&indicator_style, 10U);     /*Tick length*/
-  lv_style_set_line_width(&indicator_style, 2U); /*Tick width*/
+  lv_style_set_width(&indicator_style, 10U);
+  lv_style_set_line_width(&indicator_style, 2U);
   lv_obj_add_style(scale, &indicator_style, LV_PART_INDICATOR);
 
   static lv_style_t minor_ticks_style;
   lv_style_init(&minor_ticks_style);
   lv_style_set_line_color(&minor_ticks_style, lv_palette_lighten(LV_PALETTE_BLUE, 2));
-  lv_style_set_width(&minor_ticks_style, 5U);      /*Tick length*/
-  lv_style_set_line_width(&minor_ticks_style, 2U); /*Tick width*/
+  lv_style_set_width(&minor_ticks_style, 5U);
+  lv_style_set_line_width(&minor_ticks_style, 2U);
   lv_obj_add_style(scale, &minor_ticks_style, LV_PART_ITEMS);
 
   static lv_style_t main_line_style;
   lv_style_init(&main_line_style);
-  /* Main line properties */
+
   lv_style_set_arc_color(&main_line_style, lv_palette_darken(LV_PALETTE_BLUE, 3));
-  lv_style_set_arc_width(&main_line_style, 2U); /*Tick width*/
+  lv_style_set_arc_width(&main_line_style, 2U);
   lv_obj_add_style(scale, &main_line_style, LV_PART_MAIN);
 
-  /* Add a section */
   static lv_style_t section_minor_tick_style;
   static lv_style_t section_label_style;
   static lv_style_t section_main_line_style;
@@ -226,35 +345,56 @@ lv_obj_t *scale_4(lv_obj_t *parent)
   lv_style_init(&section_minor_tick_style);
   lv_style_init(&section_main_line_style);
 
-  /* Label style properties */
   lv_style_set_text_font(&section_label_style, LV_FONT_DEFAULT);
   lv_style_set_text_color(&section_label_style, lv_palette_darken(LV_PALETTE_RED, 3));
 
   lv_style_set_line_color(&section_label_style, lv_palette_darken(LV_PALETTE_RED, 3));
-  lv_style_set_line_width(&section_label_style, 5U); /*Tick width*/
+  lv_style_set_line_width(&section_label_style, 5U);
 
   lv_style_set_line_color(&section_minor_tick_style, lv_palette_lighten(LV_PALETTE_RED, 2));
-  lv_style_set_line_width(&section_minor_tick_style, 4U); /*Tick width*/
+  lv_style_set_line_width(&section_minor_tick_style, 4U);
 
-  /* Main line properties */
   lv_style_set_arc_color(&section_main_line_style, lv_palette_darken(LV_PALETTE_RED, 3));
-  lv_style_set_arc_width(&section_main_line_style, 4U); /*Tick width*/
+  lv_style_set_arc_width(&section_main_line_style, 4U);
 
-  /* Configure section styles */
   lv_scale_section_t *section = lv_scale_add_section(scale);
-  lv_scale_section_set_range(section, 35.5, 36.5);
+  lv_scale_section_set_range(section, 36, 40);
   lv_scale_section_set_style(section, LV_PART_INDICATOR, &section_label_style);
   lv_scale_section_set_style(section, LV_PART_ITEMS, &section_minor_tick_style);
   lv_scale_section_set_style(section, LV_PART_MAIN, &section_main_line_style);
 
-  return scale;
+  /*
+    lv_obj_set_style_bg_color(scale, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
+    lv_obj_set_style_bg_opa(scale, LV_OPA_50, 0);
+    lv_obj_set_style_pad_left(scale, 0, 0);
+    lv_obj_set_style_radius(scale, 0, 0);
+    lv_obj_set_style_pad_ver(scale, 0, 0);
+    */
+
+  lv_obj_t *needle_line = lv_line_create(scale);
+
+  lv_obj_set_style_line_width(needle_line, 6, LV_PART_MAIN);
+  lv_obj_set_style_line_rounded(needle_line, true, LV_PART_MAIN);
+
+  lv_scale_set_line_needle_value(scale, needle_line, 60, 36);
+
+  return container;
+}
+
+lv_obj_t *scale_5(lv_obj_t *parent)
+{
+  lv_obj_t *container = lv_obj_create(parent);
+
+  lv_obj_set_size(container, THERMO_WIDTH, THERMO_HEIGHT);
+  lv_obj_set_align(container, LV_ALIGN_CENTER);
+
+  return container;
 }
 
 lv_obj_t *chart_obj(lv_obj_t *parent)
 {
   /*Create a chart*/
-  lv_obj_t *chart;
-  chart = lv_chart_create(parent);
+  lv_obj_t *chart = lv_chart_create(parent);
   lv_obj_set_size(chart, CHART_WIDTH, CHART_HEIGHT);
   lv_obj_center(chart);
   lv_chart_set_type(chart, LV_CHART_TYPE_LINE); /*Show lines and points too*/
@@ -294,7 +434,7 @@ static void set_needle_img_value(void *obj, int32_t v)
 }
 
 /**
- * A simple round scale
+ * A simple round scale with needles that move
  */
 lv_obj_t *scale_3(lv_obj_t *parent)
 {
@@ -376,4 +516,73 @@ lv_obj_t *scale_3(lv_obj_t *parent)
   return scale_line;
 }
 
+lv_obj_t *pump_button_1(lv_obj_t *parent)
+{
+  // LV_IMAGE_DECLARE(pumpOff_data);
+  // LV_IMAGE_DECLARE(pumpLow_data);
+  // LV_IMAGE_DECLARE(pumpHigh_data);
+
+  /*Create a transition animation on width transformation and recolor.*/
+  static lv_style_prop_t tr_prop[] = {LV_STYLE_TRANSFORM_WIDTH, LV_STYLE_IMAGE_RECOLOR_OPA, 0};
+  static lv_style_transition_dsc_t tr;
+  lv_style_transition_dsc_init(&tr, tr_prop, lv_anim_path_linear, 200, 0, NULL);
+
+  static lv_style_t style_def;
+  lv_style_init(&style_def);
+  lv_style_set_text_color(&style_def, lv_color_white());
+  lv_style_set_transition(&style_def, &tr);
+
+  /*Darken the button when pressed and make it wider*/
+  static lv_style_t style_pr;
+  lv_style_init(&style_pr);
+  lv_style_set_image_recolor_opa(&style_pr, LV_OPA_30);
+  lv_style_set_image_recolor(&style_pr, lv_color_black());
+  lv_style_set_transform_width(&style_pr, 20);
+
+  /*Create an image button*/
+  lv_obj_t *imagebutton1 = lv_imagebutton_create(lv_screen_active());
+  lv_imagebutton_set_src(imagebutton1, LV_IMAGEBUTTON_STATE_RELEASED, NULL, &ui_img_pumpoff_png, NULL);
+  lv_obj_add_style(imagebutton1, &style_def, 0);
+  lv_obj_add_style(imagebutton1, &style_pr, LV_STATE_PRESSED);
+
+  lv_obj_set_width(imagebutton1, CHART_WIDTH);
+  lv_obj_align(imagebutton1, LV_ALIGN_CENTER, 0, 0);
+
+  /*Create a label on the image button*/
+  lv_obj_t *label = lv_label_create(imagebutton1);
+  lv_label_set_text(label, "Button");
+  lv_obj_align(label, LV_ALIGN_CENTER, 0, -4);
+  return imagebutton1;
+}
+lv_obj_t *pump_button_2(lv_obj_t *parent)
+{
+  lv_obj_t *ui_Pump1 = lv_imagebutton_create(parent);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_RELEASED, NULL, &ui_img_pumpoff_png, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_PRESSED, NULL, &ui_img_pumplow_png, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_DISABLED, NULL, &ui__temporary_image, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_CHECKED_PRESSED, NULL, &ui__temporary_image, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_CHECKED_RELEASED, NULL, &ui__temporary_image, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_CHECKED_DISABLED, NULL, &ui__temporary_image, NULL);
+  lv_obj_set_size(ui_Pump1, BUTTON_WIDTH, BUTTON_HEIGHT);
+  // lv_obj_set_height( ui_Pump1, 174);
+  // lv_obj_set_width( ui_Pump1, LV_SIZE_CONTENT);  /// 1
+  lv_obj_set_align(ui_Pump1, LV_ALIGN_CENTER);
+  return ui_Pump1;
+}
+
+lv_obj_t *lamp_button_1(lv_obj_t *parent)
+{
+  lv_obj_t *ui_Pump1 = lv_imagebutton_create(parent);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_RELEASED, NULL, &LightOff, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_PRESSED, NULL, &lightOn, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_DISABLED, NULL, &ui__temporary_image, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_CHECKED_PRESSED, NULL, &ui__temporary_image, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_CHECKED_RELEASED, NULL, &ui__temporary_image, NULL);
+  lv_imagebutton_set_src(ui_Pump1, LV_IMAGEBUTTON_STATE_CHECKED_DISABLED, NULL, &ui__temporary_image, NULL);
+  lv_obj_set_size(ui_Pump1, BUTTON_WIDTH, BUTTON_HEIGHT);
+  // lv_obj_set_height( ui_Pump1, 174);
+  // lv_obj_set_width( ui_Pump1, LV_SIZE_CONTENT);  /// 1
+  lv_obj_set_align(ui_Pump1, LV_ALIGN_CENTER);
+  return ui_Pump1;
+}
 #endif

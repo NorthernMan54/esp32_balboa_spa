@@ -7,3 +7,4 @@ emulator/node_modules
 src/main.ino.cpp
 /scripts/python
 /autosave
+/cache
