@@ -124,28 +124,42 @@ struct SpaStatusData
   u_int32_t magicNumber;
   uint8_t rawData[BALBOA_MESSAGE_SIZE];
   uint8_t rawDataLength;
-
+  /* 0x00=Running, 0x01=Initializing, 0x05=Hold Mode, ?0x14=A/B Temps ON?, 0x17=Test Mode */
   uint8_t spaState;
+  /* 0x00=Idle, 0x01=Priming Mode, 0x02=?Fault?, 0x03=Reminder, 0x04=?Stage 1?, 0x05=?Stage 3?, 0x42=?Stage 2? */
   uint8_t initMode;
+  /* Current Temp, or 0 if not available */
   float currentTemp;
+  /* Spa time */
   char time[6];
+  /* 0=Ready, 1=Rest, 3=Ready-in-Rest */
   uint8_t heatingMode;
   uint8_t reminderType;
   uint8_t sensorA;
   uint8_t sensorB;
+  /* 0=1°F, 1=0.5°C */
   uint8_t tempScale;
+  /*0=12-hour, 1=24-hour */
   uint8_t clockMode;
+  /* 0=OFF, 1=Cycle 1, 2=Cycle 2, 3=Cycle 1 and 2 */
   uint8_t filterMode;
   bool panelLocked;
+  /* 0=Low, 1=High */
   uint8_t tempRange;
   bool needsHeat;
+  /* 0=OFF, 1=Heating, 2=Heat Waiting */
   uint8_t heatingState;
-
+  /* 0=OFF, 1=Low, 2=High */
   uint8_t pump1;
+  /* 0=OFF, 1=Low, 2=High */
   uint8_t pump2;
+  /* 0=OFF, 1=Low, 2=High */
   uint8_t pump3;
+  /* 0=OFF, 1=Low, 2=High */
   uint8_t pump4;
+  /* 0=OFF, 1=Low, 2=High */
   uint8_t pump5;
+  /* 0=OFF, 1=Low, 2=High */
   uint8_t pump6;
 
   uint8_t circ;

@@ -79,6 +79,9 @@ void spaLvglLoop()
     sprintf(final_output, "%s @ %s", day_output, spaStatusData.time); // Creates: '14:05:49'
 
     uiUpdateClock(final_output);
+    uiUpdateThermostat(spaStatusData.currentTemp, spaStatusData.highSetTemp, spaStatusData.lowSetTemp);
+    uiUpdateButtons(spaStatusData.pump1, spaStatusData.pump2, spaStatusData.light1, spaStatusData.filterMode);
+    uiUpdateHeater(spaStatusData.heatingState, spaStatusData.tempRange);
   }
 
   auto const now = millis();
