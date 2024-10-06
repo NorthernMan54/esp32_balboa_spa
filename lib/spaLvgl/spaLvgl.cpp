@@ -8,11 +8,14 @@
 #include <spaUI/ui.h>
 #endif
 
+#include <spaMessage.h>
+#include <spaUtilities.h>
+
 void OnAddOneClicked(lv_event_t *e)
 {
   static uint32_t cnt = 0;
   cnt++;
-//  lv_label_set_text_fmt(ui_lblCountValue, "%u", cnt);
+  //  lv_label_set_text_fmt(ui_lblCountValue, "%u", cnt);
   log_i("OnAddOneClickedn: %lu", cnt);
 }
 
@@ -21,7 +24,7 @@ void OnRotateClicked(lv_event_t *e)
   auto disp = lv_disp_get_default();
   auto rotation = (lv_display_rotation_t)((lv_disp_get_rotation(disp) + 1) % (LV_DISPLAY_ROTATION_270 + 1));
   lv_display_set_rotation(disp, rotation);
- // lv_label_set_text_fmt(ui_lblRotationValue, "%u", (int)rotation);
+  // lv_label_set_text_fmt(ui_lblRotationValue, "%u", (int)rotation);
   log_i("OnRotateClicked: disp=%d, rotation=%d", (int)disp, (int)rotation);
 }
 
@@ -55,29 +58,30 @@ void spaLvglSetup()
 ulong next_millis;
 auto lv_last_tick = millis();
 
+uint8_t currentCrc = 0;
+
 void spaLvglLoop()
 {
-  auto const now = millis();
-  if (now > next_millis)
+
+  if (currentCrc != spaStatusData.crc)
   {
-    next_millis = now + 500;
+    currentCrc = spaStatusData.crc;
 
-    char text_buffer[32];
-    sprintf(text_buffer, "%lu", now);
-//    lv_label_set_text(ui_lblMillisecondsValue, text_buffer);
+    struct tm timeinfo;
+    char day_output[30], final_output[30];
+    while (!getLocalTime(&timeinfo, 10))
+    { // Wait for 5-sec for time to synchronise
+      Log.error("[EPaper]: Failed to obtain time");
+      return;
+    }
 
-#ifdef BOARD_HAS_RGB_LED
-    auto const rgb = (now / 2000) % 8;
-    smartdisplay_led_set_rgb(rgb & 0x01, rgb & 0x02, rgb & 0x04);
-#endif
+    sprintf(day_output, "%s, %02u %s %04u", weekday_D[timeinfo.tm_wday], timeinfo.tm_mday, month_M[timeinfo.tm_mon], (timeinfo.tm_year) + 1900);
+    sprintf(final_output, "%s @ %s", day_output, spaStatusData.time); // Creates: '14:05:49'
 
-#ifdef BOARD_HAS_CDS
-    auto cdr = analogReadMilliVolts(CDS);
-    sprintf(text_buffer, "%d", cdr);
-    lv_label_set_text(ui_lblCdrValue, text_buffer);
-#endif
+    uiUpdateClock(final_output);
   }
 
+  auto const now = millis();
   // Update the ticker
   lv_tick_inc(now - lv_last_tick);
   lv_last_tick = now;
