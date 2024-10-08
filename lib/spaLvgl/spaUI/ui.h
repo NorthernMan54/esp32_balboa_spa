@@ -41,8 +41,15 @@ extern "C"
   lv_obj_t *thermostatArc(lv_obj_t *);
   lv_obj_t *spa_clock_lable(lv_obj_t *);
   lv_obj_t *chart_obj(lv_obj_t *);
-
-  lv_obj_t *spaPumpButton(lv_obj_t *);
+/**
+ * @brief spaPumpButton
+ * create a button for the spa pump
+ * container - parent container
+ * label - label
+ * 
+ * @return lv_obj_t* 
+ */
+  lv_obj_t *spaPumpButton(lv_obj_t *, char *);
   lv_obj_t *spaLampButton(lv_obj_t *);
   lv_obj_t *spaFilterButton(lv_obj_t *);
   lv_obj_t *spaHeaterDisplay(lv_obj_t *);

@@ -6,5 +6,9 @@ emulator/node_modules
 /balboa-spa
 src/main.ino.cpp
 /scripts/python
+
+# Square Line
+
 /autosave
 /cache
+/backup

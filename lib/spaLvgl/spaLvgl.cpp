@@ -11,6 +11,8 @@
 #include <spaMessage.h>
 #include <spaUtilities.h>
 
+bool loading = true;
+
 void OnAddOneClicked(lv_event_t *e)
 {
   static uint32_t cnt = 0;
@@ -65,6 +67,17 @@ void spaLvglLoop()
 
   if (currentCrc != spaStatusData.crc)
   {
+    if(loading) {
+      loading = false;
+      lv_obj_clean(ui_Loading_Screen);
+      lv_obj_clean(ui_Loading_Pump_Off);
+      lv_obj_clean(ui_Loading_Pump_High);
+      lv_obj_clean(ui_Loading_Filter_Off);
+      lv_obj_clean(ui_Loading_Spa_Light_On);
+      lv_obj_clean(ui_Container3);
+      lv_obj_clean(ui_Loading_Filter_On);
+      lv_obj_clean(ui_Loading_Spa_Light_Off);
+    }
     currentCrc = spaStatusData.crc;
 
     struct tm timeinfo;
@@ -78,10 +91,14 @@ void spaLvglLoop()
     sprintf(day_output, "%s, %02u %s %04u", weekday_D[timeinfo.tm_wday], timeinfo.tm_mday, month_M[timeinfo.tm_mon], (timeinfo.tm_year) + 1900);
     sprintf(final_output, "%s @ %s", day_output, spaStatusData.time); // Creates: '14:05:49'
 
+    #ifdef SQUARELINE
+      lv_label_set_text(ui_uiClockLabel, final_output);
+    #else
     uiUpdateClock(final_output);
     uiUpdateThermostat(spaStatusData.currentTemp, spaStatusData.highSetTemp, spaStatusData.lowSetTemp);
     uiUpdateButtons(spaStatusData.pump1, spaStatusData.pump2, spaStatusData.light1, spaStatusData.filterMode);
     uiUpdateHeater(spaStatusData.heatingState, spaStatusData.tempRange);
+    #endif
   }
 
   auto const now = millis();

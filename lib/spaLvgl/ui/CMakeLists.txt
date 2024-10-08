@@ -1,0 +1,20 @@
+SET(SOURCES screens/ui_Loading_Screen.c
+    screens/ui_Spa_Screen.c
+    screens/ui_Light_Samples.c
+    screens/ui_Pump_Samples.c
+    screens/ui_Filter_Samples.c
+    ui.c
+    components/ui_comp_hook.c
+    ui_helpers.c
+    images/ui_img_pumpoff_png.c
+    images/ui_img_pumphigh_png.c
+    images/ui_img_filteron_png.c
+    images/ui_img_lighton_png.c
+    images/ui_img_lightoff_png.c
+    images/ui_img_pumplow_png.c
+    ui_temporary_image.cpp
+    fonts/ui_font_Montserrat_Bold_14.c
+    fonts/ui_font_Montserrat_Bold_16.c
+    fonts/ui_font_Montserrat_Bold_18.c)
+
+add_library(ui ${SOURCES})

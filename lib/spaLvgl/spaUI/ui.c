@@ -29,8 +29,8 @@ void ui_init(void)
   obj = decorateTile(spa_clock_lable(cont));
   obj = decorateTile(chart_obj(cont));
 
-  spaPumpButton1 = decorateTile(spaPumpButton(cont));
-  spaPumpButton2 = decorateTile(spaPumpButton(cont));
+  spaPumpButton1 = decorateTile(spaPumpButton(cont, "Pump 1"));
+  spaPumpButton2 = decorateTile(spaPumpButton(cont, "Pump 2"));
   spaLamp = decorateTile(spaLampButton(cont));
   spaFilter = decorateTile(spaFilterButton(cont));
   spaHeater = decorateTile(spaHeaterDisplay(cont));
@@ -106,6 +106,7 @@ void uiUpdateButtons(uint8_t pump1, uint8_t pump2, bool lamp, uint8_t filter)
 void uiUpdateHeater(uint8_t heater, uint8_t tempRange)
 {
   log_i("uiUpdateHeater: heater: %d, tempRange: %d ", heater, tempRange);
+  lv_led_set_brightness(spaHeater, 150);
   if (heater)
   {
     lv_led_on(spaHeater);
@@ -114,5 +115,6 @@ void uiUpdateHeater(uint8_t heater, uint8_t tempRange)
   {
     lv_led_off(spaHeater);
   }
+  // lv_obj_refresh_style(spaHeater, LV_PART_ANY, LV_STYLE_PROP_ANY);
 }
 #endif
