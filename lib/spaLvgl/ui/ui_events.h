@@ -10,6 +10,9 @@
 extern "C" {
 #endif
 
+void uiPumpClicked2(lv_event_t * e);
+void uiLightClicked(lv_event_t * e);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

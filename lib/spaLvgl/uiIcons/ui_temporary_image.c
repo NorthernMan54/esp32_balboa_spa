@@ -89,7 +89,7 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_UI_TEMPORARY_IMAGE uint8_t ui__tem
     
 };
 
-const lv_img_dsc_t ui__temporary_image = {
+const lv_img_dsc_t ui__temporary_image_2 = {
     .header.w = 64,
     .header.h = 64,
     .data_size = sizeof(ui__temporary_image_data),

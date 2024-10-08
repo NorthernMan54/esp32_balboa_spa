@@ -45,85 +45,17 @@ lv_obj_t *ui_uiClockLabel;
 lv_obj_t *ui_uiPump_1;
 lv_obj_t *ui_uiPumpButton_1;
 lv_obj_t *ui_uiPumpLabel_1;
+void ui_event_uiPump_2( lv_event_t * e);
 lv_obj_t *ui_uiPump_2;
 lv_obj_t *ui_uiPumpButton_2;
 lv_obj_t *ui_uiPumpLabel_2;
+void ui_event_uiLight_1( lv_event_t * e);
 lv_obj_t *ui_uiLight_1;
 lv_obj_t *ui_uiLightButton_1;
 lv_obj_t *ui_uiLightLabel_1;
 lv_obj_t *ui_uiFilter;
 lv_obj_t *ui_uiFilterButton;
 lv_obj_t *ui_uiFilterLabel;
-
-
-// SCREEN: ui_Light_Samples
-void ui_Light_Samples_screen_init(void);
-lv_obj_t *ui_Light_Samples;
-lv_obj_t *ui_OffSample;
-lv_obj_t *ui_Label6;
-lv_obj_t *ui_Lamp8;
-lv_obj_t *ui_lampButton8;
-lv_obj_t *ui_lampLabel5;
-lv_obj_t *ui_Lamp2;
-lv_obj_t *ui_lampButton2;
-lv_obj_t *ui_Container2;
-lv_obj_t *ui_Label5;
-lv_obj_t *ui_Lamp5;
-lv_obj_t *ui_lampButton5;
-lv_obj_t *ui_lampLabel4;
-lv_obj_t *ui_Lamp6;
-lv_obj_t *ui_lampButton6;
-lv_obj_t *ui_Container5;
-lv_obj_t *ui_Label3;
-lv_obj_t *ui_Sample_Spa_Light_1;
-lv_obj_t *ui_Spa_Light_Image;
-lv_obj_t *ui_Spa_Ligtht_Label;
-lv_obj_t *ui_Lamp3;
-lv_obj_t *ui_lampButton3;
-
-
-// SCREEN: ui_Pump_Samples
-void ui_Pump_Samples_screen_init(void);
-lv_obj_t *ui_Pump_Samples;
-lv_obj_t *ui_Off_Sample;
-lv_obj_t *ui_Label9;
-lv_obj_t *ui_Pump_Off;
-lv_obj_t *ui_pumpButton7;
-lv_obj_t *ui_pumpLabel7;
-lv_obj_t *ui_Lamp1;
-lv_obj_t *ui_pumpLabel;
-lv_obj_t *ui_Low_Sample;
-lv_obj_t *ui_Label7;
-lv_obj_t *ui_Pump_Off2;
-lv_obj_t *ui_lampButton10;
-lv_obj_t *ui_lampLabel3;
-lv_obj_t *ui_Lamp7;
-lv_obj_t *ui_lampButton4;
-lv_obj_t *ui_High_Sample;
-lv_obj_t *ui_Label8;
-lv_obj_t *ui_Pump_Off3;
-lv_obj_t *ui_pumpButton2;
-lv_obj_t *ui_pumpLabel3;
-lv_obj_t *ui_Lamp9;
-lv_obj_t *ui_pumpLabel1;
-
-
-// SCREEN: ui_Filter_Samples
-void ui_Filter_Samples_screen_init(void);
-lv_obj_t *ui_Filter_Samples;
-lv_obj_t *ui_Off_Sample1;
-lv_obj_t *ui_Label1;
-lv_obj_t *ui_Pump_Off1;
-lv_obj_t *ui_pumpButton1;
-lv_obj_t *ui_pumpLabel2;
-lv_obj_t *ui_Pump_Off8;
-lv_obj_t *ui_pumpButton11;
-lv_obj_t *ui_pumpLabel12;
-lv_obj_t *ui_High_Sample1;
-lv_obj_t *ui_Label11;
-lv_obj_t *ui_Filter_On;
-lv_obj_t *ui_pumpButton3;
-lv_obj_t *ui_pumpLabel5;
 lv_obj_t *ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -134,6 +66,18 @@ lv_obj_t *ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
+void ui_event_uiPump_2( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      uiPumpClicked2( e );
+}
+}
+void ui_event_uiLight_1( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      uiLightClicked( e );
+}
+}
 
 ///////////////////// SCREENS ////////////////////
 
@@ -144,9 +88,6 @@ lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE
 lv_disp_set_theme(dispp, theme);
 ui_Loading_Screen_screen_init();
 ui_Spa_Screen_screen_init();
-ui_Light_Samples_screen_init();
-ui_Pump_Samples_screen_init();
-ui_Filter_Samples_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_Loading_Screen);
 }

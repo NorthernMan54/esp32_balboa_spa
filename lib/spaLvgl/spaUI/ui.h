@@ -112,7 +112,7 @@ extern "C"
 
   lv_obj_t *temperatureGuage;
 
-  void ui_init(void);
+  void spa_ui_init(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

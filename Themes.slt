@@ -1,7 +1,56 @@
 {
   "deftheme": {
     "name": "Default",
-    "properties": []
+    "properties": [
+      {
+        "nid": -425238881,
+        "strtype": "THEME_COLOR",
+        "strval": "Background",
+        "intarray": [
+          191,
+          224,
+          248,
+          255
+        ],
+        "InheritedType": 0
+      },
+      {
+        "nid": 411681007,
+        "strtype": "THEME_COLOR",
+        "strval": "AccessoryOnBkg",
+        "intarray": [
+          7,
+          244,
+          44,
+          255
+        ],
+        "InheritedType": 0
+      },
+      {
+        "nid": -633633826,
+        "strtype": "THEME_COLOR",
+        "strval": "AccessoryOffBkg",
+        "intarray": [
+          163,
+          229,
+          174,
+          255
+        ],
+        "InheritedType": 0
+      },
+      {
+        "nid": -152583251,
+        "strtype": "THEME_COLOR",
+        "strval": "widgetBorder",
+        "intarray": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "InheritedType": 0
+      }
+    ]
   },
   "themes": [],
   "selected_theme": "Default"

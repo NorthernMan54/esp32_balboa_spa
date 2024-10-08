@@ -5,7 +5,7 @@
   "c_path": "/assets/ui_font_Montserrat_Bold_16.c",
   "cfg_path": "/assets/ui_font_Montserrat_Bold_16.fcfg",
   "size": 16,
-  "bpp": 1,
+  "bpp": 4,
   "letters": 0,
   "ranges": [
     "0x20-0x7f"

@@ -14,6 +14,8 @@ extern "C" {
 
 #include "ui_helpers.h"
 #include "ui_events.h"
+#include "ui_theme_manager.h"
+#include "ui_themes.h"
 
 // SCREEN: ui_Loading_Screen
 void ui_Loading_Screen_screen_init(void);
@@ -49,93 +51,45 @@ extern lv_obj_t *ui_uiClockLabel;
 extern lv_obj_t *ui_uiPump_1;
 extern lv_obj_t *ui_uiPumpButton_1;
 extern lv_obj_t *ui_uiPumpLabel_1;
+void ui_event_uiPump_2( lv_event_t * e);
 extern lv_obj_t *ui_uiPump_2;
 extern lv_obj_t *ui_uiPumpButton_2;
 extern lv_obj_t *ui_uiPumpLabel_2;
+void ui_event_uiLight_1( lv_event_t * e);
 extern lv_obj_t *ui_uiLight_1;
 extern lv_obj_t *ui_uiLightButton_1;
 extern lv_obj_t *ui_uiLightLabel_1;
 extern lv_obj_t *ui_uiFilter;
 extern lv_obj_t *ui_uiFilterButton;
 extern lv_obj_t *ui_uiFilterLabel;
-// SCREEN: ui_Light_Samples
-void ui_Light_Samples_screen_init(void);
-extern lv_obj_t *ui_Light_Samples;
-extern lv_obj_t *ui_OffSample;
-extern lv_obj_t *ui_Label6;
-extern lv_obj_t *ui_Lamp8;
-extern lv_obj_t *ui_lampButton8;
-extern lv_obj_t *ui_lampLabel5;
-extern lv_obj_t *ui_Lamp2;
-extern lv_obj_t *ui_lampButton2;
-extern lv_obj_t *ui_Container2;
-extern lv_obj_t *ui_Label5;
-extern lv_obj_t *ui_Lamp5;
-extern lv_obj_t *ui_lampButton5;
-extern lv_obj_t *ui_lampLabel4;
-extern lv_obj_t *ui_Lamp6;
-extern lv_obj_t *ui_lampButton6;
-extern lv_obj_t *ui_Container5;
-extern lv_obj_t *ui_Label3;
-extern lv_obj_t *ui_Sample_Spa_Light_1;
-extern lv_obj_t *ui_Spa_Light_Image;
-extern lv_obj_t *ui_Spa_Ligtht_Label;
-extern lv_obj_t *ui_Lamp3;
-extern lv_obj_t *ui_lampButton3;
-// SCREEN: ui_Pump_Samples
-void ui_Pump_Samples_screen_init(void);
-extern lv_obj_t *ui_Pump_Samples;
-extern lv_obj_t *ui_Off_Sample;
-extern lv_obj_t *ui_Label9;
-extern lv_obj_t *ui_Pump_Off;
-extern lv_obj_t *ui_pumpButton7;
-extern lv_obj_t *ui_pumpLabel7;
-extern lv_obj_t *ui_Lamp1;
-extern lv_obj_t *ui_pumpLabel;
-extern lv_obj_t *ui_Low_Sample;
-extern lv_obj_t *ui_Label7;
-extern lv_obj_t *ui_Pump_Off2;
-extern lv_obj_t *ui_lampButton10;
-extern lv_obj_t *ui_lampLabel3;
-extern lv_obj_t *ui_Lamp7;
-extern lv_obj_t *ui_lampButton4;
-extern lv_obj_t *ui_High_Sample;
-extern lv_obj_t *ui_Label8;
-extern lv_obj_t *ui_Pump_Off3;
-extern lv_obj_t *ui_pumpButton2;
-extern lv_obj_t *ui_pumpLabel3;
-extern lv_obj_t *ui_Lamp9;
-extern lv_obj_t *ui_pumpLabel1;
-// SCREEN: ui_Filter_Samples
-void ui_Filter_Samples_screen_init(void);
-extern lv_obj_t *ui_Filter_Samples;
-extern lv_obj_t *ui_Off_Sample1;
-extern lv_obj_t *ui_Label1;
-extern lv_obj_t *ui_Pump_Off1;
-extern lv_obj_t *ui_pumpButton1;
-extern lv_obj_t *ui_pumpLabel2;
-extern lv_obj_t *ui_Pump_Off8;
-extern lv_obj_t *ui_pumpButton11;
-extern lv_obj_t *ui_pumpLabel12;
-extern lv_obj_t *ui_High_Sample1;
-extern lv_obj_t *ui_Label11;
-extern lv_obj_t *ui_Filter_On;
-extern lv_obj_t *ui_pumpButton3;
-extern lv_obj_t *ui_pumpLabel5;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui__temporary_image );
-LV_IMG_DECLARE( ui_img_pumpoff_png);   // assets/pumpOff.png
-LV_IMG_DECLARE( ui_img_pumphigh_png);   // assets/pumpHigh.png
+LV_IMG_DECLARE( ui_img_uipumpoff_png);   // assets/uiPumpOff.png
+LV_IMG_DECLARE( ui_img_uipumphigh_png);   // assets/uiPumpHigh.png
 LV_IMG_DECLARE( ui_img_filteron_png);   // assets/filterOn.png
 LV_IMG_DECLARE( ui_img_lighton_png);   // assets/lightOn.png
 LV_IMG_DECLARE( ui_img_lightoff_png);   // assets/lightOff.png
-LV_IMG_DECLARE( ui_img_pumplow_png);   // assets/pumpLow.png
+LV_IMG_DECLARE( ui_img_uipumplow_png);   // assets/uiPumpLow.png
 
 
 LV_FONT_DECLARE( ui_font_Montserrat_Bold_14);
 LV_FONT_DECLARE( ui_font_Montserrat_Bold_16);
 LV_FONT_DECLARE( ui_font_Montserrat_Bold_18);
+LV_FONT_DECLARE( ui_font_Open_Sans_12);
+LV_FONT_DECLARE( ui_font_Open_Sans_14);
+LV_FONT_DECLARE( ui_font_Open_Sans_16);
+LV_FONT_DECLARE( ui_font_Open_Sans_18);
+LV_FONT_DECLARE( ui_font_Open_Sans_20);
+LV_FONT_DECLARE( ui_font_Open_Sans_24);
+LV_FONT_DECLARE( ui_font_Open_Sans_26);
+LV_FONT_DECLARE( ui_font_Open_Sans_Bold_12);
+LV_FONT_DECLARE( ui_font_Open_Sans_Bold_14);
+LV_FONT_DECLARE( ui_font_Open_Sans_Bold_16);
+LV_FONT_DECLARE( ui_font_Open_Sans_Bold_18);
+LV_FONT_DECLARE( ui_font_Open_Sans_Bold_20);
+LV_FONT_DECLARE( ui_font_Open_Sans_Bold_24);
+LV_FONT_DECLARE( ui_font_Open_Sans_Bold_26);
 
 
 void ui_init(void);

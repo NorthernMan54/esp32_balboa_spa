@@ -9,7 +9,7 @@ lv_obj_t *spaLamp;
 lv_obj_t *spaFilter;
 lv_obj_t *spaHeater;
 
-void ui_init(void)
+void spa_ui_init(void)
 {
   static lv_style_t style;
   lv_style_init(&style);
@@ -82,7 +82,7 @@ void uiUpdateThermostat(float currentTemp, float highSetPoint, float lowSetPoint
 void uiUpdateButton(lv_obj_t *button, u_int8_t state)
 {
   // log_i("uiUpdateButton: %d", state);
-  lv_obj_set_state(button, LV_STATE_DISABLED, false);
+  lv_obj_set_state(button, LV_STATE_DISABLED, false); 
   if (state)
   {
     lv_obj_set_state(button, LV_STATE_CHECKED, true);
