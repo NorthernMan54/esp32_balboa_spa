@@ -3,14 +3,16 @@
 // LVGL version: 9.1.0
 // Project name: SPA
 
-#ifndef _UI_EVENTS_H
-#define _UI_EVENTS_H
+#ifndef _SPA_UI_COMP_HOOK_H
+#define _SPA_UI_COMP_HOOK_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void uiLightClicked(lv_event_t * e);
+void ui_comp_uiFilter_create_hook( lv_obj_t *comp );
+void ui_comp_uiLight_create_hook( lv_obj_t *comp );
+void ui_comp_uiPump_create_hook( lv_obj_t *comp );
 
 #ifdef __cplusplus
 } /*extern "C"*/

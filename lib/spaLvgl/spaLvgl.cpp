@@ -46,6 +46,10 @@ void spaLvglSetup()
 #ifdef SQUARELINE
   log_i("ui_init");
   ui_init();
+
+  lv_obj_set_style_radius(ui_Spa_Screen, 8, 0);
+  lv_obj_set_style_radius(ui_Loading_Screen, 8, 0);
+
 #else
   log_i("spa_ui_init");
   spa_ui_init();
@@ -60,6 +64,35 @@ void spaLvglSetup()
   lv_qrcode_update(ui_qrcode, qr_data, strlen(qr_data));
   lv_obj_center(ui_qrcode);
   */
+}
+
+void spaButtonUpdate(lv_obj_t *component, uint8_t state)
+{
+
+  lv_obj_t *image = ui_comp_get_child(component, UI_COMP_UIPUMP_BUTTON);
+  switch (state)
+  {
+  case 1:
+    ui_object_set_themeable_style_property(component, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
+    ui_object_set_themeable_style_property(component, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
+
+    lv_imagebutton_set_src(image, LV_IMAGEBUTTON_STATE_CHECKED_RELEASED, NULL, &ui_img_uipumplow_png, NULL);
+    lv_obj_set_state(image, LV_STATE_CHECKED, true);
+    break;
+  case 2:
+    ui_object_set_themeable_style_property(component, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
+    ui_object_set_themeable_style_property(component, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
+    lv_imagebutton_set_src(image, LV_IMAGEBUTTON_STATE_CHECKED_RELEASED, NULL, &ui_img_uipumplow_png, NULL);
+    lv_obj_set_state(image, LV_STATE_CHECKED, true);
+    break;
+  case 0:
+  default:
+    ui_object_set_themeable_style_property(component, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
+    ui_object_set_themeable_style_property(component, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
+    lv_obj_set_state(image, LV_STATE_CHECKED, false);
+    break;
+  }
+  lv_obj_refresh_style(image, LV_PART_ANY, LV_STYLE_PROP_ANY);
 }
 
 ulong next_millis;
@@ -77,13 +110,11 @@ void spaLvglLoop()
       loading = false;
       _ui_screen_change(&ui_Spa_Screen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Spa_Screen_screen_init);
       lv_obj_clean(ui_Loading_Screen);
-      lv_obj_clean(ui_Loading_Pump_Off);
-      lv_obj_clean(ui_Loading_Pump_High);
-      lv_obj_clean(ui_Loading_Filter_Off);
-      lv_obj_clean(ui_Loading_Spa_Light_On);
-      lv_obj_clean(ui_Container3);
-      lv_obj_clean(ui_Loading_Filter_On);
-      lv_obj_clean(ui_Loading_Spa_Light_Off);
+      lv_obj_clean(ui_LoadingContainer);
+      lv_obj_clean(ui_LoadingLabel);
+      lv_obj_clean(ui_uiPumpLoading);
+      lv_obj_clean(ui_uiFilterLoading);
+      lv_obj_clean(ui_uiLightLoading);
     }
     currentCrc = spaStatusData.crc;
 
@@ -99,54 +130,49 @@ void spaLvglLoop()
     sprintf(final_output, "%s @ %s", day_output, spaStatusData.time); // Creates: '14:05:49'
 
 #ifdef SQUARELINE
+
+    // Thermostat
+
     lv_label_set_text(ui_uiClockLabel, final_output);
     lv_arc_set_value(ui_uiThermostatArc, spaStatusData.currentTemp);
-    switch (spaStatusData.pump1)
-    {
-    case 0:
-      ui_object_set_themeable_style_property(ui_uiPump_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
-      ui_object_set_themeable_style_property(ui_uiPump_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
-      lv_obj_set_state(ui_uiPumpButton_1, LV_STATE_DISABLED, false);
 
-      break;
-    case 1:
-      ui_object_set_themeable_style_property(ui_uiPump_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
-      ui_object_set_themeable_style_property(ui_uiPump_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
-      lv_imagebutton_set_src(ui_uiPumpButton_1, LV_IMAGEBUTTON_STATE_CHECKED_RELEASED, NULL, &ui_img_uipumplow_png, NULL);
-      lv_obj_set_state(ui_uiPumpButton_1, LV_STATE_CHECKED, false);
-      break;
-    case 2:
-      ui_object_set_themeable_style_property(ui_uiPump_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
-      ui_object_set_themeable_style_property(ui_uiPump_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
-      lv_imagebutton_set_src(ui_uiPumpButton_1, LV_IMAGEBUTTON_STATE_CHECKED_RELEASED, NULL, &ui_img_uipumphigh_png, NULL);
-      lv_obj_set_state(ui_uiPumpButton_1, LV_STATE_CHECKED, false);
-      break;
-    }
-    lv_obj_refresh_style(ui_uiPumpButton_1, LV_PART_ANY, LV_STYLE_PROP_ANY);
+    // Pump 1
 
+    spaButtonUpdate(ui_uiPump1, spaStatusData.pump1);
+
+    // Pump 2
+    spaButtonUpdate(ui_uiPump2, spaStatusData.pump2);
+
+    // Light
+
+  lv_obj_t *lightImage = ui_comp_get_child(ui_uiLight1, UI_COMP_UILIGHT_BUTTON);
     if (spaStatusData.light1)
     {
-      ui_object_set_themeable_style_property(ui_uiLight_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
-      ui_object_set_themeable_style_property(ui_uiLight_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
-      lv_obj_set_state(ui_uiLight_1, LV_STATE_DISABLED, false);
+      ui_object_set_themeable_style_property(ui_uiLight1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
+      ui_object_set_themeable_style_property(ui_uiLight1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
+      lv_obj_set_state(lightImage, LV_STATE_CHECKED, true);
     }
     else
     {
-      ui_object_set_themeable_style_property(ui_uiLight_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
-      ui_object_set_themeable_style_property(ui_uiLight_1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
-      lv_obj_set_state(ui_uiLight_1, LV_STATE_CHECKED, false);
+      ui_object_set_themeable_style_property(ui_uiLight1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
+      ui_object_set_themeable_style_property(ui_uiLight1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
+      lv_obj_set_state(lightImage, LV_STATE_CHECKED, false);
     }
-    lv_obj_refresh_style(ui_uiLight_1, LV_PART_ANY, LV_STYLE_PROP_ANY);
+    lv_obj_refresh_style(lightImage, LV_PART_ANY, LV_STYLE_PROP_ANY);
+
+    // Filter
 
     if (spaStatusData.filterMode)
     {
       ui_object_set_themeable_style_property(ui_uiFilter, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
       ui_object_set_themeable_style_property(ui_uiFilter, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
+      lv_obj_set_state(ui_uiFilter, LV_STATE_CHECKED, true);
     }
     else
     {
       ui_object_set_themeable_style_property(ui_uiFilter, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
       ui_object_set_themeable_style_property(ui_uiFilter, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
+      lv_obj_set_state(ui_uiFilter, LV_STATE_CHECKED, false);
     }
 
 #else

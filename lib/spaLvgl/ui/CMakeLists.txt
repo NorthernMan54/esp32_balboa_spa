@@ -1,4 +1,8 @@
-SET(SOURCES screens/ui_Loading_Screen.c
+SET(SOURCES components/ui_comp_uifilter.c
+    components/ui_comp_uilight.c
+    components/ui_comp_uipump.c
+    components/ui_comp.c
+    screens/ui_Loading_Screen.c
     screens/ui_Spa_Screen.c
     ui_theme_manager.c
     ui_themes.c
@@ -7,11 +11,11 @@ SET(SOURCES screens/ui_Loading_Screen.c
     ui_helpers.c
     ui_events.c
     images/ui_img_uipumpoff_png.c
+    images/ui_img_uipumplow_png.c
     images/ui_img_uipumphigh_png.c
     images/ui_img_filteron_png.c
-    images/ui_img_lighton_png.c
     images/ui_img_lightoff_png.c
-    images/ui_img_uipumplow_png.c
+    images/ui_img_lighton_png.c
     ui_temporary_image.c
     fonts/ui_font_Montserrat_Bold_14.c
     fonts/ui_font_Montserrat_Bold_16.c

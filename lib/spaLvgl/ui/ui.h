@@ -13,6 +13,8 @@ extern "C" {
     #include "lvgl.h"
 
 #include "ui_helpers.h"
+#include "components/ui_comp.h"
+#include "components/ui_comp_hook.h"
 #include "ui_events.h"
 #include "ui_theme_manager.h"
 #include "ui_themes.h"
@@ -20,26 +22,12 @@ extern "C" {
 // SCREEN: ui_Loading_Screen
 void ui_Loading_Screen_screen_init(void);
 extern lv_obj_t *ui_Loading_Screen;
-extern lv_obj_t *ui_Loading_Pump_Off;
-extern lv_obj_t *ui_pumpButton13;
-extern lv_obj_t *ui_pumpLabel14;
-extern lv_obj_t *ui_Loading_Pump_High;
-extern lv_obj_t *ui_pumpButton10;
-extern lv_obj_t *ui_pumpLabel11;
-extern lv_obj_t *ui_Loading_Filter_Off;
-extern lv_obj_t *ui_pumpButton12;
-extern lv_obj_t *ui_pumpLabel13;
-extern lv_obj_t *ui_Loading_Spa_Light_On;
-extern lv_obj_t *ui_Spa_Light_Image3;
-extern lv_obj_t *ui_Spa_Ligtht_Label3;
-extern lv_obj_t *ui_Container3;
-extern lv_obj_t *ui_Label10;
-extern lv_obj_t *ui_Loading_Filter_On;
-extern lv_obj_t *ui_pumpButton9;
-extern lv_obj_t *ui_pumpLabel10;
-extern lv_obj_t *ui_Loading_Spa_Light_Off;
-extern lv_obj_t *ui_lampButton7;
-extern lv_obj_t *ui_lampLabel2;
+extern lv_obj_t *ui_LoadingContainer;
+extern lv_obj_t *ui_LoadingLabel;
+extern lv_obj_t *ui_uiPumpLoading;
+extern lv_obj_t *ui_uiFilterLoading;
+extern lv_obj_t *ui_uiLightLoading;
+extern lv_obj_t *ui_uiLight2;
 // SCREEN: ui_Spa_Screen
 void ui_Spa_Screen_screen_init(void);
 extern lv_obj_t *ui_Spa_Screen;
@@ -48,29 +36,19 @@ extern lv_obj_t *ui_uiThermostatLabel;
 extern lv_obj_t *ui_uiThermostatArc;
 extern lv_obj_t *ui_uiClock;
 extern lv_obj_t *ui_uiClockLabel;
-extern lv_obj_t *ui_uiPump_1;
-extern lv_obj_t *ui_uiPumpButton_1;
-extern lv_obj_t *ui_uiPumpLabel_1;
-void ui_event_uiPump_2( lv_event_t * e);
-extern lv_obj_t *ui_uiPump_2;
-extern lv_obj_t *ui_uiPumpButton_2;
-extern lv_obj_t *ui_uiPumpLabel_2;
-void ui_event_uiLight_1( lv_event_t * e);
-extern lv_obj_t *ui_uiLight_1;
-extern lv_obj_t *ui_uiLightButton_1;
-extern lv_obj_t *ui_uiLightLabel_1;
+extern lv_obj_t *ui_uiPump1;
+extern lv_obj_t *ui_uiPump2;
+extern lv_obj_t *ui_uiLight1;
 extern lv_obj_t *ui_uiFilter;
-extern lv_obj_t *ui_uiFilterButton;
-extern lv_obj_t *ui_uiFilterLabel;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui__temporary_image );
 LV_IMG_DECLARE( ui_img_uipumpoff_png);   // assets/uiPumpOff.png
+LV_IMG_DECLARE( ui_img_uipumplow_png);   // assets/uiPumpLow.png
 LV_IMG_DECLARE( ui_img_uipumphigh_png);   // assets/uiPumpHigh.png
 LV_IMG_DECLARE( ui_img_filteron_png);   // assets/filterOn.png
-LV_IMG_DECLARE( ui_img_lighton_png);   // assets/lightOn.png
 LV_IMG_DECLARE( ui_img_lightoff_png);   // assets/lightOff.png
-LV_IMG_DECLARE( ui_img_uipumplow_png);   // assets/uiPumpLow.png
+LV_IMG_DECLARE( ui_img_lighton_png);   // assets/lightOn.png
 
 
 LV_FONT_DECLARE( ui_font_Montserrat_Bold_14);

@@ -12,26 +12,12 @@
 // SCREEN: ui_Loading_Screen
 void ui_Loading_Screen_screen_init(void);
 lv_obj_t *ui_Loading_Screen;
-lv_obj_t *ui_Loading_Pump_Off;
-lv_obj_t *ui_pumpButton13;
-lv_obj_t *ui_pumpLabel14;
-lv_obj_t *ui_Loading_Pump_High;
-lv_obj_t *ui_pumpButton10;
-lv_obj_t *ui_pumpLabel11;
-lv_obj_t *ui_Loading_Filter_Off;
-lv_obj_t *ui_pumpButton12;
-lv_obj_t *ui_pumpLabel13;
-lv_obj_t *ui_Loading_Spa_Light_On;
-lv_obj_t *ui_Spa_Light_Image3;
-lv_obj_t *ui_Spa_Ligtht_Label3;
-lv_obj_t *ui_Container3;
-lv_obj_t *ui_Label10;
-lv_obj_t *ui_Loading_Filter_On;
-lv_obj_t *ui_pumpButton9;
-lv_obj_t *ui_pumpLabel10;
-lv_obj_t *ui_Loading_Spa_Light_Off;
-lv_obj_t *ui_lampButton7;
-lv_obj_t *ui_lampLabel2;
+lv_obj_t *ui_LoadingContainer;
+lv_obj_t *ui_LoadingLabel;
+lv_obj_t *ui_uiPumpLoading;
+lv_obj_t *ui_uiFilterLoading;
+lv_obj_t *ui_uiLightLoading;
+lv_obj_t *ui_uiLight2;
 
 
 // SCREEN: ui_Spa_Screen
@@ -42,20 +28,10 @@ lv_obj_t *ui_uiThermostatLabel;
 lv_obj_t *ui_uiThermostatArc;
 lv_obj_t *ui_uiClock;
 lv_obj_t *ui_uiClockLabel;
-lv_obj_t *ui_uiPump_1;
-lv_obj_t *ui_uiPumpButton_1;
-lv_obj_t *ui_uiPumpLabel_1;
-void ui_event_uiPump_2( lv_event_t * e);
-lv_obj_t *ui_uiPump_2;
-lv_obj_t *ui_uiPumpButton_2;
-lv_obj_t *ui_uiPumpLabel_2;
-void ui_event_uiLight_1( lv_event_t * e);
-lv_obj_t *ui_uiLight_1;
-lv_obj_t *ui_uiLightButton_1;
-lv_obj_t *ui_uiLightLabel_1;
+lv_obj_t *ui_uiPump1;
+lv_obj_t *ui_uiPump2;
+lv_obj_t *ui_uiLight1;
 lv_obj_t *ui_uiFilter;
-lv_obj_t *ui_uiFilterButton;
-lv_obj_t *ui_uiFilterLabel;
 lv_obj_t *ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -66,23 +42,12 @@ lv_obj_t *ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
-void ui_event_uiPump_2( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      uiPumpClicked2( e );
-}
-}
-void ui_event_uiLight_1( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      uiLightClicked( e );
-}
-}
 
 ///////////////////// SCREENS ////////////////////
 
 void ui_init( void )
-{
+{LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
+
 lv_disp_t *dispp = lv_display_get_default();
 lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
 lv_disp_set_theme(dispp, theme);
