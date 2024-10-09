@@ -16,7 +16,9 @@
 #include <rs485.h>
 #include <bridge.h>
 #include <spaEpaper.h>
+#ifdef SPALVGL
 #include <spaLvgl.h>
+#endif
 
 #include "main.h"
 
