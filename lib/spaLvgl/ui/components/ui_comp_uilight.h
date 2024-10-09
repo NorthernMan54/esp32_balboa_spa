@@ -18,7 +18,7 @@ extern "C" {
 #define UI_COMP_UILIGHT_LABEL 2
 #define _UI_COMP_UILIGHT_NUM 3
 lv_obj_t *ui_uiLight_create(lv_obj_t *comp_parent);
-void ui_event_comp_uiLight_uiLight( lv_event_t * e);
+void ui_event_comp_uiLight_Button( lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

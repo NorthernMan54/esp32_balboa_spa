@@ -14,3 +14,15 @@ def uiPumpClicked2(event_struct):
 def heatRangeSwtich(event_struct):
     return
 
+
+def uiPumpClicked(event_struct):
+    return
+
+
+def heatRangeSwitch(event_struct):
+    return
+
+
+def uiLightClicked2(event_struct):
+    return
+

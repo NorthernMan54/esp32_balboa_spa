@@ -2,20 +2,25 @@
 // SquareLine Studio version: SquareLine Studio 1.4.2
 // LVGL version: 9.1.0
 // Project name: SPA
-
+#include <Arduino.h>
 #include "ui.h"
 
-void uiPumpClicked2(lv_event_t * e)
+
+void uiLightClicked(lv_event_t *e)
 {
 	// Your code here
+	log_i("uiLightClicked");
 }
 
-void uiLightClicked(lv_event_t * e)
+void heatRangeSwtich(lv_event_t *e)
 {
 	// Your code here
+	log_i("heatRangeSwtich");
 }
 
-void heatRangeSwtich(lv_event_t * e)
+
+void uiPumpClick(lv_event_t * e)
 {
 	// Your code here
+			log_i("uiPumpClick");
 }

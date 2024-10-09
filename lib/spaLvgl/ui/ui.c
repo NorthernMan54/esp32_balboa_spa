@@ -13,9 +13,6 @@
 void ui_Loading_Screen_screen_init(void);
 lv_obj_t *ui_Loading_Screen;
 lv_obj_t *ui_ThermostatLoading;
-lv_obj_t *ui_uiPumpLoading;
-lv_obj_t *ui_uiFilterLoading;
-lv_obj_t *ui_uiLightLoading;
 lv_obj_t *ui_HeatControlsLoading;
 lv_obj_t *ui_uiHeatStateLoading;
 lv_obj_t *ui_heatSwtichLabelLoading;
@@ -24,6 +21,9 @@ lv_obj_t *ui_uiTempRangelLoading;
 lv_obj_t *ui_tempRangeHighLabellLoading;
 lv_obj_t *ui_tempRangeSwitchlLoading;
 lv_obj_t *ui_tempRangeLowLabellLoading;
+lv_obj_t *ui_uiPumpLoading;
+lv_obj_t *ui_uiLightLoading;
+lv_obj_t *ui_uiFilterLoading;
 lv_obj_t *ui_LoadingContainer;
 lv_obj_t *ui_LoadingLabel;
 
@@ -63,7 +63,7 @@ lv_obj_t *ui____initial_actions0;
 void ui_event_tempRangeSwitch( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
-      heatRangeSwtich( e );
+      heatRangeSwitch( e );
 }
 }
 

@@ -314,6 +314,71 @@
           "strtype": "IMGBUTTON/Style_main",
           "strval": "lv.PART.MAIN, Rectangle, Image, Text, Transform",
           "InheritedType": 11
+        },
+        {
+          "disabled": false,
+          "nid": 1717813642,
+          "strtype": "IMGBUTTON/EventHandler",
+          "strval": "CLICKED",
+          "childs": [
+            {
+              "nid": 1933505566,
+              "strtype": "_event/name",
+              "strval": "uiPumpEvent",
+              "InheritedType": 10
+            },
+            {
+              "nid": -2033722049,
+              "strtype": "_event/condition_C",
+              "strval": "",
+              "InheritedType": 10
+            },
+            {
+              "nid": -274884935,
+              "strtype": "_event/condition_P",
+              "strval": "",
+              "InheritedType": 10
+            },
+            {
+              "nid": -1643349543,
+              "strtype": "_event/action",
+              "strval": "CALL FUNCTION",
+              "childs": [
+                {
+                  "nid": 1601942772,
+                  "strtype": "CALL FUNCTION/Name",
+                  "strval": "CALL FUNCTION",
+                  "InheritedType": 10
+                },
+                {
+                  "nid": -1035964182,
+                  "strtype": "CALL FUNCTION/Call",
+                  "strval": "<{Function_name}>( event_struct )",
+                  "InheritedType": 10
+                },
+                {
+                  "nid": 2125823435,
+                  "strtype": "CALL FUNCTION/CallC",
+                  "strval": "<{Function_name}>( e );",
+                  "InheritedType": 10
+                },
+                {
+                  "nid": -2139589962,
+                  "strtype": "CALL FUNCTION/Function_name",
+                  "strval": "uiPumpClick",
+                  "InheritedType": 10
+                },
+                {
+                  "nid": 1660565518,
+                  "strtype": "CALL FUNCTION/Dont_export_function",
+                  "strval": "False",
+                  "InheritedType": 2
+                }
+              ],
+              "InheritedType": 10
+            }
+          ],
+          "InheritedType": 4
         }
       ],
       "saved_objtypeKey": "IMGBUTTON",
@@ -642,8 +707,8 @@
       "flags": 17,
       "strtype": "OBJECT/Position",
       "intarray": [
-        60,
-        63
+        -29,
+        0
       ],
       "InheritedType": 7
     },
@@ -951,83 +1016,6 @@
       "strtype": "CONTAINER/Style_scrollbar",
       "strval": "lv.PART.SCROLLBAR, Rectangle, Pad",
       "InheritedType": 11
-    },
-    {
-      "disabled": false,
-      "nid": -1719502938,
-      "strtype": "_event/EventHandler",
-      "strval": "CLICKED",
-      "childs": [
-        {
-          "nid": 1340093429,
-          "strtype": "_event/name",
-          "strval": "uiPump1",
-          "InheritedType": 10
-        },
-        {
-          "nid": 1586939515,
-          "strtype": "_event/condition_C",
-          "strval": "",
-          "InheritedType": 10
-        },
-        {
-          "nid": 1203752487,
-          "strtype": "_event/condition_P",
-          "strval": "",
-          "InheritedType": 10
-        },
-        {
-          "nid": 1563042117,
-          "flags": 1048576,
-          "strtype": "_event/action",
-          "strval": "IMAGE_PROPERTY",
-          "childs": [
-            {
-              "nid": 2100385160,
-              "strtype": "IMAGE_PROPERTY/Name",
-              "strval": "IMAGE_PROPERTY",
-              "InheritedType": 10
-            },
-            {
-              "nid": 1405023127,
-              "strtype": "IMAGE_PROPERTY/Call",
-              "strval": "SetImageProperty(<{Target}>, '<{Property}>', <{Value}>, <{Value_}>)",
-              "InheritedType": 10
-            },
-            {
-              "nid": -1933156012,
-              "strtype": "IMAGE_PROPERTY/CallC",
-              "strval": "_ui_image_set_property(<{Target}>, _UI_IMAGE_PROPERTY_<{Property}>,& <{Value}>);",
-              "InheritedType": 10
-            },
-            {
-              "nid": -266426876,
-              "strtype": "IMAGE_PROPERTY/Target",
-              "strval": "-",
-              "InheritedType": 9
-            },
-            {
-              "nid": -1015410115,
-              "strtype": "IMAGE_PROPERTY/Property",
-              "strval": "Image",
-              "InheritedType": 3
-            },
-            {
-              "nid": 2128637623,
-              "strtype": "IMAGE_PROPERTY/Value",
-              "strval": "",
-              "InheritedType": 5
-            },
-            {
-              "nid": -1936857936,
-              "strtype": "IMAGE_PROPERTY/Value_",
-              "InheritedType": 6
-            }
-          ],
-          "InheritedType": 10
-        }
-      ],
-      "InheritedType": 4
     }
   ],
   "saved_objtypeKey": "CONTAINER"

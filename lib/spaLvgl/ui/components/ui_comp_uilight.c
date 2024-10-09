@@ -6,7 +6,7 @@
 #include "../ui.h"
 
 
-void ui_event_comp_uiLight_uiLight( lv_event_t * e) {
+void ui_event_comp_uiLight_Button( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 lv_obj_t **comp_uiLight = lv_event_get_user_data(e);
 if ( event_code == LV_EVENT_CLICKED) {
@@ -23,8 +23,8 @@ cui_uiLight = lv_obj_create(comp_parent);
 lv_obj_remove_style_all(cui_uiLight);
 lv_obj_set_width( cui_uiLight, LV_SIZE_CONTENT);  /// 104
 lv_obj_set_height( cui_uiLight, LV_SIZE_CONTENT);   /// 130
-lv_obj_set_x( cui_uiLight, 60 );
-lv_obj_set_y( cui_uiLight, 63 );
+lv_obj_set_x( cui_uiLight, 100 );
+lv_obj_set_y( cui_uiLight, 0 );
 lv_obj_set_align( cui_uiLight, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(cui_uiLight,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(cui_uiLight, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -75,7 +75,7 @@ children[UI_COMP_UILIGHT_BUTTON] = cui_Button;
 children[UI_COMP_UILIGHT_LABEL] = cui_Label;
 lv_obj_add_event_cb(cui_uiLight, get_component_child_event_cb, LV_EVENT_GET_COMP_CHILD, children);
 lv_obj_add_event_cb(cui_uiLight, del_component_child_event_cb, LV_EVENT_DELETE, children);
-lv_obj_add_event_cb(cui_uiLight, ui_event_comp_uiLight_uiLight, LV_EVENT_ALL, children);
+lv_obj_add_event_cb(cui_Button, ui_event_comp_uiLight_Button, LV_EVENT_ALL, children);
 ui_comp_uiLight_create_hook(cui_uiLight);
 return cui_uiLight; 
 }

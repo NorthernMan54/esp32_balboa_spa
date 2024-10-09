@@ -23,7 +23,7 @@
     "theme_color2": 0,
     "uiExportFolderPath": "/Users/sgracey/Code/esp32_balboa_spa/lib/spaLvgl/ui",
     "projectExportFolderPath": "/Users/sgracey/Code/esp32_balboa_spa",
-    "backup_cnt": 371,
+    "backup_cnt": 378,
     "autosave_cnt": 0,
     "lvgl_version": "9.1.0",
     "callfuncsexport": "C_FILE",

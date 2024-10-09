@@ -40,24 +40,6 @@ ui_object_set_themeable_style_property(ui_ThermostatLoading, LV_PART_MAIN| LV_ST
 ui_object_set_themeable_style_property(ui_ThermostatLoading, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA, _ui_theme_alpha_widgetBorder);
 lv_obj_set_style_border_width(ui_ThermostatLoading, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_uiPumpLoading = ui_uiPump_create(ui_Loading_Screen);
-lv_obj_set_x( ui_uiPumpLoading, 60 );
-lv_obj_set_y( ui_uiPumpLoading, 63 );
-
-
-
-ui_uiFilterLoading = ui_uiFilter_create(ui_Loading_Screen);
-lv_obj_set_x( ui_uiFilterLoading, 60 );
-lv_obj_set_y( ui_uiFilterLoading, 63 );
-
-
-
-ui_uiLightLoading = ui_uiLight_create(ui_Loading_Screen);
-lv_obj_set_x( ui_uiLightLoading, 60 );
-lv_obj_set_y( ui_uiLightLoading, 63 );
-
-
-
 ui_HeatControlsLoading = lv_obj_create(ui_Loading_Screen);
 lv_obj_remove_style_all(ui_HeatControlsLoading);
 lv_obj_set_width( ui_HeatControlsLoading, LV_SIZE_CONTENT);  /// 100
@@ -146,6 +128,24 @@ lv_obj_set_width( ui_tempRangeLowLabellLoading, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_tempRangeLowLabellLoading, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_tempRangeLowLabellLoading, LV_ALIGN_CENTER );
 lv_label_set_text(ui_tempRangeLowLabellLoading,"High");
+
+ui_uiPumpLoading = ui_uiPump_create(ui_Loading_Screen);
+lv_obj_set_x( ui_uiPumpLoading, 60 );
+lv_obj_set_y( ui_uiPumpLoading, 63 );
+
+
+
+ui_uiLightLoading = ui_uiLight_create(ui_Loading_Screen);
+lv_obj_set_x( ui_uiLightLoading, 60 );
+lv_obj_set_y( ui_uiLightLoading, 63 );
+
+
+
+ui_uiFilterLoading = ui_uiFilter_create(ui_Loading_Screen);
+lv_obj_set_x( ui_uiFilterLoading, 60 );
+lv_obj_set_y( ui_uiFilterLoading, 63 );
+
+
 
 ui_LoadingContainer = lv_obj_create(ui_Loading_Screen);
 lv_obj_remove_style_all(ui_LoadingContainer);

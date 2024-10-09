@@ -23,9 +23,6 @@ extern "C" {
 void ui_Loading_Screen_screen_init(void);
 extern lv_obj_t *ui_Loading_Screen;
 extern lv_obj_t *ui_ThermostatLoading;
-extern lv_obj_t *ui_uiPumpLoading;
-extern lv_obj_t *ui_uiFilterLoading;
-extern lv_obj_t *ui_uiLightLoading;
 extern lv_obj_t *ui_HeatControlsLoading;
 extern lv_obj_t *ui_uiHeatStateLoading;
 extern lv_obj_t *ui_heatSwtichLabelLoading;
@@ -34,6 +31,9 @@ extern lv_obj_t *ui_uiTempRangelLoading;
 extern lv_obj_t *ui_tempRangeHighLabellLoading;
 extern lv_obj_t *ui_tempRangeSwitchlLoading;
 extern lv_obj_t *ui_tempRangeLowLabellLoading;
+extern lv_obj_t *ui_uiPumpLoading;
+extern lv_obj_t *ui_uiLightLoading;
+extern lv_obj_t *ui_uiFilterLoading;
 extern lv_obj_t *ui_LoadingContainer;
 extern lv_obj_t *ui_LoadingLabel;
 // SCREEN: ui_Spa_Screen
@@ -64,9 +64,9 @@ LV_IMG_DECLARE( ui__temporary_image );
 LV_IMG_DECLARE( ui_img_uipumpoff_png);   // assets/uiPumpOff.png
 LV_IMG_DECLARE( ui_img_uipumplow_png);   // assets/uiPumpLow.png
 LV_IMG_DECLARE( ui_img_uipumphigh_png);   // assets/uiPumpHigh.png
-LV_IMG_DECLARE( ui_img_filteron_png);   // assets/filterOn.png
 LV_IMG_DECLARE( ui_img_lightoff_png);   // assets/lightOff.png
 LV_IMG_DECLARE( ui_img_lighton_png);   // assets/lightOn.png
+LV_IMG_DECLARE( ui_img_filteron_png);   // assets/filterOn.png
 
 
 LV_FONT_DECLARE( ui_font_Montserrat_Bold_14);
