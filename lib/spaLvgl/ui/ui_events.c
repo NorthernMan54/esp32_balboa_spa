@@ -12,7 +12,7 @@ void uiLightClicked(lv_event_t *e)
 	log_i("uiLightClicked");
 }
 
-void heatRangeSwtich(lv_event_t *e)
+void heatRangeSwitch(lv_event_t *e)
 {
 	// Your code here
 	log_i("heatRangeSwtich");
