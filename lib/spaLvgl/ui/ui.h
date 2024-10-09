@@ -22,24 +22,42 @@ extern "C" {
 // SCREEN: ui_Loading_Screen
 void ui_Loading_Screen_screen_init(void);
 extern lv_obj_t *ui_Loading_Screen;
-extern lv_obj_t *ui_LoadingContainer;
-extern lv_obj_t *ui_LoadingLabel;
+extern lv_obj_t *ui_ThermostatLoading;
 extern lv_obj_t *ui_uiPumpLoading;
 extern lv_obj_t *ui_uiFilterLoading;
 extern lv_obj_t *ui_uiLightLoading;
-extern lv_obj_t *ui_uiLight2;
+extern lv_obj_t *ui_HeatControlsLoading;
+extern lv_obj_t *ui_uiHeatStateLoading;
+extern lv_obj_t *ui_heatSwtichLabelLoading;
+extern lv_obj_t *ui_heatStateSwitchlLoading;
+extern lv_obj_t *ui_uiTempRangelLoading;
+extern lv_obj_t *ui_tempRangeHighLabellLoading;
+extern lv_obj_t *ui_tempRangeSwitchlLoading;
+extern lv_obj_t *ui_tempRangeLowLabellLoading;
+extern lv_obj_t *ui_LoadingContainer;
+extern lv_obj_t *ui_LoadingLabel;
 // SCREEN: ui_Spa_Screen
 void ui_Spa_Screen_screen_init(void);
 extern lv_obj_t *ui_Spa_Screen;
-extern lv_obj_t *ui_uiThermostat;
-extern lv_obj_t *ui_uiThermostatLabel;
-extern lv_obj_t *ui_uiThermostatArc;
+extern lv_obj_t *ui_uiThermostatPlaceholder;
 extern lv_obj_t *ui_uiClock;
 extern lv_obj_t *ui_uiClockLabel;
+extern lv_obj_t *ui_HeatControls;
+extern lv_obj_t *ui_uiHeatState;
+extern lv_obj_t *ui_heatSwtichLabel;
+extern lv_obj_t *ui_heatStateSwitch;
+extern lv_obj_t *ui_uiTempRange;
+extern lv_obj_t *ui_tempRangeHighLabel;
+void ui_event_tempRangeSwitch( lv_event_t * e);
+extern lv_obj_t *ui_tempRangeSwitch;
+extern lv_obj_t *ui_tempRangeLowLabel;
 extern lv_obj_t *ui_uiPump1;
 extern lv_obj_t *ui_uiPump2;
 extern lv_obj_t *ui_uiLight1;
 extern lv_obj_t *ui_uiFilter;
+extern lv_obj_t *ui_uiThermostat;
+extern lv_obj_t *ui_uiThermostatLabel;
+extern lv_obj_t *ui_uiThermostatArc;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui__temporary_image );

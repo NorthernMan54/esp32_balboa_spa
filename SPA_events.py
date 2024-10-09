@@ -10,3 +10,7 @@ def uiLightClicked(event_struct):
 def uiPumpClicked2(event_struct):
     return
 
+
+def heatRangeSwtich(event_struct):
+    return
+

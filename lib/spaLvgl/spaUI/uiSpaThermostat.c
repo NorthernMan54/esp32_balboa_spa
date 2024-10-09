@@ -2,10 +2,10 @@
 #include <Arduino.h>
 #include <lvgl.h>
 
-#include "ui.h"
+#include "uiSpaShared.h"
 
-
-
+#define THERMO_WIDTH 120
+#define THERMO_HEIGHT 100
 
 /**
  * @brief Create a circular scale meter with a needle indicator
@@ -13,9 +13,10 @@
  */
 lv_obj_t *thermostatArc(lv_obj_t *parent)
 {
+  /*
   lv_obj_t *container = lv_obj_create(parent);
 
-  lv_obj_set_size(container, THERMO_WIDTH, 110);
+  // lv_obj_set_size(container, THERMO_WIDTH, THERMO_HEIGHT);
   lv_obj_set_align(container, LV_ALIGN_CENTER);
 
   lv_obj_remove_flag(container, LV_OBJ_FLAG_SCROLLABLE);
@@ -28,8 +29,9 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
   lv_obj_remove_flag(container1, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_style_bg_color(container1, lv_palette_main(LV_PALETTE_BLUE_GREY), 0);
   lv_obj_set_style_bg_opa(container1, LV_OPA_50, 0);
+  */
 
-  temperatureGuage = lv_scale_create(container1);
+  temperatureGuage = lv_scale_create(parent);
 
   lv_scale_set_label_show(temperatureGuage, true);
   //  lv_obj_set_size(temperatureGuage, THERMO_WIDTH * .7, THERMO_HEIGHT * .7);
@@ -115,6 +117,6 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
   lv_obj_set_style_line_rounded(currentTempNeedle, true, LV_PART_MAIN);
   lv_obj_set_style_line_color(currentTempNeedle, lv_palette_main(LV_PALETTE_RED), 0);
 
-  return container;
+  return parent;
 }
 #endif

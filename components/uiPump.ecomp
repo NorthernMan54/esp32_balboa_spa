@@ -365,7 +365,7 @@
         },
         {
           "nid": -630405762,
-          "flags": 17,
+          "flags": 51,
           "strtype": "OBJECT/Size",
           "intarray": [
             100,
@@ -585,7 +585,7 @@
         {
           "nid": -1270172400,
           "strtype": "LABEL/Long_mode",
-          "strval": "WRAP",
+          "strval": "CLIP",
           "InheritedType": 3
         },
         {
@@ -596,27 +596,7 @@
         },
         {
           "part": "lv.PART.MAIN",
-          "childs": [
-            {
-              "nid": 912414451,
-              "strtype": "_style/StyleState",
-              "strval": "DEFAULT",
-              "childs": [
-                {
-                  "nid": -19626557,
-                  "strtype": "_style/Padding",
-                  "intarray": [
-                    0,
-                    0,
-                    3,
-                    8
-                  ],
-                  "InheritedType": 7
-                }
-              ],
-              "InheritedType": 1
-            }
-          ],
+          "childs": [],
           "nid": -1367339929,
           "strtype": "LABEL/Style_main",
           "strval": "lv.PART.MAIN, Text, Rectangle, Pad, Transform",
@@ -669,11 +649,11 @@
     },
     {
       "nid": 2023191037,
-      "flags": 17,
+      "flags": 51,
       "strtype": "OBJECT/Size",
       "intarray": [
-        110,
-        130
+        1,
+        1
       ],
       "InheritedType": 7
     },
@@ -890,6 +870,12 @@
           "strval": "DEFAULT",
           "childs": [
             {
+              "nid": 276185158,
+              "strtype": "_style/Bg_Radius",
+              "integer": 8,
+              "InheritedType": 6
+            },
+            {
               "nid": -200372605,
               "strtype": "_style/Bg_Color",
               "strval": "AccessoryOnBkg",
@@ -926,6 +912,17 @@
               "strtype": "_style/Border side",
               "strval": "FULL",
               "InheritedType": 3
+            },
+            {
+              "nid": -1938610159,
+              "strtype": "_style/Padding",
+              "intarray": [
+                8,
+                8,
+                8,
+                8
+              ],
+              "InheritedType": 7
             },
             {
               "nid": 588476261,

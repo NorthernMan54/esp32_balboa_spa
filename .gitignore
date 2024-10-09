@@ -12,3 +12,4 @@ src/main.ino.cpp
 /autosave
 /cache
 /backup
+*.zip

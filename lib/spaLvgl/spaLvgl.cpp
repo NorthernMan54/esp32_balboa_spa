@@ -10,6 +10,7 @@
 
 #include <spaMessage.h>
 #include <spaUtilities.h>
+#include "./spaUi/uiSpaShared.h"
 
 bool loading = true;
 
@@ -30,6 +31,20 @@ void OnRotateClicked(lv_event_t *e)
   log_i("OnRotateClicked: disp=%d, rotation=%d", (int)disp, (int)rotation);
 }
 
+/**
+ * @brief Set the Style object
+ *
+ * @param components
+ * @param radius
+ */
+void setStyle(lv_obj_t *components[], lv_coord_t radius)
+{
+  for (uint16_t i = 0; components[i] != nullptr; i++)
+  {
+    // lv_obj_set_style_radius(components[i], radius, LV_PART_MAIN);
+  }
+}
+
 void spaLvglSetup()
 {
   smartdisplay_init();
@@ -47,9 +62,19 @@ void spaLvglSetup()
   log_i("ui_init");
   ui_init();
 
-  lv_obj_set_style_radius(ui_Spa_Screen, 8, 0);
-  lv_obj_set_style_radius(ui_Loading_Screen, 8, 0);
+  lv_obj_t *loading[] = {ui_uiPumpLoading, ui_uiFilterLoading, ui_uiLightLoading, ui_HeatControlsLoading, nullptr};
+  setStyle(loading, 8);
 
+  lv_obj_t *components[] = {ui_uiThermostat, ui_uiClock, ui_uiPump1, ui_uiPump2, ui_uiLight1, ui_uiFilter, ui_uiTempRange, nullptr};
+  setStyle(components, 8);
+
+  thermostatArc(ui_ThermostatLoading);
+  thermostatArc(ui_uiThermostatPlaceholder);
+
+/*
+  lv_switch_set_orientation(ui_uiTempRangeSwitchLoading, LV_SWITCH_ORIENTATION_VERTICAL);
+  lv_switch_set_orientation(ui_tempRangeSwitch, LV_SWITCH_ORIENTATION_VERTICAL);
+  */
 #else
   log_i("spa_ui_init");
   spa_ui_init();
@@ -110,11 +135,12 @@ void spaLvglLoop()
       loading = false;
       _ui_screen_change(&ui_Spa_Screen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Spa_Screen_screen_init);
       lv_obj_clean(ui_Loading_Screen);
-      lv_obj_clean(ui_LoadingContainer);
-      lv_obj_clean(ui_LoadingLabel);
       lv_obj_clean(ui_uiPumpLoading);
       lv_obj_clean(ui_uiFilterLoading);
       lv_obj_clean(ui_uiLightLoading);
+      lv_obj_clean(ui_HeatControlsLoading);
+      lv_obj_clean(ui_uiTempRangelLoading);
+      lv_obj_clean(ui_LoadingContainer);
     }
     currentCrc = spaStatusData.crc;
 
@@ -145,7 +171,7 @@ void spaLvglLoop()
 
     // Light
 
-  lv_obj_t *lightImage = ui_comp_get_child(ui_uiLight1, UI_COMP_UILIGHT_BUTTON);
+    lv_obj_t *lightImage = ui_comp_get_child(ui_uiLight1, UI_COMP_UILIGHT_BUTTON);
     if (spaStatusData.light1)
     {
       ui_object_set_themeable_style_property(ui_uiLight1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
@@ -175,6 +201,26 @@ void spaLvglLoop()
       lv_obj_set_state(ui_uiFilter, LV_STATE_CHECKED, false);
     }
 
+    // Heating Controls
+
+    if (spaStatusData.heatingState)
+    {
+      lv_obj_set_state(ui_heatStateSwitch, LV_STATE_CHECKED, true);
+    }
+    else
+    {
+      lv_obj_set_state(ui_heatStateSwitch, LV_STATE_CHECKED, false);
+    }
+    if (spaStatusData.tempRange)
+    {
+      lv_obj_set_state(ui_tempRangeSwitch, LV_STATE_CHECKED, true);
+    }
+    else
+    {
+      lv_obj_set_state(ui_tempRangeSwitch, LV_STATE_CHECKED, false);
+    }
+
+      lv_scale_set_line_needle_value(temperatureGuage, currentTempNeedle, 60, spaStatusData.currentTemp);
 #else
     uiUpdateClock(final_output);
     uiUpdateThermostat(spaStatusData.currentTemp, spaStatusData.highSetTemp, spaStatusData.lowSetTemp);

@@ -13,20 +13,25 @@ lv_obj_t *ui_uiPump_create(lv_obj_t *comp_parent) {
 lv_obj_t *cui_uiPump;
 cui_uiPump = lv_obj_create(comp_parent);
 lv_obj_remove_style_all(cui_uiPump);
-lv_obj_set_width( cui_uiPump, 110);
-lv_obj_set_height( cui_uiPump, 130);
+lv_obj_set_width( cui_uiPump, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( cui_uiPump, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( cui_uiPump, 60 );
 lv_obj_set_y( cui_uiPump, 63 );
 lv_obj_set_align( cui_uiPump, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(cui_uiPump,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(cui_uiPump, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 lv_obj_remove_flag( cui_uiPump, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(cui_uiPump, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 ui_object_set_themeable_style_property(cui_uiPump, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOnBkg);
 ui_object_set_themeable_style_property(cui_uiPump, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOnBkg);
 ui_object_set_themeable_style_property(cui_uiPump, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BORDER_COLOR, _ui_theme_color_widgetBorder);
 ui_object_set_themeable_style_property(cui_uiPump, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BORDER_OPA, _ui_theme_alpha_widgetBorder);
 lv_obj_set_style_border_width(cui_uiPump, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_border_side(cui_uiPump, LV_BORDER_SIDE_FULL, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(cui_uiPump, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(cui_uiPump, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(cui_uiPump, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(cui_uiPump, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_color(cui_uiPump, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(cui_uiPump, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -46,18 +51,15 @@ lv_obj_set_align( cui_Button, LV_ALIGN_CENTER );
 
 lv_obj_t *cui_Label;
 cui_Label = lv_label_create(cui_uiPump);
-lv_obj_set_width( cui_Label, 100);
-lv_obj_set_height( cui_Label, 30);
+lv_obj_set_width( cui_Label, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_height( cui_Label, LV_SIZE_CONTENT);   /// 30
 lv_obj_set_x( cui_Label, 41 );
 lv_obj_set_y( cui_Label, 47 );
 lv_obj_set_align( cui_Label, LV_ALIGN_BOTTOM_MID );
 lv_obj_set_flex_flow(cui_Label,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(cui_Label, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+lv_label_set_long_mode(cui_Label,LV_LABEL_LONG_CLIP);
 lv_label_set_text(cui_Label,"Spa Pump 1");
-lv_obj_set_style_pad_left(cui_Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_right(cui_Label, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_top(cui_Label, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_bottom(cui_Label, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_t ** children = lv_malloc(sizeof(lv_obj_t *) * _UI_COMP_UIPUMP_NUM);
 children[UI_COMP_UIPUMP_UIPUMP] = cui_uiPump;

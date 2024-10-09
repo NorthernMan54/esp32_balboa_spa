@@ -889,6 +889,12 @@
           "strval": "DEFAULT",
           "childs": [
             {
+              "nid": 1155237317,
+              "strtype": "_style/Bg_Radius",
+              "integer": 8,
+              "InheritedType": 6
+            },
+            {
               "nid": -1804426087,
               "strtype": "_style/Bg_Color",
               "strval": "AccessoryOnBkg",

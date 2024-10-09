@@ -14,3 +14,8 @@ void uiLightClicked(lv_event_t * e)
 {
 	// Your code here
 }
+
+void heatRangeSwtich(lv_event_t * e)
+{
+	// Your code here
+}

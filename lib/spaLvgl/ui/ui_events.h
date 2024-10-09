@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 void uiLightClicked(lv_event_t * e);
+void heatRangeSwtich(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/
