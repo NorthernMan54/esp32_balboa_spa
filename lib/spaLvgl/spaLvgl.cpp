@@ -11,6 +11,16 @@
 #include <spaMessage.h>
 #include <spaUtilities.h>
 #include "./spaUi/uiSpaShared.h"
+#include "spaLvgl.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <lvgl.h>
+#include <libs/lodepng/lodepng.h>
+#ifdef __cplusplus
+} /*extern "C"*/
+#endif
 
 bool loading = true;
 
@@ -62,10 +72,10 @@ void spaLvglSetup()
   log_i("ui_init");
   ui_init();
 
-  lv_obj_t *loading[] = {ui_uiPumpLoading, ui_uiFilterLoading, ui_uiLightLoading, ui_HeatControlsLoading, nullptr};
+  lv_obj_t *loading[] = {ui_ThermostatLoading, ui_uiPumpLoading, ui_uiFilterLoading, ui_uiLightLoading, ui_HeatControlsLoading, nullptr};
   setStyle(loading, 8);
 
-  lv_obj_t *components[] = {ui_uiThermostat, ui_uiClock, ui_uiPump1, ui_uiPump2, ui_uiLight1, ui_uiFilter, ui_uiTempRange, nullptr};
+  lv_obj_t *components[] = {ui_uiThermostatPlaceholder, ui_uiClock, ui_uiPump1, ui_uiPump2, ui_uiLight1, ui_uiFilter, ui_uiTempRange, ui_uiTemperatureHistory, ui_uiHeaterHistory, nullptr};
   setStyle(components, 8);
 
   thermostatArc(ui_ThermostatLoading);
@@ -140,7 +150,7 @@ void spaLvglLoop()
       lv_obj_clean(ui_uiLightLoading);
       lv_obj_clean(ui_HeatControlsLoading);
       lv_obj_clean(ui_uiTempRangelLoading);
-      lv_obj_clean(ui_LoadingContainer);
+      lv_obj_clean(ui_ThermostatLoading);
     }
     currentCrc = spaStatusData.crc;
 
@@ -160,7 +170,6 @@ void spaLvglLoop()
     // Thermostat
 
     lv_label_set_text(ui_uiClockLabel, final_output);
-    lv_arc_set_value(ui_uiThermostatArc, spaStatusData.currentTemp);
 
     // Pump 1
 
@@ -236,5 +245,50 @@ void spaLvglLoop()
   // Update the UI
   lv_timer_handler();
 }
+
+uint8_t *jpegBuffer = nullptr; // Buffer for storing the JPEG output
+size_t jpegSize = 0;           // Size of the JPEG in memory
+
+size_t captureToJPEG()
+{
+  
+    /* Need to #include "lvgl/src/extra/libs/png/lodepng.h" and setup working directory as drive A in lv_conf.h */
+
+    //Take screenshot
+    lv_img_cf_t colour_format = LV_IMG_CF_TRUE_COLOR;
+    lv_img_dsc_t * screenshot = lv_snapshot_take(lv_scr_act(), colour_format);
+    
+    //encode the screenshot as a PNG using lodePNG
+    const unsigned char * image = screenshot->data;
+    unsigned int width = screenshot->header.w;
+    unsigned int height = screenshot->header.h;
+    lodepng_encode24_file("A:screenshot24.png", image, width, height); //produces garbled image
+    lodepng_encode32_file("A:screenshot32.png", image, width, height); //produces correct image
+
+
+
+  
+  // Ensure previous JPEG buffer is freed
+  if (jpegBuffer != nullptr)
+  {
+    free(jpegBuffer);
+  }
+
+  // Use fmt2jpg to convert frameBuffer (grayscale) to JPEG
+ // bool success = newfmt2jpg(frameBuffer, DISPLAY_WIDTH * SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT, NEW_PIXFORMAT_GRAYSCALE16, 100, &jpegBuffer, &jpegSize);
+
+  if (success)
+  {
+    Log.verbose("epd->JPEG created successfully, size: %d bytes\n", jpegSize);
+  }
+  else
+  {
+    Log.error("epd->JPEG conversion failed.");
+    jpegSize = 0;
+  }
+
+  return jpegSize;
+}
+
 
 #endif

@@ -11,6 +11,9 @@
 #ifdef spaEpaper
 #include <epd47.h>
 #endif
+#ifdef SPALVGL
+#include <spaLvgl.h>
+#endif
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
@@ -34,7 +37,7 @@ void handleData(AsyncWebServerRequest *request);
 void handleLoginData(AsyncWebServerRequest *request);
 void handleOptionsData(AsyncWebServerRequest *request);
 void handleOptionsLoginData(AsyncWebServerRequest *request);
-void handleepdpanel(AsyncWebServerRequest *request);
+void handleEDPpanel(AsyncWebServerRequest *request);
 String parseBody(String body);
 void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
 String listDirToString(fs::FS &fs, const char *dirname, uint8_t levels);
@@ -81,8 +84,8 @@ void spaWebServerLoop()
     server.on("/state", HTTP_GET, handleState);
     server.on("/config", HTTP_GET, handleConfig);
     server.on("/status", HTTP_GET, handleStatus);
-#ifdef spaEpaper
-    server.on("/panel.jpg", HTTP_GET, handleepdpanel);
+#if defined(spaEpaper) || defined(SPALVGL)
+    server.on("/panel.jpg", HTTP_GET, handleEDPpanel);
 #endif
     server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request)
               {
@@ -114,7 +117,23 @@ void spaWebServerLoop()
 }
 
 #ifdef spaEpaper
-void handleepdpanel(AsyncWebServerRequest *request)
+void handleEDPpanel(AsyncWebServerRequest *request)
+{
+  Log.verbose("[Web]: Request %s received from %p - size %d" CR, request->url().c_str(), request->client()->remoteIP(), jpegSize);
+  if (captureToJPEG() > 0)
+  {
+    // Send the BMP image as a response
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "image/jpeg", jpegBuffer, jpegSize);
+    response->addHeader("Content-Disposition", "inline; filename=\"framebuffer.jpeg\"");
+    request->send(response);
+  }
+  else
+  {
+    request->send(404, "text/plain", "Image not available");
+  }
+}
+#elif SPALVGL
+void handleEDPpanel(AsyncWebServerRequest *request)
 {
   Log.verbose("[Web]: Request %s received from %p - size %d" CR, request->url().c_str(), request->client()->remoteIP(), jpegSize);
   if (captureToJPEG() > 0)
@@ -143,8 +162,8 @@ void handleepdpanel(AsyncWebServerRequest *request)
 
 #define webMenuState String("<form><button formaction='/status'>SPA Status</button><button formaction='/config'>SPA Config</button><button class='active' formaction='/state'>ESP State</button><button formaction='/index.html'>SPA Website</button></form>")
 
-#ifdef spaEpaper
-#define ePaper String("<img src='panel.jpg' alt='Spa Panel' width=600>")
+#if defined(spaEpaper) || defined(SPALVGL)
+#define ePaper String("<img src='panel.jpg' alt='Spa Panel' width="DISPLAY_WIDTH">")
 #else
 #define ePaper String("")
 #endif

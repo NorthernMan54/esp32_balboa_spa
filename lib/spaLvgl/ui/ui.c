@@ -22,10 +22,23 @@ lv_obj_t *ui_tempRangeHighLabellLoading;
 lv_obj_t *ui_tempRangeSwitchlLoading;
 lv_obj_t *ui_tempRangeLowLabellLoading;
 lv_obj_t *ui_uiPumpLoading;
+lv_obj_t *ui_uiPumpLoading2;
 lv_obj_t *ui_uiLightLoading;
 lv_obj_t *ui_uiFilterLoading;
-lv_obj_t *ui_LoadingContainer;
-lv_obj_t *ui_LoadingLabel;
+lv_obj_t *ui_uiTemperatureHistory2;
+lv_obj_t *ui_uiTemperatureChart2;
+lv_obj_t *ui_uiTemperatureChart2_Xaxis;
+lv_obj_t *ui_uiTemperatureChart2_Yaxis1;
+lv_obj_t *ui_uiTemperatureChart2_Yaxis2;
+lv_obj_t *ui_temperatureChartLabel2;
+lv_obj_t *ui_uiHeaterHistory2;
+lv_obj_t *ui_uiHeaterChart2;
+lv_obj_t *ui_uiHeaterChart2_Xaxis;
+lv_obj_t *ui_uiHeaterChart2_Yaxis1;
+lv_obj_t *ui_uiHeaterChart2_Yaxis2;
+lv_obj_t *ui_heaterChartLabel2;
+lv_obj_t *ui_uiClock2;
+lv_obj_t *ui_uiClockLabel2;
 
 
 // SCREEN: ui_Spa_Screen
@@ -47,9 +60,18 @@ lv_obj_t *ui_uiPump1;
 lv_obj_t *ui_uiPump2;
 lv_obj_t *ui_uiLight1;
 lv_obj_t *ui_uiFilter;
-lv_obj_t *ui_uiThermostat;
-lv_obj_t *ui_uiThermostatLabel;
-lv_obj_t *ui_uiThermostatArc;
+lv_obj_t *ui_uiTemperatureHistory;
+lv_obj_t *ui_uiTemperatureChart;
+lv_obj_t *ui_uiTemperatureChart_Xaxis;
+lv_obj_t *ui_uiTemperatureChart_Yaxis1;
+lv_obj_t *ui_uiTemperatureChart_Yaxis2;
+lv_obj_t *ui_temperatureChartLabel;
+lv_obj_t *ui_uiHeaterHistory;
+lv_obj_t *ui_uiHeaterChart;
+lv_obj_t *ui_uiHeaterChart_Xaxis;
+lv_obj_t *ui_uiHeaterChart_Yaxis1;
+lv_obj_t *ui_uiHeaterChart_Yaxis2;
+lv_obj_t *ui_heaterChartLabel;
 lv_obj_t *ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
