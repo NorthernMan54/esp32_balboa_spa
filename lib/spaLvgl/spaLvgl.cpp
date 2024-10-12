@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 #include <esp32_smartdisplay.h>
+#include <lvgl.h> // Add this line to include the necessary header file
+
 #ifdef SQUARELINE
 #include <ui/ui.h>
 #else
@@ -12,15 +14,7 @@
 #include <spaUtilities.h>
 #include "./spaUi/uiSpaShared.h"
 #include "spaLvgl.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <lvgl.h>
-#include <libs/lodepng/lodepng.h>
-#ifdef __cplusplus
-} /*extern "C"*/
-#endif
+#include "./spaUI/snapshotBuffer.h"
 
 bool loading = true;
 
@@ -229,7 +223,12 @@ void spaLvglLoop()
       lv_obj_set_state(ui_tempRangeSwitch, LV_STATE_CHECKED, false);
     }
 
-      lv_scale_set_line_needle_value(temperatureGuage, currentTempNeedle, 60, spaStatusData.currentTemp);
+    lv_scale_set_line_needle_value(temperatureGuage, currentTempNeedle, 60, spaStatusData.currentTemp);
+
+    lv_chart_series_t *ui_uiTemperatureChart_series_1 = lv_chart_add_series(ui_uiTemperatureChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
+    static lv_coord_t ui_uiTemperatureChart_series_1_array[] = {0, 10, 20, 40, 8, 32, 40, 20, 10, 0, 22};
+    // lv_chart_set_ext_y_array(ui_uiTemperatureChart, ui_uiTemperatureChart_series_1, spaStatusData.temperatureHistory);
+
 #else
     uiUpdateClock(final_output);
     uiUpdateThermostat(spaStatusData.currentTemp, spaStatusData.highSetTemp, spaStatusData.lowSetTemp);
@@ -249,46 +248,47 @@ void spaLvglLoop()
 uint8_t *jpegBuffer = nullptr; // Buffer for storing the JPEG output
 size_t jpegSize = 0;           // Size of the JPEG in memory
 
+lv_draw_buf_t *snapshot = nullptr;
+
 size_t captureToJPEG()
 {
-  
-    /* Need to #include "lvgl/src/extra/libs/png/lodepng.h" and setup working directory as drive A in lv_conf.h */
 
-    //Take screenshot
-    lv_img_cf_t colour_format = LV_IMG_CF_TRUE_COLOR;
-    lv_img_dsc_t * screenshot = lv_snapshot_take(lv_scr_act(), colour_format);
-    
-    //encode the screenshot as a PNG using lodePNG
-    const unsigned char * image = screenshot->data;
-    unsigned int width = screenshot->header.w;
-    unsigned int height = screenshot->header.h;
-    lodepng_encode24_file("A:screenshot24.png", image, width, height); //produces garbled image
-    lodepng_encode32_file("A:screenshot32.png", image, width, height); //produces correct image
-
-
-
-  
-  // Ensure previous JPEG buffer is freed
-  if (jpegBuffer != nullptr)
+  if (snapshot != nullptr)
   {
-    free(jpegBuffer);
+    lv_draw_buf_destroy(snapshot);
+    snapshot = nullptr;
   }
 
-  // Use fmt2jpg to convert frameBuffer (grayscale) to JPEG
- // bool success = newfmt2jpg(frameBuffer, DISPLAY_WIDTH * SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT, NEW_PIXFORMAT_GRAYSCALE16, 100, &jpegBuffer, &jpegSize);
+  snapshot = snapshot_create_draw_buf(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888);
 
-  if (success)
+  log_i("snapshot_create_draw_buf created");
+
+  if (snapshot == NULL)
   {
-    Log.verbose("epd->JPEG created successfully, size: %d bytes\n", jpegSize);
+    log_i("couldn't allocate memory (%lu bytes)", (unsigned long)sizeof(lv_draw_buf_t));
   }
-  else
+  if (lv_snapshot_take_to_draw_buf(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888, snapshot) != LV_RESULT_OK)
   {
-    Log.error("epd->JPEG conversion failed.");
-    jpegSize = 0;
+    log_e("snapshot is null");
+    lv_draw_buf_destroy(snapshot);
+    return 0;
   }
+
+  // lv_image_set_src(img_snapshot, snapshot);
+  log_i("captured %p", snapshot);
+  // encode the screenshot as a PNG using lodePNG
+  const unsigned char *image = snapshot->data;
+  log_i("header.w");
+  uint32_t width = snapshot->header.w;
+  log_i("captureToJPEG() - header.h");
+  uint32_t height = snapshot->header.h;
+  log_i("captureToJPEG() - data_size");
+  jpegSize = snapshot->data_size;
+  log_i("width=%u, height=%u, jpegSize=%u", width, height, jpegSize);
+  //  lodepng_encode24_file("A:screenshot24.png", image, width, height); //produces garbled image
+  //  lodepng_encode32_file("A:screenshot32.png", image, width, height); //produces correct image
 
   return jpegSize;
 }
-
 
 #endif

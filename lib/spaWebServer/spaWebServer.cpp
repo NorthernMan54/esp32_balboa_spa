@@ -163,7 +163,8 @@ void handleEDPpanel(AsyncWebServerRequest *request)
 #define webMenuState String("<form><button formaction='/status'>SPA Status</button><button formaction='/config'>SPA Config</button><button class='active' formaction='/state'>ESP State</button><button formaction='/index.html'>SPA Website</button></form>")
 
 #if defined(spaEpaper) || defined(SPALVGL)
-#define ePaper String("<img src='panel.jpg' alt='Spa Panel' width="DISPLAY_WIDTH">")
+#define ePaper String("<img src='panel.jpg' alt='Spa Panel' width=" + String(DISPLAY_WIDTH) + ">")
+
 #else
 #define ePaper String("")
 #endif

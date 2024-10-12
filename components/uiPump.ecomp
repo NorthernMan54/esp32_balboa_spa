@@ -318,7 +318,7 @@
         {
           "disabled": false,
           "nid": 1717813642,
-          "strtype": "IMGBUTTON/EventHandler",
+          "strtype": "_event/EventHandler",
           "strval": "CLICKED",
           "childs": [
             {
@@ -707,8 +707,8 @@
       "flags": 17,
       "strtype": "OBJECT/Position",
       "intarray": [
-        -29,
-        0
+        -161,
+        -15
       ],
       "InheritedType": 7
     },
