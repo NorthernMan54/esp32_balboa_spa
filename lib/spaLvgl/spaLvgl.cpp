@@ -14,7 +14,6 @@
 #include <spaUtilities.h>
 #include "./spaUi/uiSpaShared.h"
 #include "spaLvgl.h"
-#include "./spaUI/snapshotBuffer.h"
 
 bool loading = true;
 
@@ -253,24 +252,22 @@ lv_draw_buf_t *snapshot = nullptr;
 size_t captureToJPEG()
 {
 
+  if (jpegBuffer != nullptr)
+  {
+    free(jpegBuffer);
+    jpegBuffer = nullptr;
+  }
+
   if (snapshot != nullptr)
   {
     lv_draw_buf_destroy(snapshot);
     snapshot = nullptr;
   }
 
-  snapshot = snapshot_create_draw_buf(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888);
-
-  log_i("snapshot_create_draw_buf created");
-
+  snapshot = lv_snapshot_take(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888);
   if (snapshot == NULL)
   {
-    log_i("couldn't allocate memory (%lu bytes)", (unsigned long)sizeof(lv_draw_buf_t));
-  }
-  if (lv_snapshot_take_to_draw_buf(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888, snapshot) != LV_RESULT_OK)
-  {
-    log_e("snapshot is null");
-    lv_draw_buf_destroy(snapshot);
+    log_e("snapshot_take failed");
     return 0;
   }
 
@@ -288,6 +285,13 @@ size_t captureToJPEG()
   //  lodepng_encode24_file("A:screenshot24.png", image, width, height); //produces garbled image
   //  lodepng_encode32_file("A:screenshot32.png", image, width, height); //produces correct image
 
+  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)));
+  jpegBuffer = (uint8_t *)heap_caps_calloc(1, DISPLAY_WIDTH * DISPLAY_HEIGHT * 4, MALLOC_CAP_DEFAULT);
+  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)));
+
+  lv_lodepng_encode_memory(&jpegBuffer, &jpegSize,
+                           snapshot->data, width, height, 8);
+  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)));
   return jpegSize;
 }
 
