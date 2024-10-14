@@ -76,7 +76,7 @@ int main()
 
 */
 
-
+#include <Arduino.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -84,7 +84,7 @@ extern "C"
 #endif
 
 #include "lv_lib_100ask.h"
-#if LV_USE_100ASK_SCREENSHOT != 0
+#if LV_USE_100ASK_SCREENSHOT != 0 && LV_USE_100ASK_TINY_JPEG != 0
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push

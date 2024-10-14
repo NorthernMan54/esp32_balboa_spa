@@ -6,6 +6,8 @@
 #ifndef SAVE_AS_PNG_H
 #define SAVE_AS_PNG_H
 
+#include <Arduino.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,11 +16,7 @@ extern "C" {
  *      INCLUDES
  *********************/
 #include "lv_lib_100ask.h"
-#if LV_USE_100ASK_SCREENSHOT != 0 && LV_USE_PNG
-
-#if LV_USE_PNG == 0
-  #error "LV_USE_PNG must be defined in lv_conf.h"
-#endif
+#if LV_USE_100ASK_SCREENSHOT != 0
 
 /*********************
  *      DEFINES

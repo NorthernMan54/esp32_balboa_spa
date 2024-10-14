@@ -7,8 +7,9 @@
  *      INCLUDES
  *********************/
 #include "save_as_png.h"
+#include "libs/lodepng/lodepng.h"
 
-#if LV_USE_100ASK_SCREENSHOT != 0 && LV_USE_LODEPNG
+#if LV_USE_100ASK_SCREENSHOT != 0
 
 /*********************
  *      DEFINES
@@ -34,16 +35,17 @@
  *   GLOBAL FUNCTIONS
  **********************/
 
-bool save_as_png_file(uint8_t * image, uint32_t w, uint32_t h, uint32_t bpp, char *filename)
+bool save_as_png_file(uint8_t *image, uint32_t w, uint32_t h, uint32_t bpp, char *filename)
 {
-    if(bpp == 32)
-    {
-      lodepng_encode32_file(filename, image, w, h);
-    }
-    else if(bpp == 24)
-    {
-      lodepng_encode24_file(filename, image, w, h);
-    }
+  log_i("save_as_png_file %s, width: %lu, height: %lu, bpp: %lu", filename, w, h, bpp);
+  if (bpp == 32)
+  {
+    lodepng_encode32_file(filename, image, w, h);
+  }
+  else if (bpp == 24)
+  {
+    lodepng_encode24_file(filename, image, w, h);
+  }
 }
 
 /*=====================
@@ -54,5 +56,4 @@ bool save_as_png_file(uint8_t * image, uint32_t w, uint32_t h, uint32_t bpp, cha
  *   STATIC FUNCTIONS
  **********************/
 
-
-#endif  /*LV_USE_100ASK_SCREENSHOT*/
+#endif /*LV_USE_100ASK_SCREENSHOT*/

@@ -6,6 +6,8 @@
 #ifndef LV_100ASK_SCREENSHOT_H
 #define LV_100ASK_SCREENSHOT_H
 
+#include <Arduino.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,10 +15,9 @@ extern "C" {
 /*********************
  *      INCLUDES
  *********************/
-#include "lv_lib_100ask.h"
 
 #if LV_USE_100ASK_SCREENSHOT != 0
-
+#include "lvgl.h"
 /*********************
  *      DEFINES
  *********************/
@@ -39,6 +40,7 @@ typedef enum {
  * GLOBAL PROTOTYPES
  **********************/
 bool lv_100ask_screenshot_create(lv_obj_t * obj,  lv_color_format_t cf, lv_100ask_screenshot_sv_t screenshot_sv, const char * filename);
+bool lv_100ask_screenshot_memory(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_screenshot_sv_t screenshot_sv, uint8_t *jpegBuffer, size_t jpegSize);
 
 /*=====================
  * Setter functions

@@ -8,7 +8,7 @@
  *********************/
 #include "save_as_bmp.h"
 
-#if LV_USE_100ASK_SCREENSHOT != 0
+#if LV_USE_100ASK_SCREENSHOT != 0 && LV_USE_100ASK_BMP != 0
 
 /*********************
  *      DEFINES

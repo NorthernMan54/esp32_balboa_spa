@@ -6,6 +6,8 @@
 #ifndef SAVE_AS_BMP_H
 #define SAVE_AS_BMP_H
 
+#include <Arduino.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
