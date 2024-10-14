@@ -123,28 +123,32 @@ void handleEDPpanel(AsyncWebServerRequest *request)
   if (captureToJPEG() > 0)
   {
     // Send the BMP image as a response
+   Log.verbose("[Web]: Sending Panel Image %d bytes" CR, jpegSize);
     AsyncWebServerResponse *response = request->beginResponse_P(200, "image/jpeg", jpegBuffer, jpegSize);
-    response->addHeader("Content-Disposition", "inline; filename=\"framebuffer.jpeg\"");
+    response->addHeader("Content-Disposition", "inline; filename=\"spaDisplay.jpeg\"");
     request->send(response);
   }
   else
   {
+    Log.error("[Web]: Panel image not available" CR);
     request->send(404, "text/plain", "Image not available");
   }
 }
 #elif SPALVGL
 void handleEDPpanel(AsyncWebServerRequest *request)
 {
-  Log.verbose("[Web]: Request %s received from %p - size %d" CR, request->url().c_str(), request->client()->remoteIP(), jpegSize);
+  Log.verbose("[Web]: SPA Image Request %s received from %p - size %d" CR, request->url().c_str(), request->client()->remoteIP(), jpegSize);
   if (captureToJPEG() > 0)
   {
+   Log.verbose("[Web]: Sending Panel Image %d bytes" CR, jpegSize);
     // Send the BMP image as a response
-    AsyncWebServerResponse *response = request->beginResponse_P(200, "image/jpeg", jpegBuffer, jpegSize);
-    response->addHeader("Content-Disposition", "inline; filename=\"framebuffer.jpeg\"");
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", jpegBuffer, jpegSize);
+    response->addHeader("Content-Disposition", "inline; filename=\"spaDisplay.png\"");
     request->send(response);
   }
   else
   {
+    Log.error("[Web]: Panel Image not available" CR);
     request->send(404, "text/plain", "Image not available");
   }
 }

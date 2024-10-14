@@ -227,16 +227,14 @@ void spaLvglLoop()
 
     // Temperature History
 
-    lv_chart_series_t *ui_uiTemperatureChart_series_1 = lv_chart_add_series(ui_uiTemperatureChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
-
     int32_t temperatureData[GRAPH_MAX_READINGS] = {0};
-
-    for (int i = 0; i < GRAPH_MAX_READINGS - 1; i++)
+    for (int i = 0; i < GRAPH_MAX_READINGS; i++)
     {
-      temperatureData[GRAPH_MAX_READINGS - 2 - i] = (int32_t)spaStatusData.temperatureHistory[i];
+      temperatureData[GRAPH_MAX_READINGS - 1 - i] = (int32_t)spaStatusData.temperatureHistory[i];
       log_i("temperatureData[%d] = %d", i, temperatureData[i]);
     }
-    temperatureData[GRAPH_MAX_READINGS - 1] = spaStatusData.currentTemp;
+
+    lv_chart_series_t *ui_uiTemperatureChart_series_1 = lv_chart_add_series(ui_uiTemperatureChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
     lv_chart_set_point_count(ui_uiTemperatureChart, GRAPH_MAX_READINGS);
     lv_chart_set_ext_y_array(ui_uiTemperatureChart, ui_uiTemperatureChart_series_1, temperatureData);
     lv_chart_refresh(ui_uiTemperatureChart);
@@ -244,20 +242,20 @@ void spaLvglLoop()
     // Heater History
 
     int32_t heaterData[GRAPH_MAX_READINGS] = {0};
-
-    for (int i = 0; i < GRAPH_MAX_READINGS-1; i++)
+    heaterData[GRAPH_MAX_READINGS - 1] = (int32_t)spaStatusData.heaterOnTimeToday;
+    for (int i = 0; i < GRAPH_MAX_READINGS - 1; i++)
     {
       heaterData[GRAPH_MAX_READINGS - 2 - i] = (int32_t)spaStatusData.heatOn->history()[i];
       log_i("heaterData[%d] = %d", i, heaterData[i]);
     }
-    heaterData[GRAPH_MAX_READINGS - 1] = (int32_t)spaStatusData.heaterOnTimeToday;
+
     lv_chart_series_t *ui_uiHeaterChart_series_1 = lv_chart_add_series(ui_uiHeaterChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
     // static lv_coord_t ui_uiHeaterChart_series_1_array[] = { 0,10,20,40,8,32,40,20,10,0,22 };
     // lv_chart_set_ext_y_array(ui_uiHeaterChart, ui_uiHeaterChart_series_1, ui_uiHeaterChart_series_1_array);
 
     lv_chart_set_point_count(ui_uiHeaterChart, GRAPH_MAX_READINGS);
     lv_chart_set_ext_y_array(ui_uiHeaterChart, ui_uiHeaterChart_series_1, heaterData);
-      lv_chart_refresh(ui_uiHeaterChart);
+    lv_chart_refresh(ui_uiHeaterChart);
 
 #else
     uiUpdateClock(final_output);
@@ -283,7 +281,7 @@ lv_draw_buf_t *snapshot = nullptr;
 #ifdef LV_USE_100ASK_SCREENSHOT
 #include "./screenShot/lv_100ask_screenshot.h"
 
-size_t captureToJPEG()
+size_t captureToJPEGother()
 {
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
   if (jpegBuffer != nullptr)
@@ -299,7 +297,7 @@ size_t captureToJPEG()
 
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
 
-  if (!lv_100ask_screenshot_memory(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888, LV_100ASK_SCREENSHOT_SV_PNG, (uint8_t *)(&jpegBuffer), jpegSize))
+  if (!lv_100ask_screenshot_memory(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888, LV_100ASK_SCREENSHOT_SV_PNG, (uint8_t *)jpegBuffer, jpegSize))
   {
     log_i("lv_100ask_screenshot_create failed");
     return 0;
@@ -310,11 +308,13 @@ size_t captureToJPEG()
 }
 #endif
 
+/**
+ * @brief Not used
+ *
+ * @return size_t
+ */
 
-
-
-
-size_t captureToJPEGOther()
+size_t captureToJPEG()
 {
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
   if (jpegBuffer != nullptr)
@@ -330,7 +330,9 @@ size_t captureToJPEGOther()
     snapshot = nullptr;
   }
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-  snapshot = lv_snapshot_take(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888);
+
+  snapshot = lv_snapshot_take(lv_scr_act(), LV_COLOR_FORMAT_RGB565);
+
   if (snapshot == NULL)
   {
     log_e("snapshot_take failed");
@@ -338,7 +340,7 @@ size_t captureToJPEGOther()
   }
 
   // lv_image_set_src(img_snapshot, snapshot);
-  log_i("snapshot %p", snapshot);
+  log_i("snapshot %p - %p", snapshot, snapshot->data);
   // encode the screenshot as a PNG using lodePNG
   const unsigned char *image = snapshot->data;
   log_i("header.w");
@@ -353,11 +355,14 @@ size_t captureToJPEGOther()
 
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
 
-  jpegBuffer = (uint8_t *)heap_caps_calloc(1, DISPLAY_WIDTH * DISPLAY_HEIGHT * 4, MALLOC_CAP_DEFAULT);
+  size_t outSize = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4;
+  jpegBuffer = (uint8_t *)heap_caps_calloc(1, outSize, MALLOC_CAP_DEFAULT);
 
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
 
-  // lv_lodepng_encode_memory(&jpegBuffer, &jpegSize, snapshot->data, width, height, 8);
+  data_pre_processing(snapshot, 16, LV_100ASK_SCREENSHOT_SV_PNG);
+
+  lv_lodepng_encode_memory(&jpegBuffer, &outSize, snapshot->data, width, height, 8);
 
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
   return jpegSize;
