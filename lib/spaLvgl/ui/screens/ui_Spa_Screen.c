@@ -276,9 +276,9 @@ lv_scale_set_range( ui_uiTemperatureChart_Yaxis2,  0, 0 );
 lv_scale_set_total_tick_count( ui_uiTemperatureChart_Yaxis2, (0 > 0 ? 0-1 : 0) * 0 + 1 );
 lv_scale_set_major_tick_every( ui_uiTemperatureChart_Yaxis2, 0 >= 1 ? 0 : 1 );
 lv_scale_set_label_show( ui_uiTemperatureChart_Yaxis2, false );
-lv_chart_series_t* ui_uiTemperatureChart_series_1 = lv_chart_add_series(ui_uiTemperatureChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
-static lv_coord_t ui_uiTemperatureChart_series_1_array[] = { 0,10,20,40,8,32,40,20,10,0,22 };
-lv_chart_set_ext_y_array(ui_uiTemperatureChart, ui_uiTemperatureChart_series_1, ui_uiTemperatureChart_series_1_array);
+// lv_chart_series_t* ui_uiTemperatureChart_series_1 = lv_chart_add_series(ui_uiTemperatureChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
+// static lv_coord_t ui_uiTemperatureChart_series_1_array[] = { 0,10,20,40,8,32,40,20,10,0,22 };
+// lv_chart_set_ext_y_array(ui_uiTemperatureChart, ui_uiTemperatureChart_series_1, ui_uiTemperatureChart_series_1_array);
 
 
 lv_obj_set_style_text_font(ui_uiTemperatureChart_Xaxis, &ui_font_Open_Sans_Bold_12, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -374,9 +374,9 @@ lv_scale_set_range( ui_uiHeaterChart_Yaxis2,  0, 0 );
 lv_scale_set_total_tick_count( ui_uiHeaterChart_Yaxis2, (0 > 0 ? 0-1 : 0) * 0 + 1 );
 lv_scale_set_major_tick_every( ui_uiHeaterChart_Yaxis2, 0 >= 1 ? 0 : 1 );
 lv_scale_set_label_show( ui_uiHeaterChart_Yaxis2, false );
-lv_chart_series_t* ui_uiHeaterChart_series_1 = lv_chart_add_series(ui_uiHeaterChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
-static lv_coord_t ui_uiHeaterChart_series_1_array[] = { 0,10,20,40,8,32,40,20,10,0,22 };
-lv_chart_set_ext_y_array(ui_uiHeaterChart, ui_uiHeaterChart_series_1, ui_uiHeaterChart_series_1_array);
+// lv_chart_series_t* ui_uiHeaterChart_series_1 = lv_chart_add_series(ui_uiHeaterChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
+// static lv_coord_t ui_uiHeaterChart_series_1_array[] = { 0,10,20,40,8,32,40,20,10,0,22 };
+// lv_chart_set_ext_y_array(ui_uiHeaterChart, ui_uiHeaterChart_series_1, ui_uiHeaterChart_series_1_array);
 
 
 lv_obj_set_style_text_font(ui_uiHeaterChart_Xaxis, &ui_font_Open_Sans_Bold_12, LV_PART_MAIN| LV_STATE_DEFAULT);
