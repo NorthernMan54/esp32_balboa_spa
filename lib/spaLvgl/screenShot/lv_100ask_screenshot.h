@@ -46,8 +46,7 @@ typedef enum {
  * GLOBAL PROTOTYPES
  **********************/
 bool lv_100ask_screenshot_create(lv_obj_t * obj,  lv_color_format_t cf, lv_100ask_screenshot_sv_t screenshot_sv, const char * filename);
-bool lv_100ask_screenshot_memory(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_screenshot_sv_t screenshot_sv, uint8_t *jpegBuffer, size_t jpegSize);
-void data_pre_processing(lv_draw_buf_t *snapshot, uint16_t bpp, lv_100ask_screenshot_sv_t screenshot_sv);
+bool lv_100ask_screenshot_memory(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_screenshot_sv_t screenshot_sv, unsigned bitdepth, unsigned char ** out, size_t * outsize);
 
 /*=====================
  * Setter functions

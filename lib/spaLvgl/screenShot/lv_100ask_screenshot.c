@@ -32,7 +32,7 @@
  *  STATIC PROTOTYPES
  **********************/
 
-// static void data_pre_processing(lv_draw_buf_t *snapshot, uint16_t bpp, lv_100ask_screenshot_sv_t screenshot_sv);
+static void data_pre_processing(lv_draw_buf_t *snapshot, uint16_t bpp, lv_100ask_screenshot_sv_t screenshot_sv);;
 
 /**********************
  *  STATIC VARIABLES
@@ -99,7 +99,19 @@ bool lv_100ask_screenshot_create(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_
     return false;
 }
 
-bool lv_100ask_screenshot_memory(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_screenshot_sv_t screenshot_sv, uint8_t *jpegBuffer, size_t jpegSize)
+/**
+ * @brief lv_100ask_screenshot_memory
+ * 
+ * @param obj LVGL object to take a screenshot
+ * @param cf color format 
+ * @param screenshot_sv screenshot file format 
+ * @param bitdepth bit depth
+ * @param out output buffer
+ * @param outsize output buffer size
+ * @return true 
+ * @return false 
+ */
+bool lv_100ask_screenshot_memory(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_screenshot_sv_t screenshot_sv, unsigned bitdepth, unsigned char ** out, size_t * outsize)
 {
     lv_draw_buf_t *snapshot = lv_snapshot_take(obj, cf);
 
@@ -107,16 +119,12 @@ bool lv_100ask_screenshot_memory(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_
     {
         log_i("snapshot->width=%u, snapshot->height=%u, snapshot->data_size=%u", snapshot->header.w, snapshot->header.h, snapshot->data_size);
 
-        // data_pre_processing(snapshot, LV_COLOR_DEPTH, screenshot_sv);
+        data_pre_processing(snapshot, bitdepth, screenshot_sv);
 
-        log_i("jpegSize=%u, jpegBuffer=%p", jpegSize, jpegBuffer);
+        u_int error = lodepng_encode_memory(out, outsize,
+                                            snapshot->data, snapshot->header.w, snapshot->header.h, LCT_RGB, bitdepth);
 
-        u_int error = lodepng_encode_memory(&jpegBuffer, &jpegSize,
-                                            snapshot->data, snapshot->header.w, snapshot->header.h, 2, 8);
-
-        log_i("jpegSize=%u, jpegBuffer=%p", jpegSize, jpegBuffer);
-
-        lv_snapshot_free(snapshot);
+        lv_draw_buf_destroy(snapshot);
 
         log_i("lodepng_encode_memory result: %d", error);
 
@@ -142,7 +150,7 @@ bool lv_100ask_screenshot_memory(lv_obj_t *obj, lv_color_format_t cf, lv_100ask_
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-void data_pre_processing(lv_draw_buf_t *snapshot, uint16_t bpp, lv_100ask_screenshot_sv_t screenshot_sv)
+static void data_pre_processing(lv_draw_buf_t *snapshot, uint16_t bpp, lv_100ask_screenshot_sv_t screenshot_sv)
 {
     if (bpp == 16)
     {

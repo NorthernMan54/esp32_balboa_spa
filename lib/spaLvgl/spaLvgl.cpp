@@ -281,91 +281,31 @@ lv_draw_buf_t *snapshot = nullptr;
 #ifdef LV_USE_100ASK_SCREENSHOT
 #include "./screenShot/lv_100ask_screenshot.h"
 
-size_t captureToJPEGother()
+size_t captureToJPEG()
 {
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
+  jpegSize = DISPLAY_WIDTH * DISPLAY_HEIGHT * 2;
   if (jpegBuffer != nullptr)
   {
-    free(jpegBuffer);
-    jpegBuffer = nullptr;
+  //  free(jpegBuffer);
+  //  jpegBuffer = nullptr;
+  }
+  else
+  {
+    jpegBuffer = (uint8_t *)heap_caps_calloc(1, jpegSize, MALLOC_CAP_DEFAULT);
   }
   log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
 
-  jpegSize = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4;
+  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p, jpegSize: %u", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer, jpegSize);
 
-  jpegBuffer = (uint8_t *)heap_caps_calloc(1, jpegSize, MALLOC_CAP_DEFAULT);
-
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-
-  if (!lv_100ask_screenshot_memory(lv_scr_act(), LV_COLOR_FORMAT_ARGB8888, LV_100ASK_SCREENSHOT_SV_PNG, (uint8_t *)jpegBuffer, jpegSize))
+  if (!lv_100ask_screenshot_memory(lv_scr_act(), LV_COLOR_FORMAT_RGB565, LV_100ASK_SCREENSHOT_SV_PNG, 8, &jpegBuffer, &jpegSize))
   {
     log_i("lv_100ask_screenshot_create failed");
     return 0;
   }
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
+  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p, jpegSize: %u", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer, jpegSize);
 
   return jpegSize;
 }
 #endif
-
-/**
- * @brief Not used
- *
- * @return size_t
- */
-
-size_t captureToJPEG()
-{
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-  if (jpegBuffer != nullptr)
-  {
-    free(jpegBuffer);
-    jpegBuffer = nullptr;
-  }
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-  log_i("snapshot %p", snapshot);
-  if (snapshot != nullptr)
-  {
-    lv_draw_buf_destroy(snapshot);
-    snapshot = nullptr;
-  }
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-
-  snapshot = lv_snapshot_take(lv_scr_act(), LV_COLOR_FORMAT_RGB565);
-
-  if (snapshot == NULL)
-  {
-    log_e("snapshot_take failed");
-    return 0;
-  }
-
-  // lv_image_set_src(img_snapshot, snapshot);
-  log_i("snapshot %p - %p", snapshot, snapshot->data);
-  // encode the screenshot as a PNG using lodePNG
-  const unsigned char *image = snapshot->data;
-  log_i("header.w");
-  uint32_t width = snapshot->header.w;
-  log_i("captureToJPEG() - header.h");
-  uint32_t height = snapshot->header.h;
-  log_i("captureToJPEG() - data_size");
-  jpegSize = snapshot->data_size;
-  log_i("width=%u, height=%u, jpegSize=%u", width, height, jpegSize);
-  //  lodepng_encode24_file("A:screenshot24.png", image, width, height); //produces garbled image
-  //  lodepng_encode32_file("A:screenshot32.png", image, width, height); //produces correct image
-
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-
-  size_t outSize = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4;
-  jpegBuffer = (uint8_t *)heap_caps_calloc(1, outSize, MALLOC_CAP_DEFAULT);
-
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-
-  data_pre_processing(snapshot, 16, LV_100ASK_SCREENSHOT_SV_PNG);
-
-  lv_lodepng_encode_memory(&jpegBuffer, &outSize, snapshot->data, width, height, 8);
-
-  log_i("Free Heap: %s, Free PSRAM: %s, Free Stack: %s, jpegBuffer: %p", formatNumberWithCommas(ESP.getFreeHeap()), formatNumberWithCommas(ESP.getFreePsram()), formatNumberWithCommas(uxTaskGetStackHighWaterMark(NULL)), jpegBuffer);
-  return jpegSize;
-}
-
 #endif
