@@ -43,6 +43,7 @@ lv_obj_t *ui_uiClockLabel2;
 
 // SCREEN: ui_Spa_Screen
 void ui_Spa_Screen_screen_init(void);
+void ui_event_Spa_Screen( lv_event_t * e);
 lv_obj_t *ui_Spa_Screen;
 lv_obj_t *ui_uiThermostatPlaceholder;
 lv_obj_t *ui_uiClock;
@@ -72,6 +73,22 @@ lv_obj_t *ui_uiHeaterChart_Xaxis;
 lv_obj_t *ui_uiHeaterChart_Yaxis1;
 lv_obj_t *ui_uiHeaterChart_Yaxis2;
 lv_obj_t *ui_heaterChartLabel;
+
+
+// SCREEN: ui_settingsAndAbout
+void ui_settingsAndAbout_screen_init(void);
+void ui_event_settingsAndAbout( lv_event_t * e);
+lv_obj_t *ui_settingsAndAbout;
+lv_obj_t *ui_TabView1;
+lv_obj_t *ui_settingsPage;
+lv_obj_t *ui_settingsContariner;
+lv_obj_t *ui_brightnessContainer3;
+lv_obj_t *ui_brightnessSlider3;
+lv_obj_t *ui_brightnessLabel3;
+lv_obj_t *ui_Checkbox2;
+lv_obj_t *ui_aboutPage;
+lv_obj_t *ui_Container9;
+lv_obj_t *ui_aboutLabel;
 lv_obj_t *ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -82,10 +99,24 @@ lv_obj_t *ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
+void ui_event_Spa_Screen( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM  ) {
+lv_indev_wait_release(lv_indev_active());
+      _ui_screen_change( &ui_settingsAndAbout, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_settingsAndAbout_screen_init);
+}
+}
 void ui_event_tempRangeSwitch( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
       heatRangeSwitch( e );
+}
+}
+void ui_event_settingsAndAbout( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP  ) {
+lv_indev_wait_release(lv_indev_active());
+      _ui_screen_change( &ui_Spa_Screen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Spa_Screen_screen_init);
 }
 }
 
@@ -99,6 +130,7 @@ lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE
 lv_disp_set_theme(dispp, theme);
 ui_Loading_Screen_screen_init();
 ui_Spa_Screen_screen_init();
+ui_settingsAndAbout_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_Loading_Screen);
 }

@@ -23,8 +23,8 @@ cui_uiPump = lv_obj_create(comp_parent);
 lv_obj_remove_style_all(cui_uiPump);
 lv_obj_set_width( cui_uiPump, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( cui_uiPump, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( cui_uiPump, -29 );
-lv_obj_set_y( cui_uiPump, 0 );
+lv_obj_set_x( cui_uiPump, -161 );
+lv_obj_set_y( cui_uiPump, -15 );
 lv_obj_set_align( cui_uiPump, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(cui_uiPump,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(cui_uiPump, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);

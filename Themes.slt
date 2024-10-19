@@ -7,9 +7,9 @@
         "strtype": "THEME_COLOR",
         "strval": "Background",
         "intarray": [
-          191,
-          224,
-          248,
+          31,
+          49,
+          63,
           255
         ],
         "InheritedType": 0
@@ -19,9 +19,9 @@
         "strtype": "THEME_COLOR",
         "strval": "AccessoryOnBkg",
         "intarray": [
-          7,
-          244,
-          44,
+          114,
+          192,
+          255,
           255
         ],
         "InheritedType": 0
@@ -31,9 +31,9 @@
         "strtype": "THEME_COLOR",
         "strval": "AccessoryOffBkg",
         "intarray": [
-          163,
-          229,
-          174,
+          71,
+          121,
+          161,
           255
         ],
         "InheritedType": 0
@@ -43,15 +43,93 @@
         "strtype": "THEME_COLOR",
         "strval": "widgetBorder",
         "intarray": [
-          0,
-          0,
-          0,
+          31,
+          49,
+          63,
+          255
+        ],
+        "InheritedType": 0
+      },
+      {
+        "nid": -76505334,
+        "strtype": "THEME_COLOR",
+        "strval": "graphBkg",
+        "intarray": [
+          195,
+          195,
+          200,
           255
         ],
         "InheritedType": 0
       }
     ]
   },
-  "themes": [],
+  "themes": [
+    {
+      "name": "Second Screen",
+      "properties": [
+        {
+          "nid": -425238881,
+          "strtype": "THEME_COLOR",
+          "strval": "Background",
+          "intarray": [
+            31,
+            49,
+            63,
+            255
+          ],
+          "InheritedType": 0
+        },
+        {
+          "nid": 411681007,
+          "strtype": "THEME_COLOR",
+          "strval": "AccessoryOnBkg",
+          "intarray": [
+            114,
+            192,
+            255,
+            255
+          ],
+          "InheritedType": 0
+        },
+        {
+          "nid": -633633826,
+          "strtype": "THEME_COLOR",
+          "strval": "AccessoryOffBkg",
+          "intarray": [
+            71,
+            121,
+            161,
+            255
+          ],
+          "InheritedType": 0
+        },
+        {
+          "nid": -152583251,
+          "strtype": "THEME_COLOR",
+          "strval": "widgetBorder",
+          "intarray": [
+            31,
+            49,
+            63,
+            255
+          ],
+          "InheritedType": 0
+        },
+        {
+          "nid": -76505334,
+          "strtype": "THEME_COLOR",
+          "strval": "graphBkg",
+          "intarray": [
+            195,
+            195,
+            200,
+            255
+          ],
+          "InheritedType": 0
+        }
+      ]
+    }
+  ],
   "selected_theme": "Default"
 }

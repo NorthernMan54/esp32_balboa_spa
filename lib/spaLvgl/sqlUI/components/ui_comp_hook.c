@@ -5,7 +5,7 @@
 
 #include "../ui.h"
 
-void ui_comp_uiPump_create_hook( lv_obj_t * comp)
+void ui_comp_uiFilter_create_hook( lv_obj_t * comp)
 {
 }
 
@@ -13,6 +13,6 @@ void ui_comp_uiLight_create_hook( lv_obj_t * comp)
 {
 }
 
-void ui_comp_uiFilter_create_hook( lv_obj_t * comp)
+void ui_comp_uiPump_create_hook( lv_obj_t * comp)
 {
 }
