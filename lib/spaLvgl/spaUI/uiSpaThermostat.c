@@ -20,7 +20,7 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
   lv_scale_set_mode(scale, LV_SCALE_MODE_ROUND_OUTER);
   lv_obj_center(scale);
 
-    lv_obj_align(scale, LV_ALIGN_CENTER, 0, 40);
+  lv_obj_align(scale, LV_ALIGN_CENTER, 0, 40);
 
   lv_scale_set_angle_range(scale, 180);
   lv_scale_set_rotation(scale, 180);
@@ -40,10 +40,10 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
 
   /* Label style properties */
   lv_style_set_text_font(&indicator_style, LV_FONT_DEFAULT);
-  lv_style_set_text_color(&indicator_style, lv_palette_darken(LV_PALETTE_GREY, 3));
+  lv_style_set_text_color(&indicator_style, lv_palette_lighten(LV_PALETTE_GREY, 3));
 
   /* Major tick properties */
-  lv_style_set_line_color(&indicator_style, lv_palette_darken(LV_PALETTE_GREY, 3));
+  lv_style_set_line_color(&indicator_style, lv_palette_lighten(LV_PALETTE_GREY, 3));
   lv_style_set_width(&indicator_style, 10U);     /*Tick length*/
   lv_style_set_line_width(&indicator_style, 2U); /*Tick width*/
   lv_obj_add_style(scale, &indicator_style, LV_PART_INDICATOR);
@@ -58,7 +58,7 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
   static lv_style_t main_line_style;
   lv_style_init(&main_line_style);
   /* Main line properties */
-  lv_style_set_arc_color(&main_line_style, lv_palette_darken(LV_PALETTE_GREY, 3));
+  lv_style_set_arc_color(&main_line_style, lv_palette_lighten(LV_PALETTE_GREY, 3));
   lv_style_set_arc_width(&main_line_style, 2U); /*Tick width*/
   lv_obj_add_style(scale, &main_line_style, LV_PART_MAIN);
 
