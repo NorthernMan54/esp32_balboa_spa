@@ -135,7 +135,7 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
 
   lv_obj_set_style_line_width(currentTempNeedle, 6, LV_PART_MAIN);
   lv_obj_set_style_line_rounded(currentTempNeedle, true, LV_PART_MAIN);
-  lv_obj_set_style_line_color(currentTempNeedle, lv_palette_main(LV_PALETTE_RED), 0);
+  lv_obj_set_style_line_color(currentTempNeedle, lv_palette_darken(LV_PALETTE_RED, 1), 0);
 
   return scale;
 }

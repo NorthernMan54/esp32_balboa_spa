@@ -4,11 +4,7 @@
 #include <esp32_smartdisplay.h>
 #include <lvgl.h> // Add this line to include the necessary header file
 
-#ifdef SQUARELINE
 #include <sqlUI/ui.h>
-#else
-#include <spaUI/ui.h>
-#endif
 
 #include <spaMessage.h>
 #include <spaUtilities.h>
@@ -16,6 +12,9 @@
 #include "spaLvgl.h"
 
 bool loading = true;
+
+static const char *temperatureLabels[] = {"24h", "18h", "12h", "6h", "0h", NULL};
+static const char *heaterLabels[] = {"24d", "18d", "12d", "6d", "0d", NULL};
 
 void OnAddOneClicked(lv_event_t *e)
 {
@@ -48,6 +47,34 @@ void setStyle(lv_obj_t *components[], lv_coord_t radius)
   }
 }
 
+#define auto_scale_margin 0.05 // Sets the autoscale increment, so axis steps up fter a change of e.g. 3
+
+/**
+ * @brief Calulate the min and max range of the graph
+ *
+ * @param array of graph values
+ * @param min Addrees of min value &minYscale
+ * @param max Addrees of max value &maxYscale
+ */
+void calculateMinMaxRange(int32_t *dataArray, int32_t *minYscale, int32_t *maxYscale)
+{
+  for (int i = 0; i < GRAPH_MAX_READINGS; i++)
+  {
+    if (dataArray[i] >= (*maxYscale))
+      (*maxYscale) = dataArray[i];
+    if (dataArray[i] <= (*minYscale))
+      (*minYscale) = dataArray[i];
+  }
+  // log_i("maxYscale: %i, minYscale: %i", (*maxYscale), (*minYscale));
+  // log_i("maxYscale: %i, minYscale: %i", ((int32_t)(((*maxYscale) + ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10) + 1), (((*minYscale) - ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10 + 1) );
+  (*maxYscale) = ((int32_t)(((*maxYscale) + ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10) + 1) * 10;
+
+  if ((*minYscale) > 0)
+    (*minYscale) = ((int32_t)(((*minYscale) - ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10) + 1) * 10;
+  if ((*minYscale) < 0)
+    (*minYscale) = 0;
+}
+
 void spaLvglSetup()
 {
   smartdisplay_init();
@@ -58,10 +85,10 @@ void spaLvglSetup()
 #endif
 
   __attribute__((unused)) auto disp = lv_disp_get_default();
-// lv_disp_set_rotation(disp, LV_DISP_ROT_90);
-// lv_disp_set_rotation(disp, LV_DISP_ROT_180);
-// lv_disp_set_rotation(disp, LV_DISP_ROT_270);
-#ifdef SQUARELINE
+  // lv_disp_set_rotation(disp, LV_DISP_ROT_90);
+  // lv_disp_set_rotation(disp, LV_DISP_ROT_180);
+  // lv_disp_set_rotation(disp, LV_DISP_ROT_270);
+
   log_i("ui_init");
   ui_init();
 
@@ -73,16 +100,18 @@ void spaLvglSetup()
 
   thermostatArc(ui_ThermostatLoading);
   temperatureGuage = thermostatArc(ui_uiThermostatPlaceholder);
-    lv_obj_align(temperatureGuage, LV_ALIGN_CENTER, 0, 40);
 
-/*
-  lv_switch_set_orientation(ui_uiTempRangeSwitchLoading, LV_SWITCH_ORIENTATION_VERTICAL);
-  lv_switch_set_orientation(ui_tempRangeSwitch, LV_SWITCH_ORIENTATION_VERTICAL);
-  */
-#else
-  log_i("spa_ui_init");
-  spa_ui_init();
-#endif
+  lv_scale_set_text_src(ui_uiTemperatureChart2_Xaxis, temperatureLabels);
+  lv_scale_set_text_src(ui_uiHeaterChart2_Xaxis, heaterLabels);
+
+  lv_scale_set_text_src(ui_uiTemperatureChart_Xaxis, temperatureLabels);
+  lv_scale_set_text_src(ui_uiHeaterChart_Xaxis, heaterLabels);
+
+  /*
+    lv_switch_set_orientation(ui_uiTempRangeSwitchLoading, LV_SWITCH_ORIENTATION_VERTICAL);
+    lv_switch_set_orientation(ui_tempRangeSwitch, LV_SWITCH_ORIENTATION_VERTICAL);
+    */
+
   /*
   // To use third party libraries, enable the define in lv_conf.h: #define LV_USE_QRCODE 1
   auto ui_qrcode = lv_qrcode_create(ui_scrMain);
@@ -215,6 +244,9 @@ void spaLvglLoop()
 
     lv_scale_set_line_needle_value(temperatureGuage, currentTempNeedle, 60, spaStatusData.currentTemp);
 
+    int32_t max = -10000;
+    int32_t min = 10000;
+
     // Temperature History
 
     for (int i = 0; i < GRAPH_MAX_READINGS; i++)
@@ -222,6 +254,16 @@ void spaLvglLoop()
       temperatureData[GRAPH_MAX_READINGS - 1 - i] = (int32_t)spaStatusData.temperatureHistory[i];
       log_i("temperatureData[%d] = %d", i, temperatureData[i]);
     }
+
+    if (temperatureData[GRAPH_MAX_READINGS - 1] == 0)
+    {
+      temperatureData[GRAPH_MAX_READINGS - 1] = spaStatusData.currentTemp;
+    }
+
+    calculateMinMaxRange(temperatureData, &min, &max);
+    log_i("temperatureData min: %i, max: %i", min, max);
+    lv_chart_set_range(ui_uiTemperatureChart, LV_CHART_AXIS_PRIMARY_Y, static_cast<lv_chart_axis_t>(min), static_cast<lv_chart_axis_t>(max));
+    lv_scale_set_range(ui_uiTemperatureChart_Yaxis1, min, max);
 
     ui_uiTemperatureChart_series_1 = lv_chart_add_series(ui_uiTemperatureChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
     lv_chart_set_point_count(ui_uiTemperatureChart, GRAPH_MAX_READINGS);
@@ -236,6 +278,14 @@ void spaLvglLoop()
       heaterData[GRAPH_MAX_READINGS - 2 - i] = (int32_t)spaStatusData.heatOn->history()[i];
       log_i("heaterData[%d] = %d", i, heaterData[i]);
     }
+
+    max = -10000;
+    min = 10000;
+
+    calculateMinMaxRange(heaterData, &min, &max);
+    log_i("temperatureData min: %i, max: %i", min, max);
+    lv_chart_set_range(ui_uiHeaterChart, LV_CHART_AXIS_PRIMARY_Y, static_cast<lv_chart_axis_t>(min), static_cast<lv_chart_axis_t>(max));
+    lv_scale_set_range(ui_uiHeaterChart_Yaxis1, min, max);
 
     ui_uiHeaterChart_series_1 = lv_chart_add_series(ui_uiHeaterChart, lv_color_hex(0x808080), LV_CHART_AXIS_PRIMARY_Y);
     // static lv_coord_t ui_uiHeaterChart_series_1_array[] = { 0,10,20,40,8,32,40,20,10,0,22 };
