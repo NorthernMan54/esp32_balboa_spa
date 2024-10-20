@@ -3,6 +3,7 @@
 #include <lvgl.h>
 
 #include "uiSpaShared.h"
+#include "../sqlUI/ui.h"
 
 #define THERMO_WIDTH 120
 #define THERMO_HEIGHT 100
@@ -39,18 +40,19 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
   lv_style_init(&indicator_style);
 
   /* Label style properties */
-  lv_style_set_text_font(&indicator_style, LV_FONT_DEFAULT);
-  lv_style_set_text_color(&indicator_style, lv_palette_lighten(LV_PALETTE_GREY, 3));
+  lv_style_set_text_font(&indicator_style, &ui_font_Open_Sans_Bold_16);
+  // lv_obj_set_style_text_font(ui_uiTemperatureChart2_Xaxis, &ui_font_Open_Sans_Bold_12, LV_PART_MAIN| LV_STATE_DEFAULT);
+  // lv_style_set_text_color(&indicator_style, lv_color_black());
 
   /* Major tick properties */
-  lv_style_set_line_color(&indicator_style, lv_palette_lighten(LV_PALETTE_GREY, 3));
+  lv_style_set_line_color(&indicator_style, lv_palette_darken(LV_PALETTE_GREY, 3));
   lv_style_set_width(&indicator_style, 10U);     /*Tick length*/
   lv_style_set_line_width(&indicator_style, 2U); /*Tick width*/
   lv_obj_add_style(scale, &indicator_style, LV_PART_INDICATOR);
 
   static lv_style_t minor_ticks_style;
   lv_style_init(&minor_ticks_style);
-  lv_style_set_line_color(&minor_ticks_style, lv_palette_lighten(LV_PALETTE_GREY, 2));
+  lv_style_set_line_color(&minor_ticks_style, lv_palette_darken(LV_PALETTE_GREY, 2));
   lv_style_set_width(&minor_ticks_style, 5U);      /*Tick length*/
   lv_style_set_line_width(&minor_ticks_style, 2U); /*Tick width*/
   lv_obj_add_style(scale, &minor_ticks_style, LV_PART_ITEMS);
@@ -58,7 +60,7 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
   static lv_style_t main_line_style;
   lv_style_init(&main_line_style);
   /* Main line properties */
-  lv_style_set_arc_color(&main_line_style, lv_palette_lighten(LV_PALETTE_GREY, 3));
+  lv_style_set_arc_color(&main_line_style, lv_palette_darken(LV_PALETTE_GREY, 3));
   lv_style_set_arc_width(&main_line_style, 2U); /*Tick width*/
   lv_obj_add_style(scale, &main_line_style, LV_PART_MAIN);
 
