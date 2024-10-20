@@ -200,7 +200,7 @@ lv_obj_add_flag( ui_uiTemperatureChart2, LV_OBJ_FLAG_OVERFLOW_VISIBLE );    //ma
 //lv_obj_remove_flag( ui_uiTemperatureChart2, LV_OBJ_FLAG_SCROLLABLE );    //no chart-zoom in LVGL9 - Shouldn't it be forced to False?
 lv_chart_set_type( ui_uiTemperatureChart2, LV_CHART_TYPE_LINE);
 lv_chart_set_point_count( ui_uiTemperatureChart2, 24);
-lv_chart_set_range( ui_uiTemperatureChart2, LV_CHART_AXIS_PRIMARY_Y, 0, 40);
+lv_chart_set_range( ui_uiTemperatureChart2, LV_CHART_AXIS_PRIMARY_Y, 0, 4);
 lv_chart_set_range( ui_uiTemperatureChart2, LV_CHART_AXIS_SECONDARY_Y, 0, 0);
 lv_obj_set_style_bg_color(ui_uiTemperatureChart2, lv_color_hex(0xC3C3C8), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_uiTemperatureChart2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -228,7 +228,7 @@ lv_obj_set_style_line_width( ui_uiTemperatureChart2_Yaxis1, 1, LV_PART_ITEMS );
 lv_obj_set_style_line_width( ui_uiTemperatureChart2_Yaxis1, 1, LV_PART_INDICATOR );
 lv_obj_set_style_length( ui_uiTemperatureChart2_Yaxis1, 5, LV_PART_ITEMS ); //minor tick length
 lv_obj_set_style_length( ui_uiTemperatureChart2_Yaxis1, 10, LV_PART_INDICATOR ); //major tick length
-lv_scale_set_range( ui_uiTemperatureChart2_Yaxis1,  0, 40 );
+lv_scale_set_range( ui_uiTemperatureChart2_Yaxis1,  0, 4 );
 lv_scale_set_total_tick_count( ui_uiTemperatureChart2_Yaxis1, (5 > 0 ? 5-1 : 0) * 2 + 1 );
 lv_scale_set_major_tick_every( ui_uiTemperatureChart2_Yaxis1, 2 >= 1 ? 2 : 1 );
 ui_uiTemperatureChart2_Yaxis2 = lv_scale_create( ui_uiTemperatureChart2 );

@@ -40,8 +40,8 @@ lv_obj_set_style_border_side(ui_uiThermostatPlaceholder, LV_BORDER_SIDE_FULL, LV
 
 ui_uiClock = lv_obj_create(ui_Spa_Screen);
 lv_obj_remove_style_all(ui_uiClock);
-lv_obj_set_width( ui_uiClock, LV_SIZE_CONTENT);  /// 250
-lv_obj_set_height( ui_uiClock, LV_SIZE_CONTENT);   /// 30
+lv_obj_set_width( ui_uiClock, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_uiClock, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_uiClock, LV_ALIGN_TOP_RIGHT );
 lv_obj_remove_flag( ui_uiClock, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_uiClock, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -77,7 +77,7 @@ lv_obj_set_y( ui_HeatControls, -127 );
 lv_obj_set_align( ui_HeatControls, LV_ALIGN_RIGHT_MID );
 lv_obj_set_flex_flow(ui_HeatControls,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_HeatControls, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER);
-lv_obj_remove_flag( ui_HeatControls, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_remove_flag( ui_HeatControls, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_HeatControls, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 ui_object_set_themeable_style_property(ui_HeatControls, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
 ui_object_set_themeable_style_property(ui_HeatControls, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
@@ -232,7 +232,7 @@ lv_obj_add_flag( ui_uiTemperatureChart, LV_OBJ_FLAG_OVERFLOW_VISIBLE );    //mak
 //lv_obj_remove_flag( ui_uiTemperatureChart, LV_OBJ_FLAG_SCROLLABLE );    //no chart-zoom in LVGL9 - Shouldn't it be forced to False?
 lv_chart_set_type( ui_uiTemperatureChart, LV_CHART_TYPE_LINE);
 lv_chart_set_point_count( ui_uiTemperatureChart, 24);
-// lv_chart_set_range( ui_uiTemperatureChart, LV_CHART_AXIS_PRIMARY_Y, 0, 40);
+lv_chart_set_range( ui_uiTemperatureChart, LV_CHART_AXIS_PRIMARY_Y, 0, 40);
 lv_chart_set_range( ui_uiTemperatureChart, LV_CHART_AXIS_SECONDARY_Y, 0, 0);
 ui_object_set_themeable_style_property(ui_uiTemperatureChart, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_graphBkg);
 ui_object_set_themeable_style_property(ui_uiTemperatureChart, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_graphBkg);
@@ -260,7 +260,7 @@ lv_obj_set_style_line_width( ui_uiTemperatureChart_Yaxis1, 1, LV_PART_ITEMS );
 lv_obj_set_style_line_width( ui_uiTemperatureChart_Yaxis1, 1, LV_PART_INDICATOR );
 lv_obj_set_style_length( ui_uiTemperatureChart_Yaxis1, 5, LV_PART_ITEMS ); //minor tick length
 lv_obj_set_style_length( ui_uiTemperatureChart_Yaxis1, 10, LV_PART_INDICATOR ); //major tick length
-// lv_scale_set_range( ui_uiTemperatureChart_Yaxis1,  0, 40 );
+lv_scale_set_range( ui_uiTemperatureChart_Yaxis1,  0, 40 );
 lv_scale_set_total_tick_count( ui_uiTemperatureChart_Yaxis1, (5 > 0 ? 5-1 : 0) * 2 + 1 );
 lv_scale_set_major_tick_every( ui_uiTemperatureChart_Yaxis1, 2 >= 1 ? 2 : 1 );
 ui_uiTemperatureChart_Yaxis2 = lv_scale_create( ui_uiTemperatureChart );
@@ -395,7 +395,7 @@ lv_obj_set_style_pad_right(ui_heaterChartLabel, 0, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_top(ui_heaterChartLabel, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_heaterChartLabel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-lv_obj_add_event_cb(ui_tempRangeSwitch, ui_event_tempRangeSwitch, LV_EVENT_ALL, NULL);
+lv_obj_add_event_cb(ui_HeatControls, ui_event_HeatControls, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_Spa_Screen, ui_event_Spa_Screen, LV_EVENT_ALL, NULL);
 
 }

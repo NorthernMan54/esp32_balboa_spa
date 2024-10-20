@@ -48,13 +48,13 @@ lv_obj_t *ui_Spa_Screen;
 lv_obj_t *ui_uiThermostatPlaceholder;
 lv_obj_t *ui_uiClock;
 lv_obj_t *ui_uiClockLabel;
+void ui_event_HeatControls( lv_event_t * e);
 lv_obj_t *ui_HeatControls;
 lv_obj_t *ui_uiHeatState;
 lv_obj_t *ui_heatSwtichLabel;
 lv_obj_t *ui_heatStateSwitch;
 lv_obj_t *ui_uiTempRange;
 lv_obj_t *ui_tempRangeHighLabel;
-void ui_event_tempRangeSwitch( lv_event_t * e);
 lv_obj_t *ui_tempRangeSwitch;
 lv_obj_t *ui_tempRangeLowLabel;
 lv_obj_t *ui_uiPump1;
@@ -106,10 +106,10 @@ lv_indev_wait_release(lv_indev_active());
       _ui_screen_change( &ui_settingsAndAbout, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_settingsAndAbout_screen_init);
 }
 }
-void ui_event_tempRangeSwitch( lv_event_t * e) {
+void ui_event_HeatControls( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
-      heatRangeSwitch( e );
+      clickButton( e );
 }
 }
 void ui_event_settingsAndAbout( lv_event_t * e) {

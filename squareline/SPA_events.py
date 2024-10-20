@@ -26,3 +26,11 @@ def heatRangeSwitch(event_struct):
 def uiLightClicked2(event_struct):
     return
 
+
+def clickButton(event_struct):
+    return
+
+
+def spaPump2Event(event_struct):
+    return
+

@@ -4,18 +4,19 @@
 // Project name: SPA
 
 #include "ui.h"
+#include "../spaUI/uiSpaShared.h"
 
-void uiPumpClick(lv_event_t * e)
+void clickButton(lv_event_t *e)
 {
-	// Your code here
+	spaLvglClickButton(e);
 }
 
-void uiLightClicked(lv_event_t * e)
+void uiPumpClick(lv_event_t *e)
 {
-	// Your code here
+	spaLvglClickPump(e);
 }
 
-void heatRangeSwitch(lv_event_t * e)
+void uiLightClicked(lv_event_t *e)
 {
-	// Your code here
+	spaLvglClickLight(e);
 }

@@ -23,7 +23,7 @@
     "theme_color2": 0,
     "uiExportFolderPath": "/Users/sgracey/Code/esp32_balboa_spa/lib/spaLvgl/sqlUI",
     "projectExportFolderPath": "/Users/sgracey/Code/esp32_balboa_spa/squareline",
-    "backup_cnt": 1049,
+    "backup_cnt": 1055,
     "autosave_cnt": 0,
     "lvgl_version": "9.1.0",
     "callfuncsexport": "C_FILE",

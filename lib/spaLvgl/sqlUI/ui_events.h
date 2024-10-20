@@ -12,7 +12,7 @@ extern "C" {
 
 void uiPumpClick(lv_event_t * e);
 void uiLightClicked(lv_event_t * e);
-void heatRangeSwitch(lv_event_t * e);
+void clickButton(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

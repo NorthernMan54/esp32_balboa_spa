@@ -8,12 +8,16 @@ extern "C"
 #endif
 #include "lvgl.h"
 
-lv_obj_t *currentTempNeedle;
-lv_obj_t *highTempNeedle;
-lv_obj_t *lowTempNeedle;
+  lv_obj_t *currentTempNeedle;
+  lv_obj_t *highTempNeedle;
+  lv_obj_t *lowTempNeedle;
 
-lv_obj_t *temperatureGuage;
-lv_obj_t *thermostatArc(lv_obj_t *parent);
+  lv_obj_t *temperatureGuage;
+  lv_obj_t *thermostatArc(lv_obj_t *parent);
+
+  void spaLvglClickButton(lv_event_t *e);
+  void spaLvglClickPump(lv_event_t *e);
+  void spaLvglClickLight(lv_event_t *e);
 
 #ifdef __cplusplus
 } /*extern "C"*/
