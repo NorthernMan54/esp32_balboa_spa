@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 20 px
  * Bpp: 4
- * Opts: --bpp 4 --size 20 --font /Users/sgracey/Code/esp32_balboa_spa/assets/OpenSans-Bold.ttf -o /Users/sgracey/Code/esp32_balboa_spa/assets/ui_font_Open_Sans_Bold_20.c --format lvgl -r 0x20-0x7f --no-compress --no-prefilter
+ * Opts: --bpp 4 --size 20 --font /Users/sgracey/Code/esp32_balboa_spa/squareline/assets/OpenSans-Bold.ttf -o /Users/sgracey/Code/esp32_balboa_spa/squareline/assets/ui_font_Open_Sans_Bold_20.c --format lvgl -r 0x20-0x7f --symbols ° --no-compress --no-prefilter
  ******************************************************************************/
 
 #include "../ui.h"
@@ -1059,7 +1059,13 @@ static LV_ATTRIBUTE_LARGE_CONST const uint8_t glyph_bitmap[] = {
     0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0xaf, 0xff,
     0xc6, 0x32, 0x78, 0x2f, 0xff, 0xff, 0xff, 0xff,
     0x92, 0x91, 0x3, 0x8d, 0xff, 0xb2, 0x0, 0x0,
-    0x0, 0x0, 0x0, 0x0
+    0x0, 0x0, 0x0, 0x0,
+
+    /* U+00B0 "°" */
+    0x0, 0x5b, 0xc9, 0x20, 0x8, 0xff, 0xff, 0xe2,
+    0x1f, 0xf4, 0xa, 0xf9, 0x3f, 0xc0, 0x3, 0xfc,
+    0x1f, 0xf1, 0x8, 0xfa, 0xa, 0xff, 0xef, 0xf3,
+    0x0, 0x9e, 0xfc, 0x40
 };
 
 
@@ -1163,7 +1169,8 @@ static const lv_font_fmt_txt_glyph_dsc_t glyph_dsc[] = {
     {.bitmap_index = 6321, .adv_w = 126, .box_w = 8, .box_h = 18, .ofs_x = 0, .ofs_y = -4},
     {.bitmap_index = 6393, .adv_w = 176, .box_w = 3, .box_h = 20, .ofs_x = 4, .ofs_y = -5},
     {.bitmap_index = 6423, .adv_w = 126, .box_w = 8, .box_h = 18, .ofs_x = 0, .ofs_y = -4},
-    {.bitmap_index = 6495, .adv_w = 183, .box_w = 11, .box_h = 5, .ofs_x = 0, .ofs_y = 4}
+    {.bitmap_index = 6495, .adv_w = 183, .box_w = 11, .box_h = 5, .ofs_x = 0, .ofs_y = 4},
+    {.bitmap_index = 6523, .adv_w = 137, .box_w = 8, .box_h = 7, .ofs_x = 0, .ofs_y = 8}
 };
 
 /*---------------------
@@ -1177,6 +1184,10 @@ static const lv_font_fmt_txt_cmap_t cmaps[] =
 {
     {
         .range_start = 32, .range_length = 95, .glyph_id_start = 1,
+        .unicode_list = NULL, .glyph_id_ofs_list = NULL, .list_length = 0, .type = LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY
+    },
+    {
+        .range_start = 176, .range_length = 1, .glyph_id_start = 96,
         .unicode_list = NULL, .glyph_id_ofs_list = NULL, .list_length = 0, .type = LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY
     }
 };
@@ -1202,7 +1213,7 @@ static lv_font_fmt_txt_dsc_t font_dsc = {
     .cmaps = cmaps,
     .kern_dsc = NULL,
     .kern_scale = 0,
-    .cmap_num = 1,
+    .cmap_num = 2,
     .bpp = 4,
     .kern_classes = 0,
     .bitmap_format = 0,

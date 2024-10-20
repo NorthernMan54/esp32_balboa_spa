@@ -10049,7 +10049,7 @@
                   {
                     "nid": -259104461,
                     "strtype": "LABEL/Text",
-                    "strval": "Temperature C",
+                    "strval": "Temperature °C",
                     "InheritedType": 10
                   },
                   {
@@ -10420,8 +10420,7 @@
                 "InheritedType": 11
               }
             ],
-            "saved_objtypeKey": "CONTAINER",
-            "tree_closed": true
+            "saved_objtypeKey": "CONTAINER"
           },
           {
             "guid": "GUID15225903-248180S76533283",
@@ -23307,7 +23306,7 @@
                   {
                     "nid": -738531694,
                     "strtype": "LABEL/Text",
-                    "strval": "Temperature C",
+                    "strval": "Temperature °C",
                     "InheritedType": 10
                   },
                   {
@@ -52167,7 +52166,7 @@
     "theme_color2": 0,
     "uiExportFolderPath": "/Users/sgracey/Code/esp32_balboa_spa/lib/spaLvgl/sqlUI",
     "projectExportFolderPath": "/Users/sgracey/Code/esp32_balboa_spa/squareline",
-    "backup_cnt": 1045,
+    "backup_cnt": 1048,
     "autosave_cnt": 0,
     "lvgl_version": "9.1.0",
     "callfuncsexport": "C_FILE",

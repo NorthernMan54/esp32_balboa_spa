@@ -294,7 +294,7 @@ lv_obj_set_y( ui_temperatureChartLabel, 7 );
 lv_obj_set_align( ui_temperatureChartLabel, LV_ALIGN_BOTTOM_MID );
 lv_obj_set_flex_flow(ui_temperatureChartLabel,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_temperatureChartLabel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-lv_label_set_text(ui_temperatureChartLabel,"Temperature C");
+lv_label_set_text(ui_temperatureChartLabel,"Temperature °C");
 lv_obj_set_style_pad_left(ui_temperatureChartLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_temperatureChartLabel, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_temperatureChartLabel, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
