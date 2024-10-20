@@ -10,9 +10,10 @@
 extern "C" {
 #endif
 
-void uiPumpClick(lv_event_t * e);
-void uiLightClicked(lv_event_t * e);
-void clickButton(lv_event_t * e);
+void uiHeatClick(lv_event_t * e);
+void uiPumpClick1(lv_event_t * e);
+void uiPumpClick2(lv_event_t * e);
+void uiLightClick1(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -51,15 +51,19 @@ lv_obj_t *ui_uiClockLabel;
 void ui_event_HeatControls( lv_event_t * e);
 lv_obj_t *ui_HeatControls;
 lv_obj_t *ui_uiHeatState;
-lv_obj_t *ui_heatSwtichLabel;
+lv_obj_t *ui_heatBlankLabel;
 lv_obj_t *ui_heatStateSwitch;
+lv_obj_t *ui_heatSwtichLabel;
 lv_obj_t *ui_uiTempRange;
-lv_obj_t *ui_tempRangeHighLabel;
+lv_obj_t *ui_tempRangeLowLabel1;
 lv_obj_t *ui_tempRangeSwitch;
-lv_obj_t *ui_tempRangeLowLabel;
+lv_obj_t *ui_tempRangeHighLabel;
 lv_obj_t *ui_uiPump1;
+void ui_event_uiPump1_Button( lv_event_t * e);
 lv_obj_t *ui_uiPump2;
+void ui_event_uiPump2_Button( lv_event_t * e);
 lv_obj_t *ui_uiLight1;
+void ui_event_uiLight1_Button( lv_event_t * e);
 lv_obj_t *ui_uiFilter;
 lv_obj_t *ui_uiTemperatureHistory;
 lv_obj_t *ui_uiTemperatureChart;
@@ -109,7 +113,25 @@ lv_indev_wait_release(lv_indev_active());
 void ui_event_HeatControls( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
-      clickButton( e );
+      uiHeatClick( e );
+}
+}
+void ui_event_uiPump1_Button( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      uiPumpClick1( e );
+}
+}
+void ui_event_uiPump2_Button( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      uiPumpClick2( e );
+}
+}
+void ui_event_uiLight1_Button( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      uiLightClick1( e );
 }
 }
 void ui_event_settingsAndAbout( lv_event_t * e) {

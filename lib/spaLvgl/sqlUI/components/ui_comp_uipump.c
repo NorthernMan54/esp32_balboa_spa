@@ -6,14 +6,6 @@
 #include "../ui.h"
 
 
-void ui_event_comp_uiPump_Button( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-lv_obj_t **comp_uiPump = lv_event_get_user_data(e);
-if ( event_code == LV_EVENT_CLICKED) {
-      uiPumpClick( e );
-}
-}
-
 // COMPONENT uiPump
 
 lv_obj_t *ui_uiPump_create(lv_obj_t *comp_parent) {
@@ -23,8 +15,8 @@ cui_uiPump = lv_obj_create(comp_parent);
 lv_obj_remove_style_all(cui_uiPump);
 lv_obj_set_width( cui_uiPump, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( cui_uiPump, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( cui_uiPump, -161 );
-lv_obj_set_y( cui_uiPump, -15 );
+lv_obj_set_x( cui_uiPump, 0 );
+lv_obj_set_y( cui_uiPump, -5 );
 lv_obj_set_align( cui_uiPump, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(cui_uiPump,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(cui_uiPump, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -75,7 +67,6 @@ children[UI_COMP_UIPUMP_BUTTON] = cui_Button;
 children[UI_COMP_UIPUMP_LABEL] = cui_Label;
 lv_obj_add_event_cb(cui_uiPump, get_component_child_event_cb, LV_EVENT_GET_COMP_CHILD, children);
 lv_obj_add_event_cb(cui_uiPump, del_component_child_event_cb, LV_EVENT_DELETE, children);
-lv_obj_add_event_cb(cui_Button, ui_event_comp_uiPump_Button, LV_EVENT_ALL, children);
 ui_comp_uiPump_create_hook(cui_uiPump);
 return cui_uiPump; 
 }

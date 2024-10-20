@@ -93,7 +93,7 @@ lv_obj_set_x( ui_uiHeatState, 60 );
 lv_obj_set_y( ui_uiHeatState, 63 );
 lv_obj_set_align( ui_uiHeatState, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_uiHeatState,LV_FLEX_FLOW_ROW);
-lv_obj_set_flex_align(ui_uiHeatState, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_set_flex_align(ui_uiHeatState, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
 lv_obj_remove_flag( ui_uiHeatState, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 ui_object_set_themeable_style_property(ui_uiHeatState, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
 ui_object_set_themeable_style_property(ui_uiHeatState, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
@@ -106,11 +106,11 @@ lv_obj_set_style_pad_column(ui_uiHeatState, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_color(ui_uiHeatState, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_uiHeatState, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_heatSwtichLabel = lv_label_create(ui_uiHeatState);
-lv_obj_set_width( ui_heatSwtichLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_heatSwtichLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_heatSwtichLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_heatSwtichLabel,"Heat");
+ui_heatBlankLabel = lv_label_create(ui_uiHeatState);
+lv_obj_set_width( ui_heatBlankLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_heatBlankLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_heatBlankLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_heatBlankLabel,"       ");
 
 ui_heatStateSwitch = lv_switch_create(ui_uiHeatState);
 lv_obj_set_width( ui_heatStateSwitch, 50);
@@ -126,6 +126,12 @@ lv_obj_set_style_bg_opa(ui_heatStateSwitch, 255, LV_PART_INDICATOR| LV_STATE_CHE
 
 ui_object_set_themeable_style_property(ui_heatStateSwitch, LV_PART_KNOB| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_graphBkg);
 ui_object_set_themeable_style_property(ui_heatStateSwitch, LV_PART_KNOB| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_graphBkg);
+
+ui_heatSwtichLabel = lv_label_create(ui_uiHeatState);
+lv_obj_set_width( ui_heatSwtichLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_heatSwtichLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_heatSwtichLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_heatSwtichLabel,"Heat");
 
 ui_uiTempRange = lv_obj_create(ui_HeatControls);
 lv_obj_remove_style_all(ui_uiTempRange);
@@ -148,17 +154,18 @@ lv_obj_set_style_pad_column(ui_uiTempRange, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_color(ui_uiTempRange, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_uiTempRange, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_tempRangeHighLabel = lv_label_create(ui_uiTempRange);
-lv_obj_set_width( ui_tempRangeHighLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_tempRangeHighLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_tempRangeHighLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_tempRangeHighLabel,"Low");
+ui_tempRangeLowLabel1 = lv_label_create(ui_uiTempRange);
+lv_obj_set_width( ui_tempRangeLowLabel1, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_tempRangeLowLabel1, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_tempRangeLowLabel1, LV_ALIGN_CENTER );
+lv_label_set_text(ui_tempRangeLowLabel1,"Low");
 
 ui_tempRangeSwitch = lv_switch_create(ui_uiTempRange);
 lv_obj_set_width( ui_tempRangeSwitch, 50);
 lv_obj_set_height( ui_tempRangeSwitch, 25);
 lv_obj_set_align( ui_tempRangeSwitch, LV_ALIGN_CENTER );
 lv_obj_add_state( ui_tempRangeSwitch, LV_STATE_CHECKED );     /// States
+lv_obj_remove_flag( ui_tempRangeSwitch, LV_OBJ_FLAG_CLICKABLE );    /// Flags
 
 lv_obj_set_style_bg_color(ui_tempRangeSwitch, lv_color_hex(0x10AAF0), LV_PART_INDICATOR | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_tempRangeSwitch, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
@@ -168,11 +175,11 @@ lv_obj_set_style_bg_opa(ui_tempRangeSwitch, 255, LV_PART_INDICATOR| LV_STATE_CHE
 ui_object_set_themeable_style_property(ui_tempRangeSwitch, LV_PART_KNOB| LV_STATE_CHECKED, LV_STYLE_BG_COLOR, _ui_theme_color_graphBkg);
 ui_object_set_themeable_style_property(ui_tempRangeSwitch, LV_PART_KNOB| LV_STATE_CHECKED, LV_STYLE_BG_OPA, _ui_theme_alpha_graphBkg);
 
-ui_tempRangeLowLabel = lv_label_create(ui_uiTempRange);
-lv_obj_set_width( ui_tempRangeLowLabel, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_tempRangeLowLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_tempRangeLowLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_tempRangeLowLabel,"High");
+ui_tempRangeHighLabel = lv_label_create(ui_uiTempRange);
+lv_obj_set_width( ui_tempRangeHighLabel, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_tempRangeHighLabel, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_tempRangeHighLabel, LV_ALIGN_CENTER );
+lv_label_set_text(ui_tempRangeHighLabel,"High");
 
 ui_uiPump1 = ui_uiPump_create(ui_Spa_Screen);
 lv_obj_set_x( ui_uiPump1, 0 );
@@ -396,6 +403,9 @@ lv_obj_set_style_pad_top(ui_heaterChartLabel, 3, LV_PART_MAIN| LV_STATE_DEFAULT)
 lv_obj_set_style_pad_bottom(ui_heaterChartLabel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_add_event_cb(ui_HeatControls, ui_event_HeatControls, LV_EVENT_ALL, NULL);
+lv_obj_add_event_cb(ui_comp_get_child(ui_uiPump1, UI_COMP_UIPUMP_BUTTON), ui_event_uiPump1_Button, LV_EVENT_ALL, NULL);
+lv_obj_add_event_cb(ui_comp_get_child(ui_uiPump2, UI_COMP_UIPUMP_BUTTON), ui_event_uiPump2_Button, LV_EVENT_ALL, NULL);
+lv_obj_add_event_cb(ui_comp_get_child(ui_uiLight1, UI_COMP_UILIGHT_BUTTON), ui_event_uiLight1_Button, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_Spa_Screen, ui_event_Spa_Screen, LV_EVENT_ALL, NULL);
 
 }

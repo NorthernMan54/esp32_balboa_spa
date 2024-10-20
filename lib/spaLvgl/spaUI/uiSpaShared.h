@@ -16,8 +16,9 @@ extern "C"
   lv_obj_t *thermostatArc(lv_obj_t *parent);
 
   void spaLvglClickButton(lv_event_t *e);
-  void spaLvglClickPump(lv_event_t *e);
-  void spaLvglClickLight(lv_event_t *e);
+  void spaLvglClickPump(lv_event_t *e, int);
+  void spaLvglClickLight(lv_event_t *e, int);
+  void spaLvglClickHeat(lv_event_t *e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

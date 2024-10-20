@@ -6,17 +6,22 @@
 #include "ui.h"
 #include "../spaUI/uiSpaShared.h"
 
-void clickButton(lv_event_t *e)
+void uiHeatClick(lv_event_t * e)
 {
-	spaLvglClickButton(e);
+	spaLvglClickHeat(e);
 }
 
-void uiPumpClick(lv_event_t *e)
+void uiPumpClick1(lv_event_t * e)
 {
-	spaLvglClickPump(e);
+		spaLvglClickPump(e,1);
 }
 
-void uiLightClicked(lv_event_t *e)
+void uiPumpClick2(lv_event_t * e)
 {
-	spaLvglClickLight(e);
+	spaLvglClickPump(e,2);
+}
+
+void uiLightClick1(lv_event_t * e)
+{
+	spaLvglClickLight(e,1);
 }

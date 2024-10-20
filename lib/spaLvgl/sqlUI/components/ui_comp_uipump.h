@@ -18,7 +18,6 @@ extern "C" {
 #define UI_COMP_UIPUMP_LABEL 2
 #define _UI_COMP_UIPUMP_NUM 3
 lv_obj_t *ui_uiPump_create(lv_obj_t *comp_parent);
-void ui_event_comp_uiPump_Button( lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -34,3 +34,19 @@ def clickButton(event_struct):
 def spaPump2Event(event_struct):
     return
 
+
+def uiPumpClick1(event_struct):
+    return
+
+
+def uiPumpClick2(event_struct):
+    return
+
+
+def uiLightClick1(event_struct):
+    return
+
+
+def uiHeatClick(event_struct):
+    return
+

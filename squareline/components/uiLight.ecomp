@@ -314,71 +314,6 @@
           "strtype": "IMGBUTTON/Style_main",
           "strval": "lv.PART.MAIN, Rectangle, Image, Text, Transform",
           "InheritedType": 11
-        },
-        {
-          "disabled": false,
-          "nid": 1814757919,
-          "strtype": "IMGBUTTON/EventHandler",
-          "strval": "CLICKED",
-          "childs": [
-            {
-              "nid": 442370703,
-              "strtype": "_event/name",
-              "strval": "uiLightEvent",
-              "InheritedType": 10
-            },
-            {
-              "nid": 1841687263,
-              "strtype": "_event/condition_C",
-              "strval": "",
-              "InheritedType": 10
-            },
-            {
-              "nid": -1462732063,
-              "strtype": "_event/condition_P",
-              "strval": "",
-              "InheritedType": 10
-            },
-            {
-              "nid": 809660590,
-              "strtype": "_event/action",
-              "strval": "CALL FUNCTION",
-              "childs": [
-                {
-                  "nid": -338738986,
-                  "strtype": "CALL FUNCTION/Name",
-                  "strval": "CALL FUNCTION",
-                  "InheritedType": 10
-                },
-                {
-                  "nid": -1456109940,
-                  "strtype": "CALL FUNCTION/Call",
-                  "strval": "<{Function_name}>( event_struct )",
-                  "InheritedType": 10
-                },
-                {
-                  "nid": 960883955,
-                  "strtype": "CALL FUNCTION/CallC",
-                  "strval": "<{Function_name}>( e );",
-                  "InheritedType": 10
-                },
-                {
-                  "nid": 1614407921,
-                  "strtype": "CALL FUNCTION/Function_name",
-                  "strval": "uiLightClicked",
-                  "InheritedType": 10
-                },
-                {
-                  "nid": 664667189,
-                  "strtype": "CALL FUNCTION/Dont_export_function",
-                  "strval": "False",
-                  "InheritedType": 2
-                }
-              ],
-              "InheritedType": 10
-            }
-          ],
-          "InheritedType": 4
         }
       ],
       "saved_objtypeKey": "IMGBUTTON"
@@ -707,7 +642,7 @@
       "strtype": "OBJECT/Position",
       "intarray": [
         100,
-        0
+        -5
       ],
       "InheritedType": 7
     },
@@ -945,9 +880,9 @@
               "strval": "AccessoryOnBkg",
               "integer": 411681007,
               "intarray": [
-                7,
-                244,
-                44,
+                114,
+                192,
+                255,
                 255
               ],
               "InheritedType": 7
@@ -958,9 +893,9 @@
               "strval": "widgetBorder",
               "integer": -152583251,
               "intarray": [
-                0,
-                0,
-                0,
+                31,
+                49,
+                63,
                 255
               ],
               "InheritedType": 7
