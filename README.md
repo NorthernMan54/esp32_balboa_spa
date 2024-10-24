@@ -21,6 +21,8 @@ In my setup I have the code base deployed twice, one connected to the Balboa spa
 
 Display is based on the [LilyGo T5 ePaper Display](https://www.lilygo.cc/en-ca/products/t5-4-7-inch-e-paper-v2-3?srsltid=AfmBOopva5B_jxFAsa86Fn75lR66ZpcsqNLJEqPG4Axu8zeuCEEeqI0D)
 
+Pls note I have stopped development of ePaper functionality, as my device [stopped working.](https://github.com/Xinyuan-LilyGO/LilyGo-EPD47/issues/137)
+
 ## This is the web site
 Credit for the code goes to https://github.com/jozefnad/balboa-spa
 
