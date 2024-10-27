@@ -13,3 +13,4 @@ src/main.ino.cpp
 /cache
 /backup
 *.zip
+/squareline/cache

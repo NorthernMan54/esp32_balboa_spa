@@ -29,7 +29,7 @@ ui_uiThermostatPlaceholder = lv_obj_create(ui_Spa_Screen);
 lv_obj_remove_style_all(ui_uiThermostatPlaceholder);
 lv_obj_set_width( ui_uiThermostatPlaceholder, 200);
 lv_obj_set_height( ui_uiThermostatPlaceholder, 110);
-lv_obj_remove_flag( ui_uiThermostatPlaceholder, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_remove_flag( ui_uiThermostatPlaceholder, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_uiThermostatPlaceholder, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 ui_object_set_themeable_style_property(ui_uiThermostatPlaceholder, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
 ui_object_set_themeable_style_property(ui_uiThermostatPlaceholder, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
@@ -402,6 +402,17 @@ lv_obj_set_style_pad_right(ui_heaterChartLabel, 0, LV_PART_MAIN| LV_STATE_DEFAUL
 lv_obj_set_style_pad_top(ui_heaterChartLabel, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_heaterChartLabel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_Image8 = lv_image_create(ui_Spa_Screen);
+lv_image_set_src(ui_Image8, &ui_img_hightemp_png);
+lv_obj_set_width( ui_Image8, LV_SIZE_CONTENT);  /// 100
+lv_obj_set_height( ui_Image8, LV_SIZE_CONTENT);   /// 14
+lv_obj_set_x( ui_Image8, 234 );
+lv_obj_set_y( ui_Image8, -209 );
+lv_obj_set_align( ui_Image8, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_Image8, LV_OBJ_FLAG_CLICKABLE );   /// Flags
+lv_obj_remove_flag( ui_Image8, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+lv_obj_add_event_cb(ui_uiThermostatPlaceholder, ui_event_uiThermostatPlaceholder, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_HeatControls, ui_event_HeatControls, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_comp_get_child(ui_uiPump1, UI_COMP_UIPUMP_BUTTON), ui_event_uiPump1_Button, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_comp_get_child(ui_uiPump2, UI_COMP_UIPUMP_BUTTON), ui_event_uiPump2_Button, LV_EVENT_ALL, NULL);

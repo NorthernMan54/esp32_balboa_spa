@@ -32,6 +32,7 @@ extern "C" {
 // SCREEN: ui_Loading_Screen
 void ui_Loading_Screen_screen_init(void);
 extern lv_obj_t *ui_Loading_Screen;
+void ui_event_ThermostatLoading( lv_event_t * e);
 extern lv_obj_t *ui_ThermostatLoading;
 extern lv_obj_t *ui_HeatControlsLoading;
 extern lv_obj_t *ui_uiHeatStateLoading;
@@ -59,10 +60,12 @@ extern lv_obj_t *ui_uiHeaterChart2_Yaxis2;
 extern lv_obj_t *ui_heaterChartLabel2;
 extern lv_obj_t *ui_uiClock2;
 extern lv_obj_t *ui_uiClockLabel2;
+extern lv_obj_t *ui_Container1;
 // SCREEN: ui_Spa_Screen
 void ui_Spa_Screen_screen_init(void);
 void ui_event_Spa_Screen( lv_event_t * e);
 extern lv_obj_t *ui_Spa_Screen;
+void ui_event_uiThermostatPlaceholder( lv_event_t * e);
 extern lv_obj_t *ui_uiThermostatPlaceholder;
 extern lv_obj_t *ui_uiClock;
 extern lv_obj_t *ui_uiClockLabel;
@@ -95,6 +98,7 @@ extern lv_obj_t *ui_uiHeaterChart_Xaxis;
 extern lv_obj_t *ui_uiHeaterChart_Yaxis1;
 extern lv_obj_t *ui_uiHeaterChart_Yaxis2;
 extern lv_obj_t *ui_heaterChartLabel;
+extern lv_obj_t *ui_Image8;
 // SCREEN: ui_settingsAndAbout
 void ui_settingsAndAbout_screen_init(void);
 void ui_event_settingsAndAbout( lv_event_t * e);
@@ -109,6 +113,26 @@ extern lv_obj_t *ui_Checkbox2;
 extern lv_obj_t *ui_aboutPage;
 extern lv_obj_t *ui_Container9;
 extern lv_obj_t *ui_aboutLabel;
+// SCREEN: ui_adjustThermostatScreen
+void ui_adjustThermostatScreen_screen_init(void);
+void ui_event_adjustThermostatScreen( lv_event_t * e);
+extern lv_obj_t *ui_adjustThermostatScreen;
+void ui_event_uiThermostatPlaceholder3( lv_event_t * e);
+extern lv_obj_t *ui_uiThermostatPlaceholder3;
+extern lv_obj_t *ui_uiClock3;
+extern lv_obj_t *ui_uiClockLabel3;
+void ui_event_HeatControls2( lv_event_t * e);
+extern lv_obj_t *ui_HeatControls2;
+extern lv_obj_t *ui_uiHeatState2;
+extern lv_obj_t *ui_heatBlankLabel2;
+extern lv_obj_t *ui_heatStateSwitch2;
+extern lv_obj_t *ui_heatSwtichLabel2;
+extern lv_obj_t *ui_uiTempRange2;
+extern lv_obj_t *ui_tempRangeLowLabel3;
+extern lv_obj_t *ui_tempRangeSwitch2;
+extern lv_obj_t *ui_tempRangeHighLabel2;
+void ui_event_adjustThermostatContainer( lv_event_t * e);
+extern lv_obj_t *ui_adjustThermostatContainer;
 extern lv_obj_t *ui____initial_actions0;
 
 LV_IMG_DECLARE( ui__temporary_image );
@@ -118,6 +142,7 @@ LV_IMG_DECLARE( ui_img_uipumphigh_png);   // assets/uiPumpHigh.png
 LV_IMG_DECLARE( ui_img_lightoff_png);   // assets/lightOff.png
 LV_IMG_DECLARE( ui_img_lighton_png);   // assets/lightOn.png
 LV_IMG_DECLARE( ui_img_filteron_png);   // assets/filterOn.png
+LV_IMG_DECLARE( ui_img_hightemp_png);   // assets/HighTemp.png
 
 
 LV_FONT_DECLARE( ui_font_Montserrat_Bold_14);

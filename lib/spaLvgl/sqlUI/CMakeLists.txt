@@ -5,6 +5,7 @@ SET(SOURCES components/ui_comp_uifilter.c
     screens/ui_Loading_Screen.c
     screens/ui_Spa_Screen.c
     screens/ui_settingsAndAbout.c
+    screens/ui_adjustThermostatScreen.c
     ui_theme_manager.c
     ui_themes.c
     ui.c
@@ -17,6 +18,7 @@ SET(SOURCES components/ui_comp_uifilter.c
     images/ui_img_lightoff_png.c
     images/ui_img_lighton_png.c
     images/ui_img_filteron_png.c
+    images/ui_img_hightemp_png.c
     ui_temporary_image.c
     fonts/ui_font_Montserrat_Bold_14.c
     fonts/ui_font_Montserrat_Bold_16.c

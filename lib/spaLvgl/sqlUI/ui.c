@@ -12,6 +12,7 @@
 // SCREEN: ui_Loading_Screen
 void ui_Loading_Screen_screen_init(void);
 lv_obj_t *ui_Loading_Screen;
+void ui_event_ThermostatLoading( lv_event_t * e);
 lv_obj_t *ui_ThermostatLoading;
 lv_obj_t *ui_HeatControlsLoading;
 lv_obj_t *ui_uiHeatStateLoading;
@@ -39,12 +40,14 @@ lv_obj_t *ui_uiHeaterChart2_Yaxis2;
 lv_obj_t *ui_heaterChartLabel2;
 lv_obj_t *ui_uiClock2;
 lv_obj_t *ui_uiClockLabel2;
+lv_obj_t *ui_Container1;
 
 
 // SCREEN: ui_Spa_Screen
 void ui_Spa_Screen_screen_init(void);
 void ui_event_Spa_Screen( lv_event_t * e);
 lv_obj_t *ui_Spa_Screen;
+void ui_event_uiThermostatPlaceholder( lv_event_t * e);
 lv_obj_t *ui_uiThermostatPlaceholder;
 lv_obj_t *ui_uiClock;
 lv_obj_t *ui_uiClockLabel;
@@ -77,6 +80,7 @@ lv_obj_t *ui_uiHeaterChart_Xaxis;
 lv_obj_t *ui_uiHeaterChart_Yaxis1;
 lv_obj_t *ui_uiHeaterChart_Yaxis2;
 lv_obj_t *ui_heaterChartLabel;
+lv_obj_t *ui_Image8;
 
 
 // SCREEN: ui_settingsAndAbout
@@ -93,6 +97,28 @@ lv_obj_t *ui_Checkbox2;
 lv_obj_t *ui_aboutPage;
 lv_obj_t *ui_Container9;
 lv_obj_t *ui_aboutLabel;
+
+
+// SCREEN: ui_adjustThermostatScreen
+void ui_adjustThermostatScreen_screen_init(void);
+void ui_event_adjustThermostatScreen( lv_event_t * e);
+lv_obj_t *ui_adjustThermostatScreen;
+void ui_event_uiThermostatPlaceholder3( lv_event_t * e);
+lv_obj_t *ui_uiThermostatPlaceholder3;
+lv_obj_t *ui_uiClock3;
+lv_obj_t *ui_uiClockLabel3;
+void ui_event_HeatControls2( lv_event_t * e);
+lv_obj_t *ui_HeatControls2;
+lv_obj_t *ui_uiHeatState2;
+lv_obj_t *ui_heatBlankLabel2;
+lv_obj_t *ui_heatStateSwitch2;
+lv_obj_t *ui_heatSwtichLabel2;
+lv_obj_t *ui_uiTempRange2;
+lv_obj_t *ui_tempRangeLowLabel3;
+lv_obj_t *ui_tempRangeSwitch2;
+lv_obj_t *ui_tempRangeHighLabel2;
+void ui_event_adjustThermostatContainer( lv_event_t * e);
+lv_obj_t *ui_adjustThermostatContainer;
 lv_obj_t *ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -103,11 +129,23 @@ lv_obj_t *ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
+void ui_event_ThermostatLoading( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_adjustThermostatScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_adjustThermostatScreen_screen_init);
+}
+}
 void ui_event_Spa_Screen( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_BOTTOM  ) {
 lv_indev_wait_release(lv_indev_active());
       _ui_screen_change( &ui_settingsAndAbout, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_settingsAndAbout_screen_init);
+}
+}
+void ui_event_uiThermostatPlaceholder( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_adjustThermostatScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_adjustThermostatScreen_screen_init);
 }
 }
 void ui_event_HeatControls( lv_event_t * e) {
@@ -139,6 +177,31 @@ void ui_event_settingsAndAbout( lv_event_t * e) {
 if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP  ) {
 lv_indev_wait_release(lv_indev_active());
       _ui_screen_change( &ui_Spa_Screen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Spa_Screen_screen_init);
+}
+}
+void ui_event_adjustThermostatScreen( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP  ) {
+lv_indev_wait_release(lv_indev_active());
+      _ui_screen_change( &ui_Spa_Screen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Spa_Screen_screen_init);
+}
+}
+void ui_event_uiThermostatPlaceholder3( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_adjustThermostatScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_adjustThermostatScreen_screen_init);
+}
+}
+void ui_event_HeatControls2( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      uiHeatClick( e );
+}
+}
+void ui_event_adjustThermostatContainer( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_adjustThermostatScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_adjustThermostatScreen_screen_init);
 }
 }
 

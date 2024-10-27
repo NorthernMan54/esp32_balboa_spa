@@ -84,7 +84,7 @@ void spaWebServerLoop()
     server.on("/state", HTTP_GET, handleState);
     server.on("/config", HTTP_GET, handleConfig);
     server.on("/status", HTTP_GET, handleStatus);
-#if defined(spaEpaper) || defined(SPALVGL)
+#if defined(spaEpaper) || (defined(SPALVGL) && defined(LV_USE_100ASK_SCREENSHOT))
     server.on("/panel.jpg", HTTP_GET, handleEDPpanel);
 #endif
     server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -123,7 +123,7 @@ void handleEDPpanel(AsyncWebServerRequest *request)
   if (captureToJPEG() > 0)
   {
     // Send the BMP image as a response
-   Log.verbose("[Web]: Sending Panel Image %d bytes" CR, jpegSize);
+    Log.verbose("[Web]: Sending Panel Image %d bytes" CR, jpegSize);
     AsyncWebServerResponse *response = request->beginResponse_P(200, "image/jpeg", jpegBuffer, jpegSize);
     response->addHeader("Content-Disposition", "inline; filename=\"spaDisplay.jpeg\"");
     request->send(response);
@@ -134,13 +134,13 @@ void handleEDPpanel(AsyncWebServerRequest *request)
     request->send(404, "text/plain", "Image not available");
   }
 }
-#elif SPALVGL
+#elif defined(SPALVGL) && defined(LV_USE_100ASK_SCREENSHOT)
 void handleEDPpanel(AsyncWebServerRequest *request)
 {
   Log.verbose("[Web]: SPA Image Request %s received from %p - size %d" CR, request->url().c_str(), request->client()->remoteIP(), jpegSize);
   if (captureToJPEG() > 0)
   {
-   Log.verbose("[Web]: Sending Panel Image %d bytes" CR, jpegSize);
+    Log.verbose("[Web]: Sending Panel Image %d bytes" CR, jpegSize);
     // Send the BMP image as a response
     AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", jpegBuffer, jpegSize);
     response->addHeader("Content-Disposition", "inline; filename=\"spaDisplay.png\"");
@@ -166,7 +166,7 @@ void handleEDPpanel(AsyncWebServerRequest *request)
 
 #define webMenuState String("<form><button formaction='/status'>SPA Status</button><button formaction='/config'>SPA Config</button><button class='active' formaction='/state'>ESP State</button><button formaction='/index.html'>SPA Website</button></form>")
 
-#if defined(spaEpaper) || defined(SPALVGL)
+#if defined(spaEpaper) || (defined(SPALVGL) && defined(LV_USE_100ASK_SCREENSHOT))
 #define ePaper String("<img src='panel.jpg' alt='Spa Panel' width=" + String(DISPLAY_WIDTH) + ">")
 
 #else

@@ -1,9 +1,9 @@
 #ifdef SPALVGL
-#include <Arduino.h>
+// #include <Arduino.h>
 #include <lvgl.h>
 
 #include "uiSpaShared.h"
-#include "../sqlUI/ui.h"
+#include "./sqlUI/ui.h"
 
 #define THERMO_WIDTH 120
 #define THERMO_HEIGHT 100
@@ -64,78 +64,30 @@ lv_obj_t *thermostatArc(lv_obj_t *parent)
   lv_style_set_arc_width(&main_line_style, 2U); /*Tick width*/
   lv_obj_add_style(scale, &main_line_style, LV_PART_MAIN);
 
-  /*
-
-      // High Temp Range
-
-      //Add a section
-      static lv_style_t high_minor_tick_style;
-      static lv_style_t high_label_style;
-      static lv_style_t high_main_line_style;
-
-      lv_style_init(&high_label_style);
-      lv_style_init(&high_minor_tick_style);
-      lv_style_init(&high_main_line_style);
-
-      //Label style properties
-      lv_style_set_text_font(&high_label_style, LV_FONT_DEFAULT);
-      lv_style_set_text_color(&high_label_style, lv_palette_darken(LV_PALETTE_RED, 3));
-
-      lv_style_set_line_color(&high_label_style, lv_palette_darken(LV_PALETTE_RED, 3));
-      lv_style_set_line_width(&high_label_style, 5U); // Tick width
-
-      lv_style_set_line_color(&high_minor_tick_style, lv_palette_lighten(LV_PALETTE_RED, 2));
-      lv_style_set_line_width(&high_minor_tick_style, 4U); // Tick width
-
-      //Main line properties
-      lv_style_set_arc_color(&high_main_line_style, lv_palette_darken(LV_PALETTE_RED, 3));
-      lv_style_set_arc_width(&high_main_line_style, 4U); // Tick width
-
-      //Configure section styles
-      lv_scale_section_t *highSection = lv_scale_add_section(scale);
-      lv_scale_section_set_range(highSection, 35.5, 36.5);
-      lv_scale_section_set_style(highSection, LV_PART_INDICATOR, &high_label_style);
-      lv_scale_section_set_style(highSection, LV_PART_ITEMS, &high_minor_tick_style);
-      lv_scale_section_set_style(highSection, LV_PART_MAIN, &high_main_line_style);
-
-       // High Temp Range
-
-      //Add a section
-      static lv_style_t low_minor_tick_style;
-      static lv_style_t low_label_style;
-      static lv_style_t low_main_line_style;
-
-      lv_style_init(&low_label_style);
-      lv_style_init(&low_minor_tick_style);
-      lv_style_init(&low_main_line_style);
-
-      //Label style properties
-      lv_style_set_text_font(&low_label_style, LV_FONT_DEFAULT);
-      lv_style_set_text_color(&low_label_style, lv_palette_darken(LV_PALETTE_GREEN, 3));
-
-      lv_style_set_line_color(&low_label_style, lv_palette_darken(LV_PALETTE_GREEN, 3));
-      lv_style_set_line_width(&low_label_style, 5U); // Tick width
-
-      lv_style_set_line_color(&low_minor_tick_style, lv_palette_lighten(LV_PALETTE_GREEN, 2));
-      lv_style_set_line_width(&low_minor_tick_style, 4U); // Tick width
-
-      //Main line properties
-      lv_style_set_arc_color(&low_main_line_style, lv_palette_darken(LV_PALETTE_GREEN, 3));
-      lv_style_set_arc_width(&low_main_line_style, 4U); // Tick width
-
-      //Configure section styles
-      lv_scale_section_t *lowSection = lv_scale_add_section(scale);
-      lv_scale_section_set_range(lowSection, 25.5, 26.5);
-      lv_scale_section_set_style(lowSection, LV_PART_INDICATOR, &low_label_style);
-      lv_scale_section_set_style(lowSection, LV_PART_ITEMS, &low_minor_tick_style);
-      lv_scale_section_set_style(lowSection, LV_PART_MAIN, &low_main_line_style);
-  */
+  lv_obj_add_flag(scale, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
   currentTempNeedle = lv_line_create(scale);
-
   lv_obj_set_style_line_width(currentTempNeedle, 6, LV_PART_MAIN);
   lv_obj_set_style_line_rounded(currentTempNeedle, true, LV_PART_MAIN);
   lv_obj_set_style_line_color(currentTempNeedle, lv_palette_darken(LV_PALETTE_RED, 1), 0);
+
+  lv_scale_set_line_needle_value(scale, currentTempNeedle, -1, 35);
+
+  highTempNeedle = lv_image_create(scale);
+  lv_image_set_src(highTempNeedle, &ui_img_hightemp_png);
+  lv_obj_align(highTempNeedle, LV_ALIGN_CENTER, 47, -2);
+  lv_image_set_pivot(highTempNeedle, 3, 7);
+  lv_scale_set_image_needle_value(scale, highTempNeedle, 37);
+  lv_obj_set_style_image_recolor(highTempNeedle, lv_color_hex(0xA2741E), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_image_recolor_opa(highTempNeedle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+  lowTempNeedle = lv_image_create(scale);
+  lv_image_set_src(lowTempNeedle, &ui_img_hightemp_png);
+  lv_obj_align(lowTempNeedle, LV_ALIGN_CENTER, 47, -2);
+  lv_image_set_pivot(lowTempNeedle, 3, 7);
+  lv_scale_set_image_needle_value(scale, lowTempNeedle, 22);
+  lv_obj_set_style_image_recolor(lowTempNeedle, lv_color_hex(0x10AAF0), LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_image_recolor_opa(lowTempNeedle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
   return scale;
 }

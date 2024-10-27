@@ -28,7 +28,7 @@ ui_ThermostatLoading = lv_obj_create(ui_Loading_Screen);
 lv_obj_remove_style_all(ui_ThermostatLoading);
 lv_obj_set_width( ui_ThermostatLoading, 200);
 lv_obj_set_height( ui_ThermostatLoading, 110);
-lv_obj_remove_flag( ui_ThermostatLoading, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_remove_flag( ui_ThermostatLoading, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_ThermostatLoading, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 ui_object_set_themeable_style_property(ui_ThermostatLoading, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
 ui_object_set_themeable_style_property(ui_ThermostatLoading, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_AccessoryOffBkg);
@@ -399,5 +399,14 @@ lv_obj_set_style_pad_top(ui_uiClockLabel2, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_uiClockLabel2, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_row(ui_uiClockLabel2, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_uiClockLabel2, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_Container1 = lv_obj_create(ui_Loading_Screen);
+lv_obj_remove_style_all(ui_Container1);
+lv_obj_set_width( ui_Container1, 100);
+lv_obj_set_height( ui_Container1, 50);
+lv_obj_set_align( ui_Container1, LV_ALIGN_CENTER );
+lv_obj_remove_flag( ui_Container1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
+lv_obj_add_event_cb(ui_ThermostatLoading, ui_event_ThermostatLoading, LV_EVENT_ALL, NULL);
 
 }

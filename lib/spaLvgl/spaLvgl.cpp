@@ -67,10 +67,10 @@ void calculateMinMaxRange(int32_t *dataArray, int32_t *minYscale, int32_t *maxYs
   }
   // log_i("maxYscale: %i, minYscale: %i", (*maxYscale), (*minYscale));
   // log_i("maxYscale: %i, minYscale: %i", ((int32_t)(((*maxYscale) + ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10) + 1), (((*minYscale) - ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10 + 1) );
-  (*maxYscale) = ((int32_t)(((*maxYscale) + ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10) + 1) * 10;
+  (*maxYscale) = *maxYscale + 0.2 * (*maxYscale - *minYscale);
 
   if ((*minYscale) > 0)
-    (*minYscale) = ((int32_t)(((*minYscale) - ((*maxYscale) - (*minYscale)) * auto_scale_margin) / 10) + 1) * 10;
+    (*minYscale) = *minYscale - 0.2 * (*maxYscale - *minYscale);
   if ((*minYscale) < 0)
     (*minYscale) = 0;
 }
@@ -106,22 +106,6 @@ void spaLvglSetup()
 
   lv_scale_set_text_src(ui_uiTemperatureChart_Xaxis, temperatureLabels);
   lv_scale_set_text_src(ui_uiHeaterChart_Xaxis, heaterLabels);
-
-  /*
-    lv_switch_set_orientation(ui_uiTempRangeSwitchLoading, LV_SWITCH_ORIENTATION_VERTICAL);
-    lv_switch_set_orientation(ui_tempRangeSwitch, LV_SWITCH_ORIENTATION_VERTICAL);
-    */
-
-  /*
-  // To use third party libraries, enable the define in lv_conf.h: #define LV_USE_QRCODE 1
-  auto ui_qrcode = lv_qrcode_create(ui_scrMain);
-  lv_qrcode_set_size(ui_qrcode, 100);
-  lv_qrcode_set_dark_color(ui_qrcode, lv_color_black());
-  lv_qrcode_set_light_color(ui_qrcode, lv_color_white());
-  const char *qr_data = "https://github.com/rzeldent/esp32-smartdisplay";
-  lv_qrcode_update(ui_qrcode, qr_data, strlen(qr_data));
-  lv_obj_center(ui_qrcode);
-  */
 }
 
 void spaButtonUpdate(lv_obj_t *component, uint8_t state)
@@ -242,7 +226,9 @@ void spaLvglLoop()
       lv_obj_set_state(ui_tempRangeSwitch, LV_STATE_CHECKED, false);
     }
 
-    lv_scale_set_line_needle_value(temperatureGuage, currentTempNeedle, 60, spaStatusData.currentTemp);
+    lv_scale_set_line_needle_value(temperatureGuage, currentTempNeedle, 45, spaStatusData.currentTemp);
+    lv_scale_set_image_needle_value(temperatureGuage, highTempNeedle, spaStatusData.highSetTemp);
+    lv_scale_set_image_needle_value(temperatureGuage, lowTempNeedle, spaStatusData.lowSetTemp);
 
     int32_t max = -10000;
     int32_t min = 10000;
