@@ -1,7 +1,9 @@
 #ifdef SPALVGL
 
 #include <Arduino.h>
+#ifdef ESP32_4848S040CIY1
 #include <esp32_smartdisplay.h>
+#endif
 #include <lvgl.h> // Add this line to include the necessary header file
 
 #include <sqlUI/ui.h>
@@ -10,6 +12,20 @@
 #include <spaUtilities.h>
 #include "./spaUi/uiSpaShared.h"
 #include "spaLvgl.h"
+
+#ifdef JC3248W535CIY
+#include <Arduino_GFX_Library.h>
+#define GFX_DEV_DEVICE JC3248W535
+#define GFX_BL 1
+Arduino_DataBus *bus = new Arduino_ESP32QSPI(
+    45 /* CS */, 47 /* SCK */, 21 /* D0 */, 48 /* D1 */, 40 /* D2 */, 39 /* D3 */);
+Arduino_GFX *g = new Arduino_AXS15231B(bus, GFX_NOT_DEFINED /* RST */, 0 /* rotation */, false /* IPS */, 320 /* width */, 480 /* height */);
+#define CANVAS
+Arduino_Canvas *gfx = new Arduino_Canvas(320 /* width */, 480 /* height */, g, 0 /* output_x */, 0 /* output_y */, 0 /* rotation */);
+#include "gfx_touch.h"
+#include "gfx.h"
+
+#endif // JC3248W535CIY
 
 bool loading = true;
 
@@ -77,7 +93,79 @@ void calculateMinMaxRange(int32_t *dataArray, int32_t *minYscale, int32_t *maxYs
 
 void spaLvglSetup()
 {
+#ifdef ESP32_4848S040CIY1
   smartdisplay_init();
+#endif
+#ifdef JC3248W535CIY
+  // Init Display
+  if (!gfx->begin())
+  {
+    Serial.println("gfx->begin() failed!");
+  }
+  gfx->fillScreen(BLACK);
+#ifdef GFX_BL
+  pinMode(GFX_BL, OUTPUT);
+  digitalWrite(GFX_BL, HIGH);
+#endif
+
+  // Init touch device
+  touch_init(gfx->width(), gfx->height(), gfx->getRotation());
+
+  lv_init();
+
+  /*Set a tick source so that LVGL will know how much time elapsed. */
+  lv_tick_set_cb(millis_cb);
+
+  /* register print function for debugging */
+#if LV_USE_LOG != 0
+  lv_log_register_print_cb(my_print);
+#endif
+
+  screenWidth = gfx->width();
+  screenHeight = gfx->height();
+
+#ifdef DIRECT_MODE
+  bufSize = screenWidth * screenHeight;
+#else
+  bufSize = screenWidth * 40;
+#endif
+
+#ifdef ESP32
+#if defined(DIRECT_MODE) && (defined(CANVAS) || defined(RGB_PANEL))
+  disp_draw_buf = (lv_color_t *)gfx->getFramebuffer();
+#else  // !(defined(DIRECT_MODE) && (defined(CANVAS) || defined(RGB_PANEL)))
+  disp_draw_buf = (lv_color_t *)heap_caps_malloc(bufSize * 2, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+  if (!disp_draw_buf)
+  {
+    // remove MALLOC_CAP_INTERNAL flag try again
+    disp_draw_buf = (lv_color_t *)heap_caps_malloc(bufSize * 2, MALLOC_CAP_8BIT);
+  }
+#endif // !(defined(DIRECT_MODE) && (defined(CANVAS) || defined(RGB_PANEL)))
+#else  // !ESP32
+  Serial.println("LVGL disp_draw_buf heap_caps_malloc failed! malloc again...");
+  disp_draw_buf = (lv_color_t *)malloc(bufSize * 2);
+#endif // !ESP32
+  if (!disp_draw_buf)
+  {
+    Serial.println("LVGL disp_draw_buf allocate failed!");
+  }
+  else
+  {
+    disp = lv_display_create(screenWidth, screenHeight);
+    lv_display_set_flush_cb(disp, my_disp_flush);
+#ifdef DIRECT_MODE
+    lv_display_set_buffers(disp, disp_draw_buf, NULL, bufSize * 2, LV_DISPLAY_RENDER_MODE_DIRECT);
+#else
+    lv_display_set_buffers(disp, disp_draw_buf, NULL, bufSize * 2, LV_DISPLAY_RENDER_MODE_PARTIAL);
+#endif
+
+    /*Initialize the (dummy) input device driver*/
+    lv_indev_t *indev = lv_indev_create();
+    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /*Touchpad should have POINTER type*/
+    lv_indev_set_read_cb(indev, my_touchpad_read);
+  }
+#endif // JC3248W535CIY
+
   log_i("LV_USE_LOG %d", LV_USE_LOG);
 #ifdef LV_USE_LOG
   log_i("LV_LOG_LEVEL %d", LV_LOG_LEVEL);
@@ -296,6 +384,21 @@ void spaLvglLoop()
   lv_last_tick = now;
   // Update the UI
   lv_timer_handler();
+#ifdef JC3248W535CIY
+  lv_task_handler(); /* let the GUI do its work */
+
+#ifdef DIRECT_MODE
+#if defined(CANVAS) || defined(RGB_PANEL)
+  gfx->flush();
+#else  // !(defined(CANVAS) || defined(RGB_PANEL))
+  gfx->draw16bitRGBBitmap(0, 0, (uint16_t *)disp_draw_buf, screenWidth, screenHeight);
+#endif // !(defined(CANVAS) || defined(RGB_PANEL))
+#else  // !DIRECT_MODE
+#ifdef CANVAS
+  gfx->flush();
+#endif
+#endif // !DIRECT_MODE
+#endif // JC3248W535CIY
 }
 
 uint8_t *jpegBuffer = nullptr; // Buffer for storing the JPEG output
