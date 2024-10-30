@@ -14,17 +14,7 @@
 #include "spaLvgl.h"
 
 #ifdef JC3248W535CIY
-#include <Arduino_GFX_Library.h>
-#define GFX_DEV_DEVICE JC3248W535
-#define GFX_BL 1
-Arduino_DataBus *bus = new Arduino_ESP32QSPI(
-    45 /* CS */, 47 /* SCK */, 21 /* D0 */, 48 /* D1 */, 40 /* D2 */, 39 /* D3 */);
-Arduino_GFX *g = new Arduino_AXS15231B(bus, GFX_NOT_DEFINED /* RST */, 0 /* rotation */, false /* IPS */, 320 /* width */, 480 /* height */);
-#define CANVAS
-Arduino_Canvas *gfx = new Arduino_Canvas(320 /* width */, 480 /* height */, g, 0 /* output_x */, 0 /* output_y */, 0 /* rotation */);
-#include "gfx_touch.h"
 #include "gfx.h"
-
 #endif // JC3248W535CIY
 
 bool loading = true;
@@ -97,73 +87,7 @@ void spaLvglSetup()
   smartdisplay_init();
 #endif
 #ifdef JC3248W535CIY
-  // Init Display
-  if (!gfx->begin())
-  {
-    Serial.println("gfx->begin() failed!");
-  }
-  gfx->fillScreen(BLACK);
-#ifdef GFX_BL
-  pinMode(GFX_BL, OUTPUT);
-  digitalWrite(GFX_BL, HIGH);
-#endif
-
-  // Init touch device
-  touch_init(gfx->width(), gfx->height(), gfx->getRotation());
-
-  lv_init();
-
-  /*Set a tick source so that LVGL will know how much time elapsed. */
-  lv_tick_set_cb(millis_cb);
-
-  /* register print function for debugging */
-#if LV_USE_LOG != 0
-  lv_log_register_print_cb(my_print);
-#endif
-
-  screenWidth = gfx->width();
-  screenHeight = gfx->height();
-
-#ifdef DIRECT_MODE
-  bufSize = screenWidth * screenHeight;
-#else
-  bufSize = screenWidth * 40;
-#endif
-
-#ifdef ESP32
-#if defined(DIRECT_MODE) && (defined(CANVAS) || defined(RGB_PANEL))
-  disp_draw_buf = (lv_color_t *)gfx->getFramebuffer();
-#else  // !(defined(DIRECT_MODE) && (defined(CANVAS) || defined(RGB_PANEL)))
-  disp_draw_buf = (lv_color_t *)heap_caps_malloc(bufSize * 2, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-  if (!disp_draw_buf)
-  {
-    // remove MALLOC_CAP_INTERNAL flag try again
-    disp_draw_buf = (lv_color_t *)heap_caps_malloc(bufSize * 2, MALLOC_CAP_8BIT);
-  }
-#endif // !(defined(DIRECT_MODE) && (defined(CANVAS) || defined(RGB_PANEL)))
-#else  // !ESP32
-  Serial.println("LVGL disp_draw_buf heap_caps_malloc failed! malloc again...");
-  disp_draw_buf = (lv_color_t *)malloc(bufSize * 2);
-#endif // !ESP32
-  if (!disp_draw_buf)
-  {
-    Serial.println("LVGL disp_draw_buf allocate failed!");
-  }
-  else
-  {
-    disp = lv_display_create(screenWidth, screenHeight);
-    lv_display_set_flush_cb(disp, my_disp_flush);
-#ifdef DIRECT_MODE
-    lv_display_set_buffers(disp, disp_draw_buf, NULL, bufSize * 2, LV_DISPLAY_RENDER_MODE_DIRECT);
-#else
-    lv_display_set_buffers(disp, disp_draw_buf, NULL, bufSize * 2, LV_DISPLAY_RENDER_MODE_PARTIAL);
-#endif
-
-    /*Initialize the (dummy) input device driver*/
-    lv_indev_t *indev = lv_indev_create();
-    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER); /*Touchpad should have POINTER type*/
-    lv_indev_set_read_cb(indev, my_touchpad_read);
-  }
+  gfx_init();
 #endif // JC3248W535CIY
 
   log_i("LV_USE_LOG %d", LV_USE_LOG);
@@ -172,6 +96,7 @@ void spaLvglSetup()
   log_i("LV_LOG_PRINTF %d", LV_LOG_PRINTF);
 #endif
 
+#ifdef LVGL_SKIP
   __attribute__((unused)) auto disp = lv_disp_get_default();
   // lv_disp_set_rotation(disp, LV_DISP_ROT_90);
   // lv_disp_set_rotation(disp, LV_DISP_ROT_180);
@@ -194,6 +119,7 @@ void spaLvglSetup()
 
   lv_scale_set_text_src(ui_uiTemperatureChart_Xaxis, temperatureLabels);
   lv_scale_set_text_src(ui_uiHeaterChart_Xaxis, heaterLabels);
+#endif
 }
 
 void spaButtonUpdate(lv_obj_t *component, uint8_t state)
@@ -241,6 +167,7 @@ void spaLvglLoop()
 
   if (currentCrc != spaStatusData.crc)
   {
+#ifdef LVGL_SKIP
     struct tm timeinfo;
     char day_output[30], final_output[30];
     while (!getLocalTime(&timeinfo, 10))
@@ -326,7 +253,7 @@ void spaLvglLoop()
     for (int i = 0; i < GRAPH_MAX_READINGS; i++)
     {
       temperatureData[GRAPH_MAX_READINGS - 1 - i] = (int32_t)spaStatusData.temperatureHistory[i];
-      log_i("temperatureData[%d] = %d", i, temperatureData[i]);
+      // log_i("temperatureData[%d] = %d", i, temperatureData[i]);
     }
 
     if (temperatureData[GRAPH_MAX_READINGS - 1] == 0)
@@ -350,7 +277,7 @@ void spaLvglLoop()
     for (int i = 0; i < GRAPH_MAX_READINGS - 1; i++)
     {
       heaterData[GRAPH_MAX_READINGS - 2 - i] = (int32_t)spaStatusData.heatOn->history()[i];
-      log_i("heaterData[%d] = %d", i, heaterData[i]);
+      // log_i("heaterData[%d] = %d", i, heaterData[i]);
     }
 
     max = -10000;
@@ -368,36 +295,29 @@ void spaLvglLoop()
     lv_chart_set_point_count(ui_uiHeaterChart, GRAPH_MAX_READINGS);
     lv_chart_set_ext_y_array(ui_uiHeaterChart, ui_uiHeaterChart_series_1, heaterData);
     lv_chart_refresh(ui_uiHeaterChart);
-
+#endif
     if (loading)
     {
       loading = false;
+#ifdef LVGL_SKIP
       _ui_screen_change(&ui_Spa_Screen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Spa_Screen_screen_init);
       lv_obj_clean(ui_Loading_Screen);
+#endif
+      // gfxLoopText();
     }
     currentCrc = spaStatusData.crc;
   }
-
+#ifdef LVGL_SKIP
   auto const now = millis();
   // Update the ticker
   lv_tick_inc(now - lv_last_tick);
   lv_last_tick = now;
   // Update the UI
   lv_timer_handler();
-#ifdef JC3248W535CIY
-  lv_task_handler(); /* let the GUI do its work */
-
-#ifdef DIRECT_MODE
-#if defined(CANVAS) || defined(RGB_PANEL)
-  gfx->flush();
-#else  // !(defined(CANVAS) || defined(RGB_PANEL))
-  gfx->draw16bitRGBBitmap(0, 0, (uint16_t *)disp_draw_buf, screenWidth, screenHeight);
-#endif // !(defined(CANVAS) || defined(RGB_PANEL))
-#else  // !DIRECT_MODE
-#ifdef CANVAS
-  gfx->flush();
 #endif
-#endif // !DIRECT_MODE
+
+#ifdef JC3248W535CIY
+  gfxLoop();
 #endif // JC3248W535CIY
 }
 
