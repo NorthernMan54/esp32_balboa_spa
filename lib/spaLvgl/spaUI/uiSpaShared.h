@@ -19,6 +19,10 @@ extern "C"
   void spaLvglClickPump(lv_event_t *e, int);
   void spaLvglClickLight(lv_event_t *e, int);
   void spaLvglClickHeat(lv_event_t *e);
+  void adjustSpaScreen();
+
+// uiMiscFunctions.c
+  void spaButtonUpdate(lv_obj_t *component, uint8_t state);
 
 #ifdef __cplusplus
 } /*extern "C"*/

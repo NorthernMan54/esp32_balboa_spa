@@ -5,47 +5,6 @@
 
 #include "../ui.h"
 
-void adjustedAlign(lv_obj_t *obj, lv_align_t align)
-{
-  lv_align_t adjustedAlign = align;
-  switch (align)
-  {
-  case LV_ALIGN_BOTTOM_LEFT:
-  case LV_ALIGN_BOTTOM_MID:
-  case LV_ALIGN_BOTTOM_RIGHT:
-    if (LV_VER_RES < 480)
-    {
-      lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
-      adjustedAlign = LV_ALIGN_OUT_BOTTOM_RIGHT;
-    }
-    break;
-  case LV_ALIGN_LEFT_MID:
-    if (LV_VER_RES < 480)
-    {
-
-      adjustedAlign = LV_ALIGN_BOTTOM_LEFT;
-    }
-    break;
-  case LV_ALIGN_CENTER:
-    if (LV_VER_RES < 480)
-    {
-
-      adjustedAlign = LV_ALIGN_BOTTOM_MID;
-    }
-    break;
-  case LV_ALIGN_RIGHT_MID:
-    if (LV_VER_RES < 480)
-    {
-
-      adjustedAlign = LV_ALIGN_BOTTOM_RIGHT;
-    }
-    break;
-  default:
-    adjustedAlign = align;
-  }
-  lv_obj_set_align(obj, adjustedAlign);
-}
-
 void ui_Spa_Screen_screen_init(void)
 {
 
@@ -85,7 +44,7 @@ void ui_Spa_Screen_screen_init(void)
   lv_obj_remove_style_all(ui_uiClock);
   lv_obj_set_width(ui_uiClock, LV_SIZE_CONTENT);  /// 1
   lv_obj_set_height(ui_uiClock, LV_SIZE_CONTENT); /// 1
-  adjustedAlign(ui_uiClock, LV_ALIGN_TOP_RIGHT);
+  lv_obj_set_align(ui_uiClock, LV_ALIGN_TOP_RIGHT);
   lv_obj_remove_flag(ui_uiClock, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
   lv_obj_set_style_radius(ui_uiClock, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
   ui_object_set_themeable_style_property(ui_uiClock, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
@@ -117,7 +76,7 @@ void ui_Spa_Screen_screen_init(void)
   lv_obj_set_height(ui_HeatControls, LV_SIZE_CONTENT); /// 50
   lv_obj_set_x(ui_HeatControls, 0);
   lv_obj_set_y(ui_HeatControls, 52);
-  adjustedAlign(ui_HeatControls, LV_ALIGN_TOP_RIGHT);
+  lv_obj_set_align(ui_HeatControls, LV_ALIGN_TOP_RIGHT);
   lv_obj_set_flex_flow(ui_HeatControls, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_flex_align(ui_HeatControls, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER);
   lv_obj_remove_flag(ui_HeatControls, LV_OBJ_FLAG_SCROLLABLE); /// Flags
@@ -227,30 +186,30 @@ void ui_Spa_Screen_screen_init(void)
   ui_uiPump1 = ui_uiPump_create(ui_Spa_Screen);
   lv_obj_set_x(ui_uiPump1, 0);
   lv_obj_set_y(ui_uiPump1, -5);
-  adjustedAlign(ui_uiPump1, LV_ALIGN_LEFT_MID);
+  lv_obj_set_align(ui_uiPump1, LV_ALIGN_LEFT_MID);
 
   ui_uiPump2 = ui_uiPump_create(ui_Spa_Screen);
   lv_obj_set_x(ui_uiPump2, -29);
   lv_obj_set_y(ui_uiPump2, -5);
-  adjustedAlign(ui_uiPump2, LV_ALIGN_CENTER);
+  lv_obj_set_align(ui_uiPump2, LV_ALIGN_CENTER);
 
   lv_label_set_text(ui_comp_get_child(ui_uiPump2, UI_COMP_UIPUMP_LABEL), "Spa Pump 2");
 
   ui_uiLight1 = ui_uiLight_create(ui_Spa_Screen);
   lv_obj_set_x(ui_uiLight1, 100);
   lv_obj_set_y(ui_uiLight1, -5);
-  adjustedAlign(ui_uiLight1, LV_ALIGN_CENTER);
+  lv_obj_set_align(ui_uiLight1, LV_ALIGN_CENTER);
 
   ui_uiFilter = ui_uiFilter_create(ui_Spa_Screen);
   lv_obj_set_x(ui_uiFilter, 0);
   lv_obj_set_y(ui_uiFilter, -5);
-  adjustedAlign(ui_uiFilter, LV_ALIGN_RIGHT_MID);
+  lv_obj_set_align(ui_uiFilter, LV_ALIGN_RIGHT_MID);
 
   ui_uiTemperatureHistory = lv_obj_create(ui_Spa_Screen);
   lv_obj_remove_style_all(ui_uiTemperatureHistory);
   lv_obj_set_width(ui_uiTemperatureHistory, 220);
   lv_obj_set_height(ui_uiTemperatureHistory, 150);
-  adjustedAlign(ui_uiTemperatureHistory, LV_ALIGN_BOTTOM_LEFT);
+  lv_obj_set_align(ui_uiTemperatureHistory, LV_ALIGN_BOTTOM_LEFT);
   lv_obj_remove_flag(ui_uiTemperatureHistory, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
   lv_obj_set_style_radius(ui_uiTemperatureHistory, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
   ui_object_set_themeable_style_property(ui_uiTemperatureHistory, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
@@ -346,7 +305,7 @@ void ui_Spa_Screen_screen_init(void)
   lv_obj_remove_style_all(ui_uiHeaterHistory);
   lv_obj_set_width(ui_uiHeaterHistory, 220);
   lv_obj_set_height(ui_uiHeaterHistory, 150);
-  adjustedAlign(ui_uiHeaterHistory, LV_ALIGN_BOTTOM_RIGHT);
+  lv_obj_set_align(ui_uiHeaterHistory, LV_ALIGN_BOTTOM_RIGHT);
   lv_obj_remove_flag(ui_uiHeaterHistory, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE); /// Flags
   lv_obj_set_style_radius(ui_uiHeaterHistory, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
   ui_object_set_themeable_style_property(ui_uiHeaterHistory, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_AccessoryOffBkg);
@@ -442,7 +401,7 @@ void ui_Spa_Screen_screen_init(void)
   lv_obj_set_height(ui_Image8, LV_SIZE_CONTENT); /// 14
   lv_obj_set_x(ui_Image8, 234);
   lv_obj_set_y(ui_Image8, -209);
-  adjustedAlign(ui_Image8, LV_ALIGN_CENTER);
+  lv_obj_set_align(ui_Image8, LV_ALIGN_CENTER);
   lv_obj_add_flag(ui_Image8, LV_OBJ_FLAG_CLICKABLE);     /// Flags
   lv_obj_remove_flag(ui_Image8, LV_OBJ_FLAG_SCROLLABLE); /// Flags
 

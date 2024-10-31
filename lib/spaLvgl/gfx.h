@@ -18,7 +18,6 @@ Arduino_DataBus *bus = new Arduino_ESP32QSPI(
 Arduino_GFX *g = new Arduino_AXS15231B(bus, GFX_NOT_DEFINED /* RST */, 0 /* rotation */, false /* IPS */, DISPLAY_WIDTH /* width */, DISPLAY_HEIGHT /* height */);
 #define CANVAS
 Arduino_Canvas *gfx = new Arduino_Canvas(DISPLAY_WIDTH /* width */, DISPLAY_HEIGHT /* height */, g, 0 /* output_x */, 0 /* output_y */, 0 /* rotation */);
-#include "gfx_touch.h"
 
 uint32_t millis_cb(void)
 {
