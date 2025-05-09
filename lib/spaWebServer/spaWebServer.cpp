@@ -577,7 +577,7 @@ void handleNotFound(AsyncWebServerRequest *request)
   int i;
   for (i = 0; i < headers; i++)
   {
-    AsyncWebHeader *h = request->getHeader(i);
+    const AsyncWebHeader *h = request->getHeader(i);
     Log.verbose("HEADER[%s]: %s\n", h->name().c_str(), h->value().c_str());
   }
 
