@@ -271,7 +271,7 @@ struct WiFiModuleConfigurationData
   unsigned long lastRequest;
   u_int32_t magicNumber;
 
-  char macAddress[11];
+  char macAddress[18];
 };
 
 struct SpaSettings0x04Data

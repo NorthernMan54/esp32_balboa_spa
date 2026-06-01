@@ -345,7 +345,7 @@ void parseWiFiModuleConfigurationResponse(u_int8_t *message, int length)
 
   u_int8_t *hexArray = message + 5;
 
-  sprintf(wiFiModuleConfigurationData.macAddress, "%02x:%02x:%02x:%02x:%02x:%02x", hexArray[3], hexArray[4], hexArray[5], hexArray[6], hexArray[7], hexArray[8]);
+  snprintf(wiFiModuleConfigurationData.macAddress, sizeof(wiFiModuleConfigurationData.macAddress), "%02x:%02x:%02x:%02x:%02x:%02x", hexArray[3], hexArray[4], hexArray[5], hexArray[6], hexArray[7], hexArray[8]);
 
   // Log.verbose(F("[Mess]: WiFi Module Configuration Response: %s" CR), msgToString(hexArray, length - 7).c_str());
   publishWiFiModuleConfigurationData();
@@ -446,12 +446,12 @@ void parseInformationResponse(u_int8_t *message, int length)
   spaInformationData.rawDataLength = length;
 
   u_int8_t *hexArray = message + 5;
-  sprintf(spaInformationData.softwareID, "M%d_%d V%d.%d", hexArray[0], hexArray[1], hexArray[2], hexArray[3]);
-  sprintf(spaInformationData.model, "%c%c%c%c%c%c%c%c", hexArray[4], hexArray[5], hexArray[6], hexArray[7], hexArray[8], hexArray[9], hexArray[10], hexArray[11]);
+  snprintf(spaInformationData.softwareID, sizeof(spaInformationData.softwareID), "M%d_%d V%d.%d", hexArray[0], hexArray[1], hexArray[2], hexArray[3]);
+  snprintf(spaInformationData.model, sizeof(spaInformationData.model), "%c%c%c%c%c%c%c%c", hexArray[4], hexArray[5], hexArray[6], hexArray[7], hexArray[8], hexArray[9], hexArray[10], hexArray[11]);
   spaInformationData.setupNumber = hexArray[12];
   spaInformationData.voltage = hexArray[17];
   spaInformationData.heaterType = hexArray[18];
-  sprintf(spaInformationData.dipSwitch, "%x%x", hexArray[20], hexArray[19]);
+  snprintf(spaInformationData.dipSwitch, sizeof(spaInformationData.dipSwitch), "%x%x", hexArray[20], hexArray[19]);
 
   // Log.verbose(F("[Mess]: Information Response: %s" CR), msgToString(hexArray, length - 7).c_str());
   publishSpaInformationData();
